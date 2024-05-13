@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.ksp)
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -67,5 +69,33 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // SplashScreen API
     implementation(libs.androidx.core.splashscreen)
+
+    // Dagger - Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.dagger.hilt.compiler)
+
+    implementation (libs.hilt.navigation.compose)
+
+    // Coroutines
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+    implementation (libs.kotlinx.coroutines.play.services)
+
+    // Coroutine Lifecycle Scopes
+    implementation (libs.lifecycle.viewmodel.ktx)
+    implementation (libs.androidx.lifecycle.runtime.ktx)
+
+    // Coil
+    implementation(libs.coil.compose)
+
+    // Retrofit
+    implementation (libs.retrofit)
+
+    // OkHttp
+    implementation(libs.okhttp)
+
+    // JSON Converter
+    implementation (libs.converter.gson)
 }

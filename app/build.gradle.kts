@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
+    id("com.google.gms.google-services")
     id("com.google.dagger.hilt.android")
 }
 
@@ -71,6 +72,13 @@ dependencies {
 
     // SplashScreen API
     implementation(libs.androidx.core.splashscreen)
+
+    implementation(platform(libs.firebase.bom))
+    // Firebase authentication and Firestore
+    //noinspection UseTomlInstead
+    implementation("com.google.firebase:firebase-auth")
+    //noinspection UseTomlInstead
+    implementation("com.google.firebase:firebase-firestore")
 
     // Dagger - Hilt
     implementation(libs.hilt.android)

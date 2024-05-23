@@ -1,4 +1,4 @@
-package com.example.planificatorbuget.screens
+package com.example.planificatorbuget.screens.register
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

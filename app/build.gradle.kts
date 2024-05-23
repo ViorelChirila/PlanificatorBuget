@@ -107,4 +107,6 @@ dependencies {
     // JSON Converter
     implementation (libs.converter.gson)
 
+    // Extended Icon Pack
+    implementation (libs.androidx.material.icons.extended)
 }

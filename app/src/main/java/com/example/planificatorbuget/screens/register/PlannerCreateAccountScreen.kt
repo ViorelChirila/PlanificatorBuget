@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.UserForm
@@ -31,7 +32,7 @@ import com.example.planificatorbuget.navigation.PlannerScreens
 
 @Preview
 @Composable
-fun PlannerCreateAccountScreen(navController: NavController = NavController(LocalContext.current)){
+fun PlannerCreateAccountScreen(navController: NavController = NavController(LocalContext.current),viewModel: CreateAccountScreenViewModel = viewModel()){
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -52,7 +53,12 @@ fun PlannerCreateAccountScreen(navController: NavController = NavController(Loca
             Spacer(modifier = Modifier.height(5.dp))
             Text(text = "Creaza-ti un cont.", modifier = Modifier.padding(3.dp))
             Spacer(modifier = Modifier.height(5.dp))
-            UserForm(loading = false,isCreateAccountForm = true)
+            UserForm(loading = false,isCreateAccountForm = true){
+                email, password ->
+                viewModel.createUserWithEmailAndPassword(email, password){
+                    navController.navigate(PlannerScreens.HomeScreen.name)
+                }
+            }
 
             Row(
                 modifier = Modifier

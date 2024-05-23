@@ -27,10 +27,11 @@ import androidx.navigation.NavController
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.UserForm
 import com.example.planificatorbuget.navigation.PlannerScreens
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Preview
 @Composable
-fun PlannerLoginScreen(navController: NavController = NavController(LocalContext.current)) {
+fun PlannerLoginScreen(navController: NavController = NavController(LocalContext.current), viewModel: LoginScreenViewModel = viewModel()) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -52,7 +53,11 @@ fun PlannerLoginScreen(navController: NavController = NavController(LocalContext
             Spacer(modifier = Modifier.height(5.dp))
             Text(text = "Logheaza-te acum", modifier = Modifier.padding(3.dp))
             Spacer(modifier = Modifier.height(5.dp))
-            UserForm(loading = false,isCreateAccountForm = false)
+            UserForm(loading = false,isCreateAccountForm = false){email, password ->
+                viewModel.signInWithEmailAndPassword(email, password){
+                    navController.navigate(PlannerScreens.HomeScreen.name)
+                }
+            }
 
             Row(
                 modifier = Modifier

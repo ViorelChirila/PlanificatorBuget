@@ -25,10 +25,6 @@ import com.example.planificatorbuget.navigation.PlannerScreens
 @Composable
 fun NavigationBarComponent(navController: NavController) {
 
-    val selectedItemIndex = rememberSaveable {
-        mutableIntStateOf(0)
-    }
-
     val items = listOf(
         BottomNavigationItem(
             title = "Acasa",
@@ -64,10 +60,10 @@ fun NavigationBarComponent(navController: NavController) {
     )
 
     NavigationBar {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(selected = selectedItemIndex.intValue == index,
+        items.forEach {item ->
+            val isSelected = item.destination == navController.currentDestination?.route
+            NavigationBarItem(selected = isSelected,
                 onClick = {
-                    selectedItemIndex.intValue = index
                     item.destination?.let { navController.navigate(it) }
                 },
                 label = {
@@ -84,12 +80,11 @@ fun NavigationBarComponent(navController: NavController) {
                         }
                     }) {
                         Icon(
-                            imageVector = if (index == selectedItemIndex.intValue) item.selectedIcon else item.unselectedIcon,
+                            imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.title
                         )
                     }
                 })
         }
     }
-
 }

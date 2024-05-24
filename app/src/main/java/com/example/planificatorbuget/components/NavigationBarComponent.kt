@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.outlined.Sort
@@ -20,6 +21,9 @@ import androidx.navigation.NavController
 import com.example.planificatorbuget.data.BottomNavigationItem
 import  androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import com.example.planificatorbuget.navigation.PlannerScreens
 
 @Composable
@@ -59,7 +63,7 @@ fun NavigationBarComponent(navController: NavController) {
 
     )
 
-    NavigationBar {
+    NavigationBar(modifier = Modifier.clip(shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))) {
         items.forEach {item ->
             val isSelected = item.destination == navController.currentDestination?.route
             NavigationBarItem(selected = isSelected,

@@ -4,12 +4,14 @@ data class UserModel(
     val userId: String,
     val userName: String,
     val profession: String,
+    val initialBudget: Double = 0.0
 ){
     fun toMap(): MutableMap<String,Any>{
         return mutableMapOf(
             "user_id" to this.userId,
             "user_name" to this.userName,
-            "profession" to this.profession
+            "profession" to this.profession,
+            "initial_budget" to this.initialBudget
         )
     }
 }

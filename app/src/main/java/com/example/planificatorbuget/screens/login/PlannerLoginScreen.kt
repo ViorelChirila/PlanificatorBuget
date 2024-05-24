@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens.login
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +35,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Preview
 @Composable
 fun PlannerLoginScreen(navController: NavController = NavController(LocalContext.current), viewModel: LoginScreenViewModel = viewModel()) {
+
+    val context = LocalContext.current
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -78,6 +84,10 @@ fun PlannerLoginScreen(navController: NavController = NavController(LocalContext
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary
                 )
+            }
+            errorMessage?.let {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.clearErrorMessage()
             }
 
         }

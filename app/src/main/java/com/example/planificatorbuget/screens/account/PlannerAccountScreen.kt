@@ -1,5 +1,9 @@
 package com.example.planificatorbuget.screens.account
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,16 +28,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.NavigationBarComponent
@@ -86,10 +96,23 @@ fun PlannerAccountScreen(navController: NavController = NavController(LocalConte
                         shape = CircleShape,
                         shadowElevation = 5.dp,
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.profil_avatar),
-                            contentDescription = "ProfilePicture"
+                        var selectedImageUri by remember {
+                            mutableStateOf<Uri?>(null)
+                        }
+
+                        val photoPickerLauncher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.PickVisualMedia(),
+                            onResult = { uri -> selectedImageUri = uri }
                         )
+
+                        ProfileImage(selectedImageUri)
+                        {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
@@ -107,10 +130,40 @@ fun PlannerAccountScreen(navController: NavController = NavController(LocalConte
 }
 
 @Composable
+private fun ProfileImage(
+    selectedImageUri: Uri?,
+    onClick: () -> Unit
+) {
+
+    if (selectedImageUri == null) {
+        Image(
+            painter = painterResource(id = R.drawable.profil_avatar),
+            contentDescription = "Profile picture",
+            modifier = Modifier
+                .clickable { onClick() }.size(150.dp)
+        )
+    } else {
+        AsyncImage(
+            model = selectedImageUri,
+            contentDescription = "Profile picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.clickable { onClick() }.size(150.dp))
+    }
+
+
+}
+
+@Composable
 fun AccountOptions(navController: NavController) {
     val options = listOf(
-        AccountOptionItem("Setari cont", painterResource(id = R.drawable.account_info)) { /* Handle click for "Setari cont" here */ },
-        AccountOptionItem("Setari notificari", painterResource(id = R.drawable.notification_settings)) { /* Handle click for "Setari notificari" here */ },
+        AccountOptionItem(
+            "Setari cont",
+            painterResource(id = R.drawable.account_info)
+        ) { /* Handle click for "Setari cont" here */ },
+        AccountOptionItem(
+            "Setari notificari",
+            painterResource(id = R.drawable.notification_settings)
+        ) { /* Handle click for "Setari notificari" here */ },
         AccountOptionItem("Deconecteaza-te", painterResource(id = R.drawable.logout_button)) {
             FirebaseAuth.getInstance().signOut().run {
                 navController.navigate(PlannerScreens.LoginScreen.name)
@@ -123,7 +176,10 @@ fun AccountOptions(navController: NavController) {
             .padding(10.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
     ) {
-        LazyColumn(contentPadding = PaddingValues(15.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(
+            contentPadding = PaddingValues(15.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             items(options) { option ->
                 OptionItem(
                     name = option.name,
@@ -138,17 +194,24 @@ fun AccountOptions(navController: NavController) {
 
 //@Preview
 @Composable
-fun OptionItem(name: String = "Option name",
-               icon: Painter,
-               onClick: () -> Unit ={}) {
-    Card(modifier = Modifier
-        .clickable { onClick()}
-        .fillMaxWidth(),
+fun OptionItem(
+    name: String = "Option name",
+    icon: Painter,
+    onClick: () -> Unit = {}
+) {
+    Card(
+        modifier = Modifier
+            .clickable { onClick() }
+            .fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(5.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(5.dp)) {
-            Image(painter = icon, contentDescription = "Account info icon", modifier = Modifier.size(50.dp))
+            Image(
+                painter = icon,
+                contentDescription = "Account info icon",
+                modifier = Modifier.size(50.dp)
+            )
             Text(
                 text = name,
                 modifier = Modifier.padding(10.dp),

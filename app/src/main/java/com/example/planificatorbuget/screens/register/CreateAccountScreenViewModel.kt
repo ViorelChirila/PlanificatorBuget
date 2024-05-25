@@ -56,7 +56,8 @@ class CreateAccountScreenViewModel: ViewModel() {
             userId = userId.toString(),
             userName = displayName.toString(),
             profession = "",
-            initialBudget = 0.0
+            initialBudget = 0.0,
+            avatarUrl = ""
         ).toMap()
 
 

@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
@@ -33,6 +34,14 @@ fun PlannerHomeScreen(navController: NavController = NavController(LocalContext.
         )
     ) {
         Scaffold(
+            topBar = {
+                AppBar(
+                    title = "Acasa",
+                    haveNotifications = false,
+                    isHomeScreen = true,
+                    navController = navController
+                )
+            },
             bottomBar = {
                 NavigationBarComponent(navController = navController)
             },

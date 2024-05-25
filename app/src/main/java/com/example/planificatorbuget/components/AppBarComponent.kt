@@ -30,6 +30,7 @@ fun AppBar(
     modifier: Modifier = Modifier,
     title: String = "Planner",
     haveNotifications: Boolean = false,
+    isHomeScreen: Boolean = false,
     navController: NavController = NavController(LocalContext.current),
     onBackArrowClicked: () -> Unit = {}
 ) {
@@ -43,9 +44,11 @@ fun AppBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = { onBackArrowClicked() }) {
-                Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = "Back")
+            if (!isHomeScreen) {
+                IconButton(onClick = { onBackArrowClicked() }) {
+                    Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = "Back")
 
+                }
             }
         },
         actions = {

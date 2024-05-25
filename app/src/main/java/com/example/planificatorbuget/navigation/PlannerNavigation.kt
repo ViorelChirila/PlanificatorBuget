@@ -8,6 +8,7 @@ import com.example.planificatorbuget.screens.account.PlannerAccountScreen
 import com.example.planificatorbuget.screens.register.PlannerCreateAccountScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
 import com.example.planificatorbuget.screens.login.PlannerLoginScreen
+import com.example.planificatorbuget.screens.notification.PlannerNotificationsScreen
 
 @Composable
 fun PlannerNavigation(startDestination: String) {
@@ -30,6 +31,10 @@ fun PlannerNavigation(startDestination: String) {
 
         composable(PlannerScreens.AccountScreen.name){
             PlannerAccountScreen(navController = navController)
+        }
+
+        composable(PlannerScreens.NotificationsScreen.name){
+             PlannerNotificationsScreen(navController = navController)
         }
 
     }

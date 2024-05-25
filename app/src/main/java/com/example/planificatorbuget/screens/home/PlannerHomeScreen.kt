@@ -25,7 +25,7 @@ fun PlannerHomeScreen(navController: NavController = NavController(LocalContext.
             brush = gradientBackgroundBrush(
                 isVerticalGradient = true,
                 colors = listOf(
-                    Color(0xff3f4848),
+                    Color(0xFF7F9191),
                     Color(0xffc3c3d8),
                     Color(0xff00d4ff)
                 )

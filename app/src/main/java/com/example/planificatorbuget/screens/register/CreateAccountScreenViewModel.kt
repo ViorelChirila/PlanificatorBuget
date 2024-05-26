@@ -61,20 +61,14 @@ class CreateAccountScreenViewModel: ViewModel() {
         ).toMap()
 
         val db = FirebaseFirestore.getInstance()
-        val dbCollection = db.collection("users")
+        val dbCollection = db.collection("users").document(userId.toString())
 
-        dbCollection.add(user)
-            .addOnSuccessListener { documentReference ->
-                val documentUserId = documentReference.id
-                dbCollection.document(documentUserId).update(hashMapOf("id" to documentUserId) as Map<String, Any>)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Log.d("CreateAccountScreenViewModel", "createUser:success")
-                        }
-                    }
-                    .addOnFailureListener {
-                        Log.d("Error", "Error adding document", it)
-                    }
+        dbCollection.set(user)
+            .addOnSuccessListener {
+                Log.d("CreateAccountScreenViewModel", "DocumentSnapshot successfully written!")
+            }
+            .addOnFailureListener { e ->
+                Log.w("CreateAccountScreenViewModel", "Error writing document", e)
             }
     }
 }

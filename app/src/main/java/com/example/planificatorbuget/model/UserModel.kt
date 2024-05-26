@@ -1,11 +1,23 @@
 package com.example.planificatorbuget.model
 
+import com.google.firebase.firestore.PropertyName
+
 data class UserModel(
-    val userId: String,
-    val userName: String,
-    val profession: String,
-    val initialBudget: Double = 0.0,
-    val avatarUrl: String,
+    @get:PropertyName("user_id")
+    @set:PropertyName("user_id")
+    var userId: String = "",
+    @get:PropertyName("user_name")
+    @set:PropertyName("user_name")
+    var userName: String = "",
+    @get:PropertyName("profession")
+    @set:PropertyName("profession")
+    var profession: String = "",
+    @get:PropertyName("initial_budget")
+    @set:PropertyName("initial_budget")
+    var initialBudget: Double = 0.0,
+    @get:PropertyName("avatar_url")
+    @set:PropertyName("avatar_url")
+    var avatarUrl: String = "",
 ){
     fun toMap(): MutableMap<String,Any>{
         return mutableMapOf(

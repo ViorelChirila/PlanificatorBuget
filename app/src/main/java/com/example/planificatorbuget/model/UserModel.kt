@@ -1,6 +1,7 @@
 package com.example.planificatorbuget.model
 
 data class UserModel(
+    val documentUserId: String? = null,
     val userId: String,
     val userName: String,
     val profession: String,

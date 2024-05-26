@@ -51,6 +51,7 @@ import com.example.planificatorbuget.data.AccountOptionItem
 import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Preview
 @Composable

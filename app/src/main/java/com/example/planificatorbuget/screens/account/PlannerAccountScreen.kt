@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -118,21 +119,39 @@ fun PlannerAccountScreen(
                             shape = CircleShape,
                             shadowElevation = 5.dp,
                         ) {
-                            var selectedImageUri by remember {
-                                mutableStateOf<Uri?>(null)
-                            }
-
-                            val photoPickerLauncher = rememberLauncherForActivityResult(
-                                contract = ActivityResultContracts.PickVisualMedia(),
-                                onResult = { uri -> selectedImageUri = uri }
-                            )
-
-                            ProfileImage(selectedImageUri)
+//                            var selectedImageUri by remember {
+//                                mutableStateOf<Uri?>(null)
+//                            }
+//
+//                            val photoPickerLauncher = rememberLauncherForActivityResult(
+//                                contract = ActivityResultContracts.PickVisualMedia(),
+//                                onResult = { uri -> selectedImageUri = uri }
+//                            )
+//
+//                            ProfileImage(selectedImageUri)
+//                            {
+//                                photoPickerLauncher.launch(
+//                                    PickVisualMediaRequest(
+//                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+//                                    )
+//                                )
+//                            }
+                            if (user?.avatarUrl?.isEmpty() == true)
                             {
-                                photoPickerLauncher.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
+                                Image(
+                                    painter = painterResource(id = R.drawable.profil_avatar),
+                                    contentDescription = "Profile picture",
+                                    modifier = Modifier
+                                        .size(150.dp)
+                                )
+                            }
+                            else {
+                                AsyncImage(
+                                    model = user?.avatarUrl?.toUri(),
+                                    contentDescription = "Profile picture",
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(150.dp)
                                 )
                             }
                         }

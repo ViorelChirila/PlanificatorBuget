@@ -5,11 +5,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.AreaChart
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -40,17 +44,19 @@ fun NavigationBarComponent(navController: NavController) {
         ),
         BottomNavigationItem(
             title = "Statistici",
-            selectedIcon = Icons.Filled.BarChart,
-            unselectedIcon = Icons.Outlined.BarChart,
+            selectedIcon = Icons.Filled.AreaChart,
+            unselectedIcon = Icons.Outlined.AreaChart,
             hasNews = false,
-            badgeCount = null
+            badgeCount = null,
+            destination = PlannerScreens.StatisticsScreen.name
         ),
         BottomNavigationItem(
             title = "Tranzactii",
-            selectedIcon = Icons.AutoMirrored.Filled.Sort,
-            unselectedIcon = Icons.AutoMirrored.Outlined.Sort,
+            selectedIcon = Icons.Filled.MonetizationOn,
+            unselectedIcon = Icons.Outlined.MonetizationOn,
             hasNews = false,
-            badgeCount = null
+            badgeCount = null,
+            destination = PlannerScreens.TransactionsScreen.name
         ),
         BottomNavigationItem(
             title = "Cont",

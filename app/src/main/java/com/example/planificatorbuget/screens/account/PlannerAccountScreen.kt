@@ -185,7 +185,7 @@ fun AccountOptions(navController: NavController) {
         AccountOptionItem(
             "Setari cont",
             painterResource(id = R.drawable.account_info)
-        ) { /* Handle click for "Setari cont" here */ },
+        ) { navController.navigate(PlannerScreens.AccountSettingsScreen.name) },
         AccountOptionItem(
             "Setari notificari",
             painterResource(id = R.drawable.notification_settings)

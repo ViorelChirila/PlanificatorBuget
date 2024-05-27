@@ -56,7 +56,11 @@ fun PlannerCreateAccountScreen(navController: NavController = NavController(Loca
             UserForm(loading = false,isCreateAccountForm = true){
                 email, password ->
                 viewModel.createUserWithEmailAndPassword(email, password){
-                    navController.navigate(PlannerScreens.HomeScreen.name)
+                    navController.navigate(PlannerScreens.HomeScreen.name){
+                        popUpTo("auth"){
+                            inclusive = true
+                        }
+                    }
                 }
             }
 

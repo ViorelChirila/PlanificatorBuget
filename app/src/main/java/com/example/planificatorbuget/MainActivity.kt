@@ -76,7 +76,7 @@ private fun PlannerApp(viewModel: MainViewModel) {
         PlannerScreens.HomeScreen.name
     }
     else{
-        PlannerScreens.LoginScreen.name
+        "auth"
     }
     Surface(
         modifier = Modifier.fillMaxSize(),

@@ -30,7 +30,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -41,10 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -57,19 +54,16 @@ import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 import com.google.firebase.auth.FirebaseAuth
 
-@Preview
 @Composable
-fun PlannerAccountScreen(navController: NavController = NavController(LocalContext.current),
-                         viewModel: AccountScreenViewModel = hiltViewModel()) {
+fun PlannerAccountScreen(
+    navController: NavController,
+    viewModel: AccountScreenViewModel = hiltViewModel()
+) {
 
     val dataOrException by viewModel.data.observeAsState()
-
-    LaunchedEffect(key1 = true) {
-        viewModel.fetchUser()
-    }
-
     val user = dataOrException?.data
     val isLoading = dataOrException?.isLoading ?: true
+
     Log.d("PlannerAccountScreen", "PlannerAccountScreen: ${user.toString()}")
 
     Box(
@@ -101,43 +95,55 @@ fun PlannerAccountScreen(navController: NavController = NavController(LocalConte
             containerColor = Color.Transparent
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    Surface(
-                        modifier = Modifier.padding(5.dp),
-                        shape = CircleShape,
-                        shadowElevation = 5.dp,
+                if (isLoading) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        var selectedImageUri by remember {
-                            mutableStateOf<Uri?>(null)
-                        }
-
-                        val photoPickerLauncher = rememberLauncherForActivityResult(
-                            contract = ActivityResultContracts.PickVisualMedia(),
-                            onResult = { uri -> selectedImageUri = uri }
-                        )
-
-                        ProfileImage(selectedImageUri)
-                        {
-                            photoPickerLauncher.launch(
-                                PickVisualMediaRequest(
-                                    ActivityResultContracts.PickVisualMedia.ImageOnly
-                                )
-                            )
-                        }
+                        CircularProgressIndicator()
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = user?.userName ?: "Nume utilizator",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    AccountOptions(navController = navController)
+                } else {
+
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Surface(
+                            modifier = Modifier.padding(5.dp),
+                            shape = CircleShape,
+                            shadowElevation = 5.dp,
+                        ) {
+                            var selectedImageUri by remember {
+                                mutableStateOf<Uri?>(null)
+                            }
+
+                            val photoPickerLauncher = rememberLauncherForActivityResult(
+                                contract = ActivityResultContracts.PickVisualMedia(),
+                                onResult = { uri -> selectedImageUri = uri }
+                            )
+
+                            ProfileImage(selectedImageUri)
+                            {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = user?.userName ?: "Nume utilizator",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        AccountOptions(navController = navController)
+                    }
                 }
 
 
@@ -212,7 +218,6 @@ fun AccountOptions(navController: NavController) {
     }
 }
 
-//@Preview
 @Composable
 fun OptionItem(
     name: String = "Option name",

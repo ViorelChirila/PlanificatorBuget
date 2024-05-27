@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 import com.example.planificatorbuget.navigation.PlannerNavigation
 import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.ui.theme.PlanificatorBugetTheme
@@ -76,7 +77,7 @@ private fun PlannerApp(viewModel: MainViewModel) {
         PlannerScreens.HomeScreen.name
     }
     else{
-        "auth"
+        FunctionalitiesRoutes.Authentication.name
     }
     Surface(
         modifier = Modifier.fillMaxSize(),

@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 import com.example.planificatorbuget.navigation.PlannerScreens
 
 @Composable
@@ -64,7 +65,7 @@ fun NavigationBarComponent(navController: NavController) {
             unselectedIcon = Icons.Outlined.AccountCircle,
             hasNews = false,
             badgeCount = null,
-            destination = PlannerScreens.AccountScreen.name
+            destination = FunctionalitiesRoutes.Account.name
         )
 
     )

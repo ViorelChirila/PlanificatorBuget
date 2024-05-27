@@ -20,6 +20,7 @@ class AccountScreenViewModel @Inject constructor(private val userRepository: Use
 
     init {
         fetchUser()
+        Log.d("MyViewModel", "Instance created")
     }
 
     fun fetchUser() {

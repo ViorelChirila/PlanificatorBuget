@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.UserForm
+import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 import com.example.planificatorbuget.navigation.PlannerScreens
 
 
@@ -57,7 +58,7 @@ fun PlannerCreateAccountScreen(navController: NavController = NavController(Loca
                 email, password ->
                 viewModel.createUserWithEmailAndPassword(email, password){
                     navController.navigate(PlannerScreens.HomeScreen.name){
-                        popUpTo("auth"){
+                        popUpTo(FunctionalitiesRoutes.Authentication.name){
                             inclusive = true
                         }
                     }

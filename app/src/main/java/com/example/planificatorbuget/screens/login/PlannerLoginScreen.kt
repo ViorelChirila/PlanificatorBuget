@@ -31,6 +31,7 @@ import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.UserForm
 import com.example.planificatorbuget.navigation.PlannerScreens
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 
 @Preview
 @Composable
@@ -62,7 +63,7 @@ fun PlannerLoginScreen(navController: NavController = NavController(LocalContext
             UserForm(loading = false,isCreateAccountForm = false){email, password ->
                 viewModel.signInWithEmailAndPassword(email, password){
                     navController.navigate(PlannerScreens.HomeScreen.name){
-                        popUpTo("auth"){
+                        popUpTo(FunctionalitiesRoutes.Authentication.name){
                             inclusive = true
                         }
                     }

@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens.accountsettings
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,6 +27,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -37,17 +40,27 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.InputField
 import com.example.planificatorbuget.components.NavigationBarComponent
+import com.example.planificatorbuget.screens.account.AccountScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 @Preview
 @Composable
-fun PlannerAccountSettingsScreen(navController: NavController = NavController(LocalContext.current)) {
+fun PlannerAccountSettingsScreen(
+    navController: NavController = NavController(LocalContext.current),
+    viewModel: AccountScreenViewModel = hiltViewModel()
+) {
+
+    val dataOrException by viewModel.data.observeAsState()
+    val user = dataOrException?.data
+    val isLoading = dataOrException?.isLoading ?: true
+
+    Log.d("PlannerAccountScreenSettings", "PlannerAccountScreen: ${user.toString()}")
     Box(
         modifier = Modifier.background(
             brush = gradientBackgroundBrush(
@@ -124,7 +137,7 @@ fun PlannerAccountSettingsScreen(navController: NavController = NavController(Lo
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Nume utilizator",
+                        text = user?.userName ?: "Nume utilizator",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )

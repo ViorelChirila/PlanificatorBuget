@@ -1,6 +1,7 @@
 package com.example.planificatorbuget.di
 
 import com.example.planificatorbuget.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -15,6 +16,6 @@ object AppModule {
     @Singleton
     @Provides
     fun provideUserRepository(): UserRepository =
-        UserRepository(firebaseFirestore = FirebaseFirestore.getInstance())
+        UserRepository(firebaseFirestore = FirebaseFirestore.getInstance(), auth = FirebaseAuth.getInstance())
 
 }

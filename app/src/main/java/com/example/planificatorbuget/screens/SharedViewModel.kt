@@ -18,6 +18,9 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
     private val _data = MutableLiveData<DataOrException<UserModel, Boolean, Exception>>()
     val data: LiveData<DataOrException<UserModel, Boolean, Exception>> get() = _data
 
+    private val _updateResult = MutableLiveData<DataOrException<Boolean, Boolean, Exception>>()
+    val updateResult: LiveData<DataOrException<Boolean, Boolean, Exception>> get() = _updateResult
+
     init {
         fetchUser()
         Log.d("MyViewModel", "Instance created")
@@ -28,6 +31,27 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
             _data.value = DataOrException(isLoading = true)
             val result = userRepository.fetchUser()
             _data.postValue(result)
+        }
+    }
+
+    fun updateUserData(user: Map<String, Any>) {
+        viewModelScope.launch {
+            _updateResult.value = DataOrException(isLoading = true)
+            val result = userRepository.updateUserData(user)
+            fetchUser()
+            _updateResult.postValue(result)
+        }
+    }
+
+    fun updateUserEmail(email: String){
+        viewModelScope.launch {
+            userRepository.updateUserEmail(email)
+        }
+    }
+
+    fun updateUserPassword(password: String){
+        viewModelScope.launch {
+            userRepository.updateUserPassword(password)
         }
     }
 }

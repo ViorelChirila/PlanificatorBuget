@@ -20,7 +20,6 @@ import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 import com.example.planificatorbuget.navigation.PlannerNavigation
-import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.ui.theme.PlanificatorBugetTheme
 import dagger.hilt.android.AndroidEntryPoint
 

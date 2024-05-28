@@ -62,7 +62,7 @@ fun PlannerLoginScreen(navController: NavController = NavController(LocalContext
             Spacer(modifier = Modifier.height(5.dp))
             UserForm(loading = false,isCreateAccountForm = false){email, password ->
                 viewModel.signInWithEmailAndPassword(email, password){
-                    navController.navigate(PlannerScreens.HomeScreen.name){
+                    navController.navigate(FunctionalitiesRoutes.Main.name){
                         popUpTo(FunctionalitiesRoutes.Authentication.name){
                             inclusive = true
                         }

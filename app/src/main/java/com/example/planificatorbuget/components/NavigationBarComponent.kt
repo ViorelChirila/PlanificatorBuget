@@ -65,7 +65,7 @@ fun NavigationBarComponent(navController: NavController) {
             unselectedIcon = Icons.Outlined.AccountCircle,
             hasNews = false,
             badgeCount = null,
-            destination = FunctionalitiesRoutes.Account.name
+            destination = PlannerScreens.AccountScreen.name
         )
 
     )

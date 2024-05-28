@@ -24,58 +24,61 @@ import com.example.planificatorbuget.screens.transactions.PlannerTransactionsScr
 fun PlannerNavigation(startDestination: String) {
 
     val navController = rememberNavController()
-    val viewModel = hiltViewModel<SharedViewModel>()
+//    val viewModel = hiltViewModel<SharedViewModel>()
 
-    NavHost(navController = navController, startDestination = startDestination ){
+    NavHost(navController = navController, startDestination = startDestination) {
 
         navigation(
             startDestination = PlannerScreens.LoginScreen.name,
             route = FunctionalitiesRoutes.Authentication.name
-        ){
-            composable(PlannerScreens.LoginScreen.name){
+        ) {
+            composable(PlannerScreens.LoginScreen.name) {
                 PlannerLoginScreen(navController = navController)
             }
 
-            composable(PlannerScreens.CreateAccountScreen.name){
+            composable(PlannerScreens.CreateAccountScreen.name) {
                 PlannerCreateAccountScreen(navController = navController)
             }
         }
 
-        composable(PlannerScreens.HomeScreen.name){
-            PlannerHomeScreen(navController = navController)
-        }
-
-        composable(PlannerScreens.NotificationsScreen.name){
-             PlannerNotificationsScreen(navController = navController)
-        }
-
         navigation(
-            startDestination = PlannerScreens.AccountScreen.name,
-            route = FunctionalitiesRoutes.Account.name
-        ){
-            composable(PlannerScreens.AccountScreen.name){
+            startDestination = PlannerScreens.HomeScreen.name,
+            route = FunctionalitiesRoutes.Main.name
+        ) {
+            composable(PlannerScreens.HomeScreen.name) {
+                PlannerHomeScreen(navController = navController)
+            }
+
+            composable(PlannerScreens.NotificationsScreen.name) {
+                PlannerNotificationsScreen(navController = navController)
+            }
+
+
+            composable(PlannerScreens.AccountScreen.name) {
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
                 PlannerAccountScreen(navController = navController, viewModel = viewModel)
             }
 
-            composable(PlannerScreens.AccountSettingsScreen.name){
+            composable(PlannerScreens.AccountSettingsScreen.name) {
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
                 PlannerAccountSettingsScreen(navController = navController, viewModel = viewModel)
+            }
+
+            composable(PlannerScreens.StatisticsScreen.name) {
+                PlannerStatisticsScreen(navController = navController)
+            }
+
+            composable(PlannerScreens.TransactionsScreen.name) {
+                PlannerTransactionsScreen(navController = navController)
             }
         }
 
-
-        composable(PlannerScreens.StatisticsScreen.name){
-            PlannerStatisticsScreen(navController = navController)
-        }
-
-        composable(PlannerScreens.TransactionsScreen.name){
-            PlannerTransactionsScreen(navController = navController)
-        }
 
     }
 }
 
 @Composable
-inline fun <reified T: ViewModel> NavBackStackEntry.sharedViewModel(navController: NavController): T {
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavController): T {
     val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
     val parentBackStackEntry = remember(this) {
         navController.getBackStackEntry(navGraphRoute)

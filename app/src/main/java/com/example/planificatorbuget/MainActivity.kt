@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun PlannerApp(viewModel: MainViewModel) {
     val startDestination: String = if (viewModel.user.value){
-        PlannerScreens.HomeScreen.name
+        FunctionalitiesRoutes.Main.name
     }
     else{
         FunctionalitiesRoutes.Authentication.name

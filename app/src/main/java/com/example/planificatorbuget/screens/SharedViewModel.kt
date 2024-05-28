@@ -1,4 +1,4 @@
-package com.example.planificatorbuget.screens.account
+package com.example.planificatorbuget.screens
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AccountScreenViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
+class SharedViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
 
     private val _data = MutableLiveData<DataOrException<UserModel, Boolean, Exception>>()
     val data: LiveData<DataOrException<UserModel, Boolean, Exception>> get() = _data

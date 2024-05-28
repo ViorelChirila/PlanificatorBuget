@@ -52,13 +52,14 @@ import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.data.AccountOptionItem
 import com.example.planificatorbuget.navigation.PlannerScreens
+import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun PlannerAccountScreen(
     navController: NavController,
-    viewModel: AccountScreenViewModel = hiltViewModel()
+    viewModel: SharedViewModel = hiltViewModel()
 ) {
 
     val dataOrException by viewModel.data.observeAsState()

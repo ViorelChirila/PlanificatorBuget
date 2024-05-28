@@ -46,14 +46,14 @@ import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.InputField
 import com.example.planificatorbuget.components.NavigationBarComponent
-import com.example.planificatorbuget.screens.account.AccountScreenViewModel
+import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 @Preview
 @Composable
 fun PlannerAccountSettingsScreen(
     navController: NavController = NavController(LocalContext.current),
-    viewModel: AccountScreenViewModel = hiltViewModel()
+    viewModel: SharedViewModel = hiltViewModel()
 ) {
 
     val dataOrException by viewModel.data.observeAsState()

@@ -6,12 +6,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
-import androidx.navigation.Navigation
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.example.planificatorbuget.screens.account.AccountScreenViewModel
+import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.account.PlannerAccountScreen
 import com.example.planificatorbuget.screens.accountsettings.PlannerAccountSettingsScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
@@ -25,7 +24,7 @@ import com.example.planificatorbuget.screens.transactions.PlannerTransactionsScr
 fun PlannerNavigation(startDestination: String) {
 
     val navController = rememberNavController()
-//    val viewModel = hiltViewModel<AccountScreenViewModel>()
+    val viewModel = hiltViewModel<SharedViewModel>()
 
     NavHost(navController = navController, startDestination = startDestination ){
 
@@ -55,12 +54,10 @@ fun PlannerNavigation(startDestination: String) {
             route = FunctionalitiesRoutes.Account.name
         ){
             composable(PlannerScreens.AccountScreen.name){
-                val viewModel = it.sharedViewModel<AccountScreenViewModel>(navController = navController)
                 PlannerAccountScreen(navController = navController, viewModel = viewModel)
             }
 
             composable(PlannerScreens.AccountSettingsScreen.name){
-                val viewModel = it.sharedViewModel<AccountScreenViewModel>(navController = navController)
                 PlannerAccountSettingsScreen(navController = navController, viewModel = viewModel)
             }
         }

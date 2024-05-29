@@ -1,6 +1,11 @@
 package com.example.planificatorbuget.screens.accountsettings
 
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,13 +34,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -43,8 +52,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.EmailInput
@@ -65,8 +76,28 @@ fun PlannerAccountSettingsScreen(
 ) {
 
     val dataOrException by viewModel.data.observeAsState()
+    val result = viewModel.updateResult.observeAsState()
     val user = dataOrException?.data
     val isLoading = dataOrException?.isLoading ?: true
+    val context = LocalContext.current
+
+    var selectedImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    val avatarImageIsChanged = remember {
+        mutableStateOf(false)
+    }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            selectedImageUri = uri
+            avatarImageIsChanged.value = true
+        }
+    )
+
+
 
     Log.d("PlannerAccountScreenSettings", "PlannerAccountScreen: ${user.toString()}")
     Box(
@@ -134,13 +165,16 @@ fun PlannerAccountSettingsScreen(
                                 shape = CircleShape,
                                 shadowElevation = 5.dp,
                             ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.profil_avatar),
-                                    contentDescription = "Profile picture",
-                                    modifier = Modifier
-                                        .size(150.dp)
-                                        .clickable { }
-                                )
+                                ProfileImage(
+                                    selectedImageUri = selectedImageUri,
+                                    avatarUserUrl = user?.avatarUrl ?: ""
+                                ) {
+                                    photoPickerLauncher.launch(
+                                        PickVisualMediaRequest(
+                                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                                        )
+                                    )
+                                }
                             }
                             Icon(
                                 imageVector = Icons.Default.Edit,
@@ -159,17 +193,27 @@ fun PlannerAccountSettingsScreen(
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
-                        EditUserInfo(
+                        EditUserInfoForm(
                             user = user,
+                            avatarImageIsChanged = avatarImageIsChanged,
                             navController = navController,
-                        ) { user, email, password ->
+                        ) { userToUpdate, email, password ->
                             if (email.isNotEmpty()) {
                                 viewModel.updateUserEmail(email)
                             }
                             if (password.isNotEmpty()) {
                                 viewModel.updateUserPassword(password)
                             }
-                            viewModel.updateUserData(user)
+                            if (selectedImageUri != null) {
+
+                                viewModel.updateUserPhoto(selectedImageUri!!) { imageUrl ->
+                                    userToUpdate["avatar_url"] = imageUrl
+                                    viewModel.updateUserData(userToUpdate)
+                                }
+
+                            } else {
+                                viewModel.updateUserData(userToUpdate)
+                            }
                             if (password.isNotEmpty() || email.isNotEmpty()) {
                                 FirebaseAuth.getInstance().signOut()
                                 navController.navigate(FunctionalitiesRoutes.Authentication.name) {
@@ -179,6 +223,15 @@ fun PlannerAccountSettingsScreen(
                                 }
                             }
                         }
+                        if (result.value?.data == true) {
+                            Toast.makeText(
+                                context,
+                                "Datele au fost actualizate cu succes",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            viewModel.fetchUser()
+                            result.value?.data = false
+                        }
                     }
                 }
             }
@@ -187,9 +240,11 @@ fun PlannerAccountSettingsScreen(
 }
 
 @Composable
-fun EditUserInfo(
-    navController: NavController, user: UserModel?,
-    onClick: (Map<String, Any>, email: String, password: String) -> Unit
+fun EditUserInfoForm(
+    navController: NavController,
+    avatarImageIsChanged: MutableState<Boolean>,
+    user: UserModel?,
+    onClick: (MutableMap<String, Any>, email: String, password: String) -> Unit
 ) {
     val email = rememberSaveable {
         mutableStateOf("")
@@ -210,8 +265,14 @@ fun EditUserInfo(
         mutableStateOf(false)
     }
     val enabledButton =
-        rememberSaveable(email.value, password.value,userName.value.isNotEmpty(),initialBudget.value.isNotEmpty()) {
-            email.value.isNotEmpty() || password.value.isNotEmpty() || (userName.value.isNotEmpty() || initialBudget.value.isNotEmpty())
+        remember(
+            email.value,
+            password.value,
+            userName.value,
+            initialBudget.value,
+            avatarImageIsChanged.value
+        ) {
+            email.value.isNotEmpty() || password.value.isNotEmpty() || (userName.value.isNotEmpty() || initialBudget.value.isNotEmpty()) || avatarImageIsChanged.value
         }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -276,8 +337,7 @@ fun EditUserInfo(
                     userToUpdate["initial_budget"] = initialBudget.value.toDoubleOrNull() ?: 0.0
                 }
                 onClick(userToUpdate, email.value, password.value)
-            }
-            , enabled = enabledButton) {
+            }, enabled = enabledButton) {
                 Text(text = "Salveaza")
             }
 
@@ -288,4 +348,31 @@ fun EditUserInfo(
             }
         }
     }
+}
+
+@Composable
+private fun ProfileImage(
+    selectedImageUri: Uri?,
+    avatarUserUrl: String?,
+    onClick: () -> Unit
+) {
+
+    if (selectedImageUri == null && avatarUserUrl.isNullOrEmpty()) {
+        Image(
+            painter = painterResource(id = R.drawable.profil_avatar),
+            contentDescription = "Profile picture",
+            modifier = Modifier
+                .clickable { onClick() }
+                .size(150.dp)
+        )
+    } else {
+        AsyncImage(
+            model = selectedImageUri ?: avatarUserUrl?.toUri()!!,
+            contentDescription = "Profile picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .clickable { onClick() }
+                .size(150.dp))
+    }
+
 }

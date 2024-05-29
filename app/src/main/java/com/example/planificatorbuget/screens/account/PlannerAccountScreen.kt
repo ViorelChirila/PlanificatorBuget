@@ -115,23 +115,6 @@ fun PlannerAccountScreen(
                             shape = CircleShape,
                             shadowElevation = 5.dp,
                         ) {
-//                            var selectedImageUri by remember {
-//                                mutableStateOf<Uri?>(null)
-//                            }
-//
-//                            val photoPickerLauncher = rememberLauncherForActivityResult(
-//                                contract = ActivityResultContracts.PickVisualMedia(),
-//                                onResult = { uri -> selectedImageUri = uri }
-//                            )
-//
-//                            ProfileImage(selectedImageUri)
-//                            {
-//                                photoPickerLauncher.launch(
-//                                    PickVisualMediaRequest(
-//                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-//                                    )
-//                                )
-//                            }
                             if (user?.avatarUrl?.isEmpty() == true)
                             {
                                 Image(
@@ -165,33 +148,6 @@ fun PlannerAccountScreen(
             }
         }
     }
-}
-
-@Composable
-private fun ProfileImage(
-    selectedImageUri: Uri?,
-    onClick: () -> Unit
-) {
-
-    if (selectedImageUri == null) {
-        Image(
-            painter = painterResource(id = R.drawable.profil_avatar),
-            contentDescription = "Profile picture",
-            modifier = Modifier
-                .clickable { onClick() }
-                .size(150.dp)
-        )
-    } else {
-        AsyncImage(
-            model = selectedImageUri,
-            contentDescription = "Profile picture",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .clickable { onClick() }
-                .size(150.dp))
-    }
-
-
 }
 
 @Composable

@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -38,7 +39,6 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
         viewModelScope.launch {
             _updateResult.value = DataOrException(isLoading = true)
             val result = userRepository.updateUserData(user)
-            fetchUser()
             _updateResult.postValue(result)
         }
     }
@@ -52,6 +52,14 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
     fun updateUserPassword(password: String){
         viewModelScope.launch {
             userRepository.updateUserPassword(password)
+        }
+    }
+
+    fun updateUserPhoto(photoUri: Uri, onSuccess: (String) -> Unit){
+        viewModelScope.launch {
+            val result = userRepository.uploadImageToFirebaseStorage(photoUri)
+            Log.d("SharedViewModel", "updateUserPhoto: ${result.data}")
+            result.data?.let { onSuccess(it) }
         }
     }
 }

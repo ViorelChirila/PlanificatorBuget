@@ -1,10 +1,12 @@
 package com.example.planificatorbuget.repository
 
+import android.net.Uri
 import android.util.Log
 import com.example.planificatorbuget.data.DataOrException
 import com.example.planificatorbuget.model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -83,6 +85,27 @@ class UserRepository @Inject constructor(private val firebaseFirestore: Firebase
             }?.await()
         } catch (e: Exception) {
             Log.d("UserRepository", "updateUserPassword:failure")
+        }
+    }
+
+    suspend fun uploadImageToFirebaseStorage(uri: Uri): DataOrException<String, Boolean, Exception> {
+        val avatarUri = DataOrException<String, Boolean, Exception>()
+        val storageRef = FirebaseStorage.getInstance().reference
+        val userId = auth.currentUser?.uid
+        val imageRef = storageRef.child("profile_images/$userId.jpg")
+
+        return try {
+            avatarUri.isLoading = true
+            imageRef.putFile(uri).await()
+            val downloadUri = imageRef.downloadUrl.await()
+            avatarUri.data = downloadUri.toString()
+            Log.d("UserRepository", "URL: $downloadUri")
+            avatarUri.isLoading = false
+            avatarUri
+        } catch (e: Exception) {
+            avatarUri.exception = e
+            avatarUri.isLoading = false
+            avatarUri
         }
     }
 }

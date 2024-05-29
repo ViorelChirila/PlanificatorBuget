@@ -80,6 +80,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     //noinspection UseTomlInstead
     implementation("com.google.firebase:firebase-firestore")
+    //noinspection UseTomlInstead
+    implementation("com.google.firebase:firebase-storage")
 
     // Dagger - Hilt
     implementation(libs.hilt.android)

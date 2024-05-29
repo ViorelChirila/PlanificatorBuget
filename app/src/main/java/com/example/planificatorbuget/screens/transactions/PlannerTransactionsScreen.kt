@@ -17,18 +17,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.planificatorbuget.components.AppBar
+import com.example.planificatorbuget.components.FABContent
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
@@ -73,6 +72,12 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
             bottomBar = {
                 NavigationBarComponent(navController = navController)
             },
+            floatingActionButton = {
+                FABContent {
+
+                }
+            },
+            floatingActionButtonPosition = FabPosition.Center,
             containerColor = Color.Transparent
         ) { paddingValues ->
             Card(
@@ -88,77 +93,13 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Tranzactii", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                        Spacer(modifier = Modifier.width(50.dp))
-                        OutlinedTextField(
-                            value = "08/17/2023",
-                            onValueChange = {},
-                            label = { Text("Date") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                    SearchTransactionsByDateForm()
                     Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider(
                         color = Color.Black.copy(alpha = 0.3f),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = { /* TODO: Filter action */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Black
-                            ),
-                            contentPadding = PaddingValues(5.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Filter")
-                                Text(text = "Sorteaza")
-                            }
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Button(
-                            onClick = { /* TODO: Filter action */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Black
-                            ),
-                            contentPadding = PaddingValues(5.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Icon(Icons.Default.FilterList, contentDescription = "Filter")
-                                Text(text = "Filtreaza")
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(30.dp))
-                        OutlinedTextField(
-                            value = "Hinted search text",
-                            onValueChange = {},
-                            label = { Text("Cauta tranzactii") },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = TextFieldDefaults.colors(),
-                            shape = RoundedCornerShape(30),
-                            leadingIcon = {
-                                Icon(Icons.Default.Search, contentDescription = "Sort")
-                            }
-
-                        )
-                    }
+                    FilterAndSortTransactions()
                     Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider(
                         color = Color.Black.copy(alpha = 0.3f),
@@ -171,4 +112,81 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
 
     }
 
+}
+
+@Composable
+private fun FilterAndSortTransactions() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Button(
+            onClick = { /* TODO: Filter action */ },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Black
+            ),
+            contentPadding = PaddingValues(5.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Filter")
+                Text(text = "Sorteaza")
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Button(
+            onClick = { /* TODO: Filter action */ },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Black
+            ),
+            contentPadding = PaddingValues(5.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(Icons.Default.FilterList, contentDescription = "Filter")
+                Text(text = "Filtreaza")
+            }
+        }
+        Spacer(modifier = Modifier.width(30.dp))
+        OutlinedTextField(
+            value = "Hinted search text",
+            onValueChange = {},
+            label = { Text("Cauta tranzactii") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.colors(),
+            shape = RoundedCornerShape(30),
+            leadingIcon = {
+                Icon(Icons.Default.Search, contentDescription = "Sort")
+            }
+
+        )
+    }
+}
+
+@Composable
+private fun SearchTransactionsByDateForm() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
+            Text("Tranzactii", fontWeight = FontWeight.Bold, fontSize = 20.sp,modifier = Modifier.padding(bottom = 2.dp))
+            Text(text = "08/17/2023")
+        }
+        Spacer(modifier = Modifier.width(50.dp))
+        OutlinedTextField(
+            value = "08/17/2023",
+            onValueChange = {},
+            label = { Text("Date") },
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }

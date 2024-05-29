@@ -62,6 +62,7 @@ import com.example.planificatorbuget.components.EmailInput
 import com.example.planificatorbuget.components.InputField
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.PasswordInput
+import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.UserModel
 import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 import com.example.planificatorbuget.screens.SharedViewModel
@@ -76,7 +77,8 @@ fun PlannerAccountSettingsScreen(
 ) {
 
     val dataOrException by viewModel.data.observeAsState()
-    val result = viewModel.updateResult.observeAsState()
+    val resultForDataUpdate by viewModel.dataUpdateResult.observeAsState()
+    val isUpdateDone by viewModel.isUpdateDone.observeAsState(initial = false)
     val user = dataOrException?.data
     val isLoading = dataOrException?.isLoading ?: true
     val context = LocalContext.current
@@ -222,15 +224,24 @@ fun PlannerAccountSettingsScreen(
                                     }
                                 }
                             }
+
                         }
-                        if (result.value?.data == true) {
-                            Toast.makeText(
-                                context,
-                                "Datele au fost actualizate cu succes",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            viewModel.fetchUser()
-                            result.value?.data = false
+                        if (isUpdateDone) {
+                            if (resultForDataUpdate is Response.Success && (resultForDataUpdate as Response.Success).data == true) {
+                                Toast.makeText(
+                                    context,
+                                    "Datele au fost actualizate cu succes",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                viewModel.fetchUser()
+                                viewModel.resetUpdateStatus()
+                            } else if (resultForDataUpdate is Response.Error) {
+                                Toast.makeText(
+                                    context,
+                                    "Failed to update data",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
                     }
                 }

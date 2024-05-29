@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.planificatorbuget.data.DataOrException
+import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.UserModel
 import com.example.planificatorbuget.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,8 +20,11 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
     private val _data = MutableLiveData<DataOrException<UserModel, Boolean, Exception>>()
     val data: LiveData<DataOrException<UserModel, Boolean, Exception>> get() = _data
 
-    private val _updateResult = MutableLiveData<DataOrException<Boolean, Boolean, Exception>>()
-    val updateResult: LiveData<DataOrException<Boolean, Boolean, Exception>> get() = _updateResult
+    private val _dataUpdateResult = MutableLiveData<Response<Boolean>>()
+    val dataUpdateResult: LiveData<Response<Boolean>> get() = _dataUpdateResult
+
+    private val _isUpdateDone = MutableLiveData<Boolean>()
+    val isUpdateDone: LiveData<Boolean> get() = _isUpdateDone
 
     init {
         fetchUser()
@@ -37,9 +41,11 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
 
     fun updateUserData(user: Map<String, Any>) {
         viewModelScope.launch {
-            _updateResult.value = DataOrException(isLoading = true)
+            _dataUpdateResult.value = Response.Loading()
             val result = userRepository.updateUserData(user)
-            _updateResult.postValue(result)
+            _dataUpdateResult.postValue(result)
+            _isUpdateDone.postValue(true)
+
         }
     }
 
@@ -61,5 +67,10 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
             Log.d("SharedViewModel", "updateUserPhoto: ${result.data}")
             result.data?.let { onSuccess(it) }
         }
+    }
+
+
+    fun resetUpdateStatus() {
+        _isUpdateDone.value = false // Reset isUpdateDone to false when needed
     }
 }

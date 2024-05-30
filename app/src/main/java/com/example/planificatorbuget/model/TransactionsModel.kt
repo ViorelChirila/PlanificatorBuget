@@ -1,12 +1,12 @@
 package com.example.planificatorbuget.model
 
 class TransactionsModel(
-    transactionId: String = "",
-    userId: String = "",
-    amount: Double = 0.0,
-    transactionType: String = "",
-    categoryId: String = "",
-    transactionDate: String = "",
-    transactionDescription: String = ""
+    var transactionId: String = "",
+    var userId: String = "",
+    var amount: Double = 0.0,
+    var transactionType: String = "",
+    var categoryId: String = "",
+    var transactionDate: String = "",
+    var transactionDescription: String = ""
 ) {
 }

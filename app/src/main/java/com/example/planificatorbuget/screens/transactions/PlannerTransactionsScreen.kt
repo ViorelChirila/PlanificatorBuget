@@ -1,5 +1,7 @@
 package com.example.planificatorbuget.screens.transactions
 
+import android.app.DatePickerDialog
+import android.widget.DatePicker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -68,6 +71,7 @@ import com.example.planificatorbuget.components.FABContent
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
+import java.util.Calendar
 
 @Preview
 @Composable
@@ -82,7 +86,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     20.0,
                     "Venit",
                     "Salariu",
-                    "08/17/2023",
+                    "08/17/2024",
                     "Mancare petru caine",
                     "multe chestii pentru caine i-am cumparat boabe si altele"
                 ),
@@ -92,7 +96,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     20.0,
                     "Cheltuiala",
                     "Cumparaturi",
-                    "08/17/2023",
+                    "06/01/2024",
                     "Service masina"
                 ),
                 TransactionModel("3", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
@@ -102,7 +106,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     30.0,
                     "Cheltuiala",
                     "Cumparaturi",
-                    "08/17/2023",
+                    "05/17/2024",
                     "Factura telefon"
                 ),
                 TransactionModel("5", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
@@ -112,7 +116,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     20.0,
                     "Cheltuiala",
                     "Cumparaturi",
-                    "08/17/2023",
+                    "05/17/2024",
                     "Altceva"
                 ),
                 TransactionModel("7", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
@@ -188,7 +192,15 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    SearchTransactionsByDateForm()
+                    SearchTransactionsByDateForm { date ->
+                        if (date.isEmpty())
+                            filteredListOfTransactions.value = originalListOfTransactions.value
+                        else
+                            filteredListOfTransactions.value =
+                                originalListOfTransactions.value.filter {
+                                    it.transactionDate == date
+                                }
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                     HorizontalDivider(
                         color = Color.Black.copy(alpha = 0.3f),
@@ -321,7 +333,11 @@ private fun FilterAndSortTransactions(
 }
 
 @Composable
-private fun SearchTransactionsByDateForm() {
+private fun SearchTransactionsByDateForm(
+    onSelectedDate: (String) -> Unit = { }
+) {
+    var selectedDate by remember { mutableStateOf("") }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -329,21 +345,75 @@ private fun SearchTransactionsByDateForm() {
     ) {
         Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
             Text(
-                "Tranzactii",
+                text = "Tranzactii",
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
-            Text(text = "08/17/2023")
         }
         Spacer(modifier = Modifier.width(50.dp))
-        OutlinedTextField(
-            value = "08/17/2023",
-            onValueChange = {},
-            label = { Text("Date") },
-            modifier = Modifier.fillMaxWidth()
+        DatePickerField(
+            label = "Alege o data",
+            selectedDate = selectedDate,
+            onDateSelected = {
+                selectedDate = it
+                onSelectedDate(selectedDate)
+            },
+            onClearDate = {
+                selectedDate = ""
+                onSelectedDate(selectedDate)
+            }
         )
     }
+}
+
+@Composable
+fun DatePickerField(
+    label: String,
+    selectedDate: String,
+    onDateSelected: (String) -> Unit,
+    onClearDate: () -> Unit
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+            val formattedDate =
+                String.format("%02d/%02d/%d", selectedMonth + 1, selectedDayOfMonth, selectedYear)
+            onDateSelected(formattedDate)
+        }, year, month, day
+    )
+
+
+    OutlinedTextField(
+        value = selectedDate,
+        onValueChange = {},
+        label = { Text(label) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { datePickerDialog.show() },
+        enabled = false,
+        colors = TextFieldDefaults.colors(
+            disabledTextColor = Color.Black,
+            disabledLabelColor = Color.Black,
+            disabledIndicatorColor = Color.Black
+        ),
+        trailingIcon = {
+            if (selectedDate.isNotEmpty()) {
+                IconButton(onClick = { onClearDate() }) {
+                    Icon(Icons.Default.Clear, contentDescription = "Clear Date")
+                }
+            }
+        }
+    )
+
+
 }
 
 @Preview
@@ -371,7 +441,7 @@ fun TransactionItem(transaction: TransactionModel) {
         Column {
             Row(
                 modifier = Modifier
-                    .padding(start = 10.dp,top = 10.dp, end = 10.dp, bottom = 3.dp)
+                    .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 3.dp)
                     .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
@@ -396,8 +466,10 @@ fun TransactionItem(transaction: TransactionModel) {
             }
             if (expanded) {
                 Spacer(modifier = Modifier.height(3.dp))
-                Text(text = "Descriere: ${transaction.transactionDescription}",modifier = Modifier
-                    .padding(10.dp))
+                Text(
+                    text = "Descriere: ${transaction.transactionDescription}", modifier = Modifier
+                        .padding(10.dp)
+                )
             }
             Spacer(modifier = Modifier.height(3.dp))
             Row(
@@ -452,13 +524,13 @@ fun FilterDialog(
                             DropdownMenuItem(onClick = {
                                 selectedType.value = "Venit"
                                 expanded = false
-                            }, text = { Text(text ="Venit") })
+                            }, text = { Text(text = "Venit") })
                             DropdownMenuItem(
                                 onClick = {
                                     selectedType.value = "Cheltuiala"
                                     expanded = false
                                 },
-                                text = { Text(text ="Cheltuiala") })
+                                text = { Text(text = "Cheltuiala") })
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))

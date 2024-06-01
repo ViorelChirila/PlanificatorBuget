@@ -73,6 +73,10 @@ import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 import java.util.Calendar
 
+enum class SortOrder {
+    NONE, ASCENDING, DESCENDING
+}
+
 @Preview
 @Composable
 fun PlannerTransactionsScreen(navController: NavController = NavController(LocalContext.current)) {
@@ -144,6 +148,21 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
     }
     val filteredListOfTransactions = remember { mutableStateOf(originalListOfTransactions.value) }
 
+    var sortOrder by remember { mutableStateOf(SortOrder.NONE) }
+
+    fun sortTransactions() {
+        sortOrder = when (sortOrder) {
+            SortOrder.NONE -> SortOrder.ASCENDING
+            SortOrder.ASCENDING -> SortOrder.DESCENDING
+            SortOrder.DESCENDING -> SortOrder.NONE
+        }
+
+        filteredListOfTransactions.value = when (sortOrder) {
+            SortOrder.NONE -> originalListOfTransactions.value
+            SortOrder.ASCENDING -> filteredListOfTransactions.value.sortedBy { it.amount }
+            SortOrder.DESCENDING -> filteredListOfTransactions.value.sortedByDescending { it.amount }
+        }
+    }
 
     Box(
         modifier = Modifier.background(
@@ -208,8 +227,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     )
                     FilterAndSortTransactions(
                         onSort = {
-                            filteredListOfTransactions.value =
-                                filteredListOfTransactions.value.sortedBy { it.amount }
+                            sortTransactions()
                         },
                         onFilter = { type, categories ->
                             filteredListOfTransactions.value =

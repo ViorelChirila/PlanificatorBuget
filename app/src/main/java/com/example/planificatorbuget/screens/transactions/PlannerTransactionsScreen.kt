@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -65,7 +66,7 @@ import androidx.navigation.NavController
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.FABContent
 import com.example.planificatorbuget.components.NavigationBarComponent
-import com.example.planificatorbuget.model.TransactionsModel
+import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 @Preview
@@ -75,16 +76,17 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
     val originalListOfTransactions = remember {
         mutableStateOf(
             listOf(
-                TransactionsModel(
+                TransactionModel(
                     "1",
                     "1",
                     20.0,
                     "Venit",
                     "Salariu",
                     "08/17/2023",
-                    "Mancare petru caine"
+                    "Mancare petru caine",
+                    "multe chestii pentru caine i-am cumparat boabe si altele"
                 ),
-                TransactionsModel(
+                TransactionModel(
                     "2",
                     "1",
                     20.0,
@@ -93,8 +95,8 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     "08/17/2023",
                     "Service masina"
                 ),
-                TransactionsModel("3", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionsModel(
+                TransactionModel("3", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
+                TransactionModel(
                     "4",
                     "1",
                     30.0,
@@ -103,8 +105,8 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     "08/17/2023",
                     "Factura telefon"
                 ),
-                TransactionsModel("5", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionsModel(
+                TransactionModel("5", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
+                TransactionModel(
                     "6",
                     "1",
                     20.0,
@@ -113,8 +115,8 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     "08/17/2023",
                     "Altceva"
                 ),
-                TransactionsModel("7", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionsModel(
+                TransactionModel("7", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
+                TransactionModel(
                     "8",
                     "1",
                     60.0,
@@ -123,8 +125,8 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     "08/17/2023",
                     "Alta factura"
                 ),
-                TransactionsModel("9", "1", 10.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionsModel(
+                TransactionModel("9", "1", 10.0, "Venit", "Salariu", "08/17/2023", "1000"),
+                TransactionModel(
                     "10",
                     "1",
                     6.0,
@@ -209,7 +211,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                         } else {
                             filteredListOfTransactions.value =
                                 originalListOfTransactions.value.filter {
-                                    it.transactionDescription.contains(query, ignoreCase = true)
+                                    it.transactionTitle.contains(query, ignoreCase = true)
                                 }
                         }
                     }
@@ -241,9 +243,7 @@ private fun FilterAndSortTransactions(
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val valid = remember(searchQueryState.value) {
-        searchQueryState.value.trim().isNotEmpty()
-    }
+
     val showDialog = rememberSaveable { mutableStateOf(false) }
     val selectedType = rememberSaveable { mutableStateOf("") }
     val selectedCategories = rememberSaveable { mutableStateOf(listOf<String>()) }
@@ -348,7 +348,7 @@ private fun SearchTransactionsByDateForm() {
 
 @Preview
 @Composable
-fun TransactionsList(lisOfTransactions: List<TransactionsModel> = emptyList()) {
+fun TransactionsList(lisOfTransactions: List<TransactionModel> = emptyList()) {
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(5.dp)) {
         items(items = lisOfTransactions) { transaction ->
@@ -359,37 +359,55 @@ fun TransactionsList(lisOfTransactions: List<TransactionsModel> = emptyList()) {
 
 //@Preview
 @Composable
-fun TransactionItem(transaction: TransactionsModel) {
+fun TransactionItem(transaction: TransactionModel) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(modifier = Modifier
         .clickable { }
         .fillMaxWidth()
         .padding(3.dp),
         elevation = CardDefaults.cardElevation(7.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(text = transaction.transactionDescription, fontWeight = FontWeight.Bold)
-                Text(
-                    text = "Categorie: ${transaction.categoryId}",
-                    color = Color.Gray,
-                    fontStyle = FontStyle.Italic
-                )
-                Text(text = transaction.transactionDate, color = Color.Gray)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Column {
-                Text(
-                    text = transaction.amount.toString(),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 17.sp,
-                    color = if (transaction.transactionType == "Venit") Color.Green else Color.Red
-                )
-            }
+        Column {
+            Row(
+                modifier = Modifier
+                    .padding(start = 10.dp,top = 10.dp, end = 10.dp, bottom = 3.dp)
+                    .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(text = transaction.transactionTitle, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Categorie: ${transaction.categoryId}",
+                        color = Color.Gray,
+                        fontStyle = FontStyle.Italic
+                    )
+                    Text(text = transaction.transactionDate, color = Color.Gray)
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Column {
+                    Text(
+                        text = transaction.amount.toString(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp,
+                        color = if (transaction.transactionType == "Venit") Color(0xFF349938) else Color.Red
+                    )
+                }
 
+            }
+            if (expanded) {
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(text = "Descriere: ${transaction.transactionDescription}",modifier = Modifier
+                    .padding(10.dp))
+            }
+            Spacer(modifier = Modifier.height(3.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = { expanded = !expanded }) {
+                    Text(text = if (expanded) "Restrange" else "Extinde")
+                }
+            }
         }
 
     }

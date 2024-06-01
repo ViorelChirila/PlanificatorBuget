@@ -20,24 +20,33 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -182,16 +192,25 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                         color = Color.Black.copy(alpha = 0.3f),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    FilterAndSortTransactions(onSort = {
-                        filteredListOfTransactions.value = filteredListOfTransactions.value.sortedBy { it.amount }
-                    }) { query ->
-
+                    FilterAndSortTransactions(
+                        onSort = {
+                            filteredListOfTransactions.value =
+                                filteredListOfTransactions.value.sortedBy { it.amount }
+                        },
+                        onFilter = { type, categories ->
+                            filteredListOfTransactions.value =
+                                originalListOfTransactions.value.filter {
+                                    (type.isEmpty() || it.transactionType == type) &&
+                                            (categories.isEmpty() || categories.contains(it.categoryId))
+                                }
+                        }) { query ->
                         if (query.isEmpty()) {
                             filteredListOfTransactions.value = originalListOfTransactions.value
                         } else {
-                            filteredListOfTransactions.value = originalListOfTransactions.value.filter {
-                                it.transactionDescription.contains(query, ignoreCase = true)
-                            }
+                            filteredListOfTransactions.value =
+                                originalListOfTransactions.value.filter {
+                                    it.transactionDescription.contains(query, ignoreCase = true)
+                                }
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
@@ -213,6 +232,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
 @Composable
 private fun FilterAndSortTransactions(
     onSort: () -> Unit = { },
+    onFilter: (String, List<String>) -> Unit = { _, _ -> },
     onSearch: (String) -> Unit = { },
 ) {
 
@@ -224,6 +244,9 @@ private fun FilterAndSortTransactions(
     val valid = remember(searchQueryState.value) {
         searchQueryState.value.trim().isNotEmpty()
     }
+    val showDialog = rememberSaveable { mutableStateOf(false) }
+    val selectedType = rememberSaveable { mutableStateOf("") }
+    val selectedCategories = rememberSaveable { mutableStateOf(listOf<String>()) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -248,7 +271,9 @@ private fun FilterAndSortTransactions(
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(
-            onClick = { /* TODO: Filter action */ },
+            onClick = {
+                showDialog.value = true
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
                 contentColor = Color.Black
@@ -287,6 +312,12 @@ private fun FilterAndSortTransactions(
         )
 
     }
+    FilterDialog(
+        showDialog = showDialog,
+        onFilterApply = onFilter,
+        selectedType = selectedType,
+        selectedCategories = selectedCategories
+    )
 }
 
 @Composable
@@ -361,5 +392,124 @@ fun TransactionItem(transaction: TransactionsModel) {
 
         }
 
+    }
+}
+
+@Composable
+fun FilterDialog(
+    showDialog: MutableState<Boolean>,
+    onFilterApply: (String, List<String>) -> Unit,
+    selectedType: MutableState<String>,
+    selectedCategories: MutableState<List<String>>
+) {
+    if (showDialog.value) {
+        val density = LocalContext.current.resources.displayMetrics.density
+        val screenHeightPx = LocalContext.current.resources.displayMetrics.heightPixels
+        val dialogHeightDp = (screenHeightPx * 0.5 / density).dp
+
+        var expanded by remember { mutableStateOf(false) }
+
+
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Filter Transactions") },
+            text = {
+                Column(modifier = Modifier.height(dialogHeightDp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "Tipul tranzactiei: ")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(selectedType.value)
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Arrow")
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            offset = DpOffset(150.dp, 0.dp)
+                        ) {
+                            DropdownMenuItem(onClick = {
+                                selectedType.value = "Venit"
+                                expanded = false
+                            }, text = { Text(text ="Venit") })
+                            DropdownMenuItem(
+                                onClick = {
+                                    selectedType.value = "Cheltuiala"
+                                    expanded = false
+                                },
+                                text = { Text(text ="Cheltuiala") })
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Select Categories:")
+                    LazyColumn {
+                        val categories = listOf(
+                            "Salariu",
+                            "Cumparaturi",
+                            "Factura telefon",
+                            "Altceva",
+                            "Service masina",
+                            "Mancare petru caine",
+                            "1000",
+                            "Alta factura",
+                            "Ceva",
+                            "Altceva"
+                        )
+                        items(categories) { category ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        val currentCategories =
+                                            selectedCategories.value.toMutableList()
+                                        if (currentCategories.contains(category)) {
+                                            currentCategories.remove(category)
+                                        } else {
+                                            currentCategories.add(category)
+                                        }
+                                        selectedCategories.value = currentCategories
+                                    }
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Checkbox(
+                                    checked = selectedCategories.value.contains(category),
+                                    onCheckedChange = {
+                                        val currentCategories =
+                                            selectedCategories.value.toMutableList()
+                                        if (it) {
+                                            currentCategories.add(category)
+                                        } else {
+                                            currentCategories.remove(category)
+                                        }
+                                        selectedCategories.value = currentCategories
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(text = category)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onFilterApply(selectedType.value, selectedCategories.value)
+                        showDialog.value = false
+                    }
+                ) {
+                    Text("Apply")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }

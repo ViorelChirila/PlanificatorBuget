@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.di
 
+import com.example.planificatorbuget.repository.TransactionsRepository
 import com.example.planificatorbuget.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,4 +19,8 @@ object AppModule {
     fun provideUserRepository(): UserRepository =
         UserRepository(firebaseFirestore = FirebaseFirestore.getInstance(), auth = FirebaseAuth.getInstance())
 
+    @Singleton
+    @Provides
+    fun provideTransactionRepository(): TransactionsRepository =
+        TransactionsRepository(firebaseFirestore = FirebaseFirestore.getInstance(), auth = FirebaseAuth.getInstance())
 }

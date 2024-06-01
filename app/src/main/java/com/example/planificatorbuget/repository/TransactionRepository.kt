@@ -7,7 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class TransactionsRepository @Inject constructor(
+class TransactionRepository @Inject constructor(
     private val firebaseFirestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ) {

@@ -258,7 +258,7 @@ fun TransactionItem(transaction: TransactionModel) {
                 Spacer(modifier = Modifier.weight(1f))
                 Column {
                     Text(
-                        text = transaction.amount.toString(),
+                        text = if(transaction.transactionType == "Venit") "+${transaction.amount}" else transaction.amount.toString(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = if (transaction.transactionType == "Venit") Color(0xFF349938) else Color.Red

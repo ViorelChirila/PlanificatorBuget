@@ -568,15 +568,15 @@ fun AddTransactionDialog(
                                 onClick = {
 
                                     if (valid) {
+                                        val tempAmount = if (type == "Venit") amount.toDouble() else amount.toDouble() * -1
                                         val transaction = TransactionModel(
-                                            amount = amount.toDouble(),
+                                            amount = tempAmount,
                                             transactionType = type,
                                             transactionDate = date,
                                             transactionTitle = title,
                                             transactionDescription = description,
                                         )
                                         onAddTransaction(transaction)
-//                                    showDialog.value = false
                                     } else {
                                         Toast.makeText(
                                             context,

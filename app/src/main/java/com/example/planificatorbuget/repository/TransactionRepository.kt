@@ -35,4 +35,28 @@ class TransactionRepository @Inject constructor(
             dataOrExceptionTransactions
         }
     }
+
+    suspend fun addTransaction(transaction: TransactionModel): DataOrException<Boolean, Boolean, Exception> {
+        val dataOrException = DataOrException<Boolean, Boolean, Exception>()
+        val userId = auth.currentUser?.uid ?: return dataOrException.apply {
+            isLoading = false
+        }
+
+        dataOrException.isLoading = true
+        return try {
+            firebaseFirestore.collection(TRANSACTIONS_COLLECTION).add(transaction.apply {
+                this.userId = userId
+            }).addOnSuccessListener {documentReference ->
+               val docId = documentReference.id
+                firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docId).update("transaction_id", docId)
+            }.await()
+            dataOrException.data = true
+            dataOrException.isLoading = false
+            dataOrException
+        } catch (e: Exception) {
+            dataOrException.exception = e
+            dataOrException.isLoading = false
+            dataOrException
+        }
+    }
 }

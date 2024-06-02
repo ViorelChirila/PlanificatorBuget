@@ -2,6 +2,7 @@ package com.example.planificatorbuget.components
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
@@ -360,7 +362,7 @@ fun DatePickerField(
 @Composable
 fun AddTransactionDialog(
     showDialog: MutableState<Boolean>,
-    onAddTransaction: (TransactionModel) -> Unit ={}
+    onAddTransaction: (TransactionModel) -> Unit = {}
 ) {
     val categories = listOf(
         "Salariu",
@@ -386,11 +388,24 @@ fun AddTransactionDialog(
                     var type by remember { mutableStateOf("") }
                     var category by remember { mutableStateOf("") }
                     var date by remember { mutableStateOf("") }
+                    var description by remember { mutableStateOf("") }
 
                     var expandedType by remember { mutableStateOf(false) }
                     var extendedCategory by remember { mutableStateOf(false) }
 
-                    Text(text = "Add New Transaction", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    val valid = remember(title, amount, type, category, date, description) {
+                        title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
+                            .isNotEmpty() && category.trim().isNotEmpty() && date.trim()
+                            .isNotEmpty() && description.trim().isNotEmpty()
+                    }
+
+                    var context = LocalContext.current
+
+                    Text(
+                        text = "Add New Transaction",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
@@ -409,9 +424,12 @@ fun AddTransactionDialog(
                         modifier = Modifier.fillMaxWidth(),
                         trailingIcon = {
                             if (type == "Venit") {
-                                Icon(imageVector = Icons.Default.Add, contentDescription = "Plus sign", tint = Color(0xFF349938))
-                            }
-                            else {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Plus sign",
+                                    tint = Color(0xFF349938)
+                                )
+                            } else {
                                 Icon(
                                     painter = painterResource(id = R.drawable.baseline_remove_24),
                                     contentDescription = "Minus sign",
@@ -422,7 +440,9 @@ fun AddTransactionDialog(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    ExposedDropdownMenuBox(expanded = expandedType, onExpandedChange = {expandedType = !expandedType}) {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedType,
+                        onExpandedChange = { expandedType = !expandedType }) {
                         OutlinedTextField(
                             value = type,
                             onValueChange = { type = it },
@@ -431,7 +451,10 @@ fun AddTransactionDialog(
                                 .fillMaxWidth()
                                 .menuAnchor(),
                             trailingIcon = {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Arrow")
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = "Dropdown Arrow"
+                                )
                             },
                             readOnly = true
                         )
@@ -455,7 +478,9 @@ fun AddTransactionDialog(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    ExposedDropdownMenuBox(expanded = extendedCategory, onExpandedChange = {extendedCategory = !extendedCategory}) {
+                    ExposedDropdownMenuBox(
+                        expanded = extendedCategory,
+                        onExpandedChange = { extendedCategory = !extendedCategory }) {
                         OutlinedTextField(
                             value = category,
                             onValueChange = { category = it },
@@ -464,7 +489,10 @@ fun AddTransactionDialog(
                                 .fillMaxWidth()
                                 .menuAnchor(),
                             trailingIcon = {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = "Dropdown Arrow")
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = "Dropdown Arrow"
+                                )
                             },
                             readOnly = true
                         )
@@ -491,6 +519,30 @@ fun AddTransactionDialog(
                         onDateSelected = { date = it },
                         onClearDate = { date = "" }
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text("Descriere") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp), // Set a minimum height to allow multiple lines
+                        maxLines = 5,
+                        trailingIcon = {
+                            IconButton(
+                                onClick = {
+                                    // Add photo functionality
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CameraAlt,
+                                    contentDescription = "Add Photo",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
@@ -504,7 +556,20 @@ fun AddTransactionDialog(
                         Button(
                             onClick = {
 
-                                showDialog.value = false
+                                if (valid) {
+                                    val transaction = TransactionModel(
+                                        amount = amount.toDouble(),
+                                        transactionType = type,
+                                        transactionDate = date,
+                                        transactionTitle = title,
+                                        transactionDescription = description,
+                                    )
+                                    onAddTransaction(transaction)
+                                    showDialog.value = false
+                                }
+                                else{
+                                    Toast.makeText(context, "Toate campurile sunt obligatorii", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         ) {
                             Text("Adauga")

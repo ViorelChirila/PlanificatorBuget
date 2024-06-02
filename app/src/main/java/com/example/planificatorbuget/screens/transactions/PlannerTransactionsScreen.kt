@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.planificatorbuget.components.AddTransactionDialog
 import com.example.planificatorbuget.components.AppBar
@@ -53,7 +54,7 @@ enum class SortOrder {
 
 @Preview
 @Composable
-fun PlannerTransactionsScreen(navController: NavController = NavController(LocalContext.current)) {
+fun PlannerTransactionsScreen(navController: NavController = NavController(LocalContext.current), viewModel: TransactionsScreenViewModel = hiltViewModel()) {
 
     val originalListOfTransactions = remember {
         mutableStateOf(
@@ -236,7 +237,9 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
         }
 
     }
-    AddTransactionDialog(showDialog = showDialog)
+    AddTransactionDialog(showDialog = showDialog){transactionModel->
+        viewModel.addTransaction(transactionModel)
+    }
 }
 
 @Preview

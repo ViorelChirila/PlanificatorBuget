@@ -1,6 +1,7 @@
 package com.example.planificatorbuget.repository
 
 import com.example.planificatorbuget.data.DataOrException
+import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -36,13 +37,9 @@ class TransactionRepository @Inject constructor(
         }
     }
 
-    suspend fun addTransaction(transaction: TransactionModel): DataOrException<Boolean, Boolean, Exception> {
-        val dataOrException = DataOrException<Boolean, Boolean, Exception>()
-        val userId = auth.currentUser?.uid ?: return dataOrException.apply {
-            isLoading = false
-        }
+    suspend fun addTransaction(transaction: TransactionModel): Response<Boolean> {
+        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
 
-        dataOrException.isLoading = true
         return try {
             firebaseFirestore.collection(TRANSACTIONS_COLLECTION).add(transaction.apply {
                 this.userId = userId
@@ -50,13 +47,9 @@ class TransactionRepository @Inject constructor(
                val docId = documentReference.id
                 firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docId).update("transaction_id", docId)
             }.await()
-            dataOrException.data = true
-            dataOrException.isLoading = false
-            dataOrException
+            Response.Success(true)
         } catch (e: Exception) {
-            dataOrException.exception = e
-            dataOrException.isLoading = false
-            dataOrException
+            Response.Error(e.message, false)
         }
     }
 }

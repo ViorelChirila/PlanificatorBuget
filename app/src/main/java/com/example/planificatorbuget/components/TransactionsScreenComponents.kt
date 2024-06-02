@@ -31,6 +31,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -362,6 +363,7 @@ fun DatePickerField(
 @Composable
 fun AddTransactionDialog(
     showDialog: MutableState<Boolean>,
+    showLoading: MutableState<Boolean>,
     onAddTransaction: (TransactionModel) -> Unit = {}
 ) {
     val categories = listOf(
@@ -382,197 +384,210 @@ fun AddTransactionDialog(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.background,
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    var title by remember { mutableStateOf("") }
-                    var amount by remember { mutableStateOf("") }
-                    var type by remember { mutableStateOf("") }
-                    var category by remember { mutableStateOf("") }
-                    var date by remember { mutableStateOf("") }
-                    var description by remember { mutableStateOf("") }
-
-                    var expandedType by remember { mutableStateOf(false) }
-                    var extendedCategory by remember { mutableStateOf(false) }
-
-                    val valid = remember(title, amount, type, category, date, description) {
-                        title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
-                            .isNotEmpty() && category.trim().isNotEmpty() && date.trim()
-                            .isNotEmpty() && description.trim().isNotEmpty()
+                if (showLoading.value) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
                     }
+                }else {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        var title by remember { mutableStateOf("") }
+                        var amount by remember { mutableStateOf("") }
+                        var type by remember { mutableStateOf("") }
+                        var category by remember { mutableStateOf("") }
+                        var date by remember { mutableStateOf("") }
+                        var description by remember { mutableStateOf("") }
 
-                    var context = LocalContext.current
+                        var expandedType by remember { mutableStateOf(false) }
+                        var extendedCategory by remember { mutableStateOf(false) }
 
-                    Text(
-                        text = "Add New Transaction",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        label = { Text("Titlu") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = amount,
-                        onValueChange = { amount = it },
-                        label = { Text("Valoare in LEI") },
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            if (type == "Venit") {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Plus sign",
-                                    tint = Color(0xFF349938)
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.baseline_remove_24),
-                                    contentDescription = "Minus sign",
-                                    tint = Color.Red
-                                )
-                            }
+                        val valid = remember(title, amount, type, category, date, description) {
+                            title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
+                                .isNotEmpty() && category.trim().isNotEmpty() && date.trim()
+                                .isNotEmpty() && description.trim().isNotEmpty()
                         }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    ExposedDropdownMenuBox(
-                        expanded = expandedType,
-                        onExpandedChange = { expandedType = !expandedType }) {
-                        OutlinedTextField(
-                            value = type,
-                            onValueChange = { type = it },
-                            label = { Text(text = "Tip (Venit/Cheltuiala)") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
-                            trailingIcon = {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    contentDescription = "Dropdown Arrow"
-                                )
-                            },
-                            readOnly = true
+                        val context = LocalContext.current
+
+                        Text(
+                            text = "Add New Transaction",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        ExposedDropdownMenu(
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = title,
+                            onValueChange = { title = it },
+                            label = { Text("Titlu") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = amount,
+                            onValueChange = { amount = it },
+                            label = { Text("Valoare in LEI") },
+                            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth(),
+                            trailingIcon = {
+                                if (type == "Venit") {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Plus sign",
+                                        tint = Color(0xFF349938)
+                                    )
+                                } else {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.baseline_remove_24),
+                                        contentDescription = "Minus sign",
+                                        tint = Color.Red
+                                    )
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        ExposedDropdownMenuBox(
                             expanded = expandedType,
-                            onDismissRequest = { expandedType = false },
-                        ) {
-                            DropdownMenuItem(onClick = {
-                                type = "Venit"
-                                expandedType = false
-                            }, text = { Text("Venit") })
-
-
-                            DropdownMenuItem(onClick = {
-                                type = "Cheltuiala"
-                                expandedType = false
-                            }, text = { Text("Cheltuiala") })
-
-                        }
-
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    ExposedDropdownMenuBox(
-                        expanded = extendedCategory,
-                        onExpandedChange = { extendedCategory = !extendedCategory }) {
-                        OutlinedTextField(
-                            value = category,
-                            onValueChange = { category = it },
-                            label = { Text(text = "Categorie") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(),
-                            trailingIcon = {
-                                Icon(
-                                    Icons.Default.ArrowDropDown,
-                                    contentDescription = "Dropdown Arrow"
-                                )
-                            },
-                            readOnly = true
-                        )
-                        ExposedDropdownMenu(
-                            expanded = extendedCategory,
-                            onDismissRequest = { extendedCategory = false },
-                            modifier = Modifier.heightIn(max = 200.dp)
-                        ) {
-                            categories.forEach { item ->
+                            onExpandedChange = { expandedType = !expandedType }) {
+                            OutlinedTextField(
+                                value = type,
+                                onValueChange = { type = it },
+                                label = { Text(text = "Tip (Venit/Cheltuiala)") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Default.ArrowDropDown,
+                                        contentDescription = "Dropdown Arrow"
+                                    )
+                                },
+                                readOnly = true
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expandedType,
+                                onDismissRequest = { expandedType = false },
+                            ) {
                                 DropdownMenuItem(onClick = {
-                                    category = item
-                                    extendedCategory = false
-                                }, text = { Text(item) })
+                                    type = "Venit"
+                                    expandedType = false
+                                }, text = { Text("Venit") })
+
+
+                                DropdownMenuItem(onClick = {
+                                    type = "Cheltuiala"
+                                    expandedType = false
+                                }, text = { Text("Cheltuiala") })
+
                             }
 
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
+                        ExposedDropdownMenuBox(
+                            expanded = extendedCategory,
+                            onExpandedChange = { extendedCategory = !extendedCategory }) {
+                            OutlinedTextField(
+                                value = category,
+                                onValueChange = { category = it },
+                                label = { Text(text = "Categorie") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(),
+                                trailingIcon = {
+                                    Icon(
+                                        Icons.Default.ArrowDropDown,
+                                        contentDescription = "Dropdown Arrow"
+                                    )
+                                },
+                                readOnly = true
+                            )
+                            ExposedDropdownMenu(
+                                expanded = extendedCategory,
+                                onDismissRequest = { extendedCategory = false },
+                                modifier = Modifier.heightIn(max = 200.dp)
+                            ) {
+                                categories.forEach { item ->
+                                    DropdownMenuItem(onClick = {
+                                        category = item
+                                        extendedCategory = false
+                                    }, text = { Text(item) })
+                                }
 
-                    DatePickerField(
-                        label = "Data tranzactiei",
-                        selectedDate = date,
-                        onDateSelected = { date = it },
-                        onClearDate = { date = "" }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+                            }
 
-                    OutlinedTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = { Text("Descriere") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 100.dp), // Set a minimum height to allow multiple lines
-                        maxLines = 5,
-                        trailingIcon = {
-                            IconButton(
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        DatePickerField(
+                            label = "Data tranzactiei",
+                            selectedDate = date,
+                            onDateSelected = { date = it },
+                            onClearDate = { date = "" }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = description,
+                            onValueChange = { description = it },
+                            label = { Text("Descriere") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 100.dp), // Set a minimum height to allow multiple lines
+                            maxLines = 5,
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {
+                                        // Add photo functionality
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.CameraAlt,
+                                        contentDescription = "Add Photo",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = { showDialog.value = false }) {
+                                Text("Renunta")
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
                                 onClick = {
-                                    // Add photo functionality
+
+                                    if (valid) {
+                                        val transaction = TransactionModel(
+                                            amount = amount.toDouble(),
+                                            transactionType = type,
+                                            transactionDate = date,
+                                            transactionTitle = title,
+                                            transactionDescription = description,
+                                        )
+                                        onAddTransaction(transaction)
+//                                    showDialog.value = false
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Toate campurile sunt obligatorii",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.CameraAlt,
-                                    contentDescription = "Add Photo",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
+                                Text("Adauga")
                             }
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        TextButton(onClick = { showDialog.value = false }) {
-                            Text("Renunta")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-
-                                if (valid) {
-                                    val transaction = TransactionModel(
-                                        amount = amount.toDouble(),
-                                        transactionType = type,
-                                        transactionDate = date,
-                                        transactionTitle = title,
-                                        transactionDescription = description,
-                                    )
-                                    onAddTransaction(transaction)
-                                    showDialog.value = false
-                                }
-                                else{
-                                    Toast.makeText(context, "Toate campurile sunt obligatorii", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        ) {
-                            Text("Adauga")
                         }
                     }
                 }

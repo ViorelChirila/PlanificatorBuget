@@ -1,5 +1,7 @@
 package com.example.planificatorbuget.screens.transactions
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,6 +48,7 @@ import com.example.planificatorbuget.components.FABContent
 import com.example.planificatorbuget.components.FilterAndSortTransactions
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.SearchTransactionsByDateForm
+import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
@@ -123,8 +127,12 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
     }
     val filteredListOfTransactions = remember { mutableStateOf(originalListOfTransactions.value) }
     val showDialog = rememberSaveable { mutableStateOf(false) }
+    val showLoading = rememberSaveable { mutableStateOf(false) }
 
     var sortOrder by remember { mutableStateOf(SortOrder.NONE) }
+
+    val resultForAdd by viewModel.transactionAddResult.observeAsState()
+    val context = LocalContext.current
 
     fun sortTransactions() {
         sortOrder = when (sortOrder) {
@@ -237,8 +245,21 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
         }
 
     }
-    AddTransactionDialog(showDialog = showDialog){transactionModel->
+    AddTransactionDialog(showDialog = showDialog,showLoading = showLoading){transactionModel->
         viewModel.addTransaction(transactionModel)
+        Log.d("PlannerTransactionsScreen", resultForAdd.toString())
+    }
+    if (resultForAdd is Response.Loading){
+        showLoading.value = true
+        Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
+    }
+    else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true){
+        Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT).show()
+        showLoading.value = false
+//        showDialog.value = false
+    }
+    else if (resultForAdd is Response.Error){
+        Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()
     }
 }
 

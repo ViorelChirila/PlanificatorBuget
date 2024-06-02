@@ -1,6 +1,7 @@
 package com.example.planificatorbuget.screens.statistics
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -19,10 +20,14 @@ fun PlannerStatisticsScreen(navController: NavController = NavController(LocalCo
         modifier = Modifier.background(
             brush = gradientBackgroundBrush(
                 isVerticalGradient = true,
-                colors = listOf(
+                colors = if(!isSystemInDarkTheme()) listOf(
                     Color(0xFF7F9191),
                     Color(0xffc3c3d8),
                     Color(0xff00d4ff)
+                ) else listOf(
+                    Color(0xFF332D2D),
+                    Color(0xFF232D52),
+                    Color(0xFF1442A0)
                 )
             )
         )

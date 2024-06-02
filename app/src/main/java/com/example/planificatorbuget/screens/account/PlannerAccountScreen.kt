@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,10 +68,14 @@ fun PlannerAccountScreen(
         modifier = Modifier.background(
             brush = gradientBackgroundBrush(
                 isVerticalGradient = true,
-                colors = listOf(
+                colors = if(!isSystemInDarkTheme()) listOf(
                     Color(0xFF7F9191),
                     Color(0xffc3c3d8),
                     Color(0xff00d4ff)
+                ) else listOf(
+                    Color(0xFF332D2D),
+                    Color(0xFF232D52),
+                    Color(0xFF1442A0)
                 )
             )
         )
@@ -175,7 +180,7 @@ fun AccountOptions(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(containerColor = if (!isSystemInDarkTheme())Color.White.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)),
     ) {
         LazyColumn(
             contentPadding = PaddingValues(15.dp),
@@ -203,7 +208,7 @@ fun OptionItem(
         modifier = Modifier
             .clickable { onClick() }
             .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(5.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(5.dp)) {

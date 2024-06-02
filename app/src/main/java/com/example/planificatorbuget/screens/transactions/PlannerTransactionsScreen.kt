@@ -19,12 +19,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -60,72 +64,9 @@ enum class SortOrder {
 @Composable
 fun PlannerTransactionsScreen(navController: NavController = NavController(LocalContext.current), viewModel: TransactionsScreenViewModel = hiltViewModel()) {
 
-    val originalListOfTransactions = remember {
-        mutableStateOf(
-            listOf(
-                TransactionModel(
-                    "1",
-                    "1",
-                    20.0,
-                    "Venit",
-                    "Salariu",
-                    "08/17/2024",
-                    "Mancare petru caine",
-                    "multe chestii pentru caine i-am cumparat boabe si altele"
-                ),
-                TransactionModel(
-                    "2",
-                    "1",
-                    20.0,
-                    "Cheltuiala",
-                    "Cumparaturi",
-                    "06/01/2024",
-                    "Service masina"
-                ),
-                TransactionModel("3", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionModel(
-                    "4",
-                    "1",
-                    30.0,
-                    "Cheltuiala",
-                    "Cumparaturi",
-                    "05/17/2024",
-                    "Factura telefon"
-                ),
-                TransactionModel("5", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionModel(
-                    "6",
-                    "1",
-                    20.0,
-                    "Cheltuiala",
-                    "Cumparaturi",
-                    "05/17/2024",
-                    "Altceva"
-                ),
-                TransactionModel("7", "1", 20.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionModel(
-                    "8",
-                    "1",
-                    60.0,
-                    "Cheltuiala",
-                    "Cumparaturi",
-                    "08/17/2023",
-                    "Alta factura"
-                ),
-                TransactionModel("9", "1", 10.0, "Venit", "Salariu", "08/17/2023", "1000"),
-                TransactionModel(
-                    "10",
-                    "1",
-                    6.0,
-                    "Cheltuiala",
-                    "Cumparaturi",
-                    "08/17/2023",
-                    "Ceva"
-                ),
-            )
-        )
-    }
-    val filteredListOfTransactions = remember { mutableStateOf(originalListOfTransactions.value) }
+    val transactionsData by viewModel.transactions.collectAsState()
+    val originalListOfTransactions by remember { derivedStateOf { transactionsData.data ?: emptyList() } }
+    val filteredListOfTransactions = remember { mutableStateOf(originalListOfTransactions) }
     val showDialog = rememberSaveable { mutableStateOf(false) }
     val showLoading = rememberSaveable { mutableStateOf(false) }
 
@@ -142,10 +83,13 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
         }
 
         filteredListOfTransactions.value = when (sortOrder) {
-            SortOrder.NONE -> originalListOfTransactions.value
+            SortOrder.NONE -> originalListOfTransactions
             SortOrder.ASCENDING -> filteredListOfTransactions.value.sortedBy { it.amount }
             SortOrder.DESCENDING -> filteredListOfTransactions.value.sortedByDescending { it.amount }
         }
+    }
+    LaunchedEffect(originalListOfTransactions) {
+        filteredListOfTransactions.value = originalListOfTransactions
     }
 
     Box(
@@ -192,53 +136,65 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     .padding(bottom = 10.dp, start = 7.dp, end = 7.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.3f))
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
-                ) {
-                    SearchTransactionsByDateForm { date ->
-                        if (date.isEmpty())
-                            filteredListOfTransactions.value = originalListOfTransactions.value
-                        else
-                            filteredListOfTransactions.value =
-                                originalListOfTransactions.value.filter {
-                                    it.transactionDate == date
-                                }
+                if (transactionsData.isLoading == true){
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(
-                        color = Color.Black.copy(alpha = 0.3f),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    FilterAndSortTransactions(
-                        onSort = {
-                            sortTransactions()
-                        },
-                        onFilter = { type, categories ->
-                            filteredListOfTransactions.value =
-                                originalListOfTransactions.value.filter {
-                                    (type.isEmpty() || it.transactionType == type) &&
-                                            (categories.isEmpty() || categories.contains(it.categoryId))
-                                }
-                        }) { query ->
-                        if (query.isEmpty()) {
-                            filteredListOfTransactions.value = originalListOfTransactions.value
-                        } else {
-                            filteredListOfTransactions.value =
-                                originalListOfTransactions.value.filter {
-                                    it.transactionTitle.contains(query, ignoreCase = true)
-                                }
+                }else {
+
+                    Log.d("PlannerTransactionsScreen", "PlannerTransactionsScreen: ${transactionsData.data.toString()}")
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        SearchTransactionsByDateForm { date ->
+                            if (date.isEmpty())
+                                filteredListOfTransactions.value = originalListOfTransactions
+                            else
+                                filteredListOfTransactions.value =
+                                    originalListOfTransactions.filter {
+                                        it.transactionDate == date
+                                    }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(
+                            color = Color.Black.copy(alpha = 0.3f),
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        FilterAndSortTransactions(
+                            onSort = {
+                                sortTransactions()
+                            },
+                            onFilter = { type, categories ->
+                                filteredListOfTransactions.value =
+                                    originalListOfTransactions.filter {
+                                        (type.isEmpty() || it.transactionType == type) &&
+                                                (categories.isEmpty() || categories.contains(it.categoryId))
+                                    }
+                            }) { query ->
+                            if (query.isEmpty()) {
+                                filteredListOfTransactions.value = originalListOfTransactions
+                            } else {
+                                filteredListOfTransactions.value =
+                                    originalListOfTransactions.filter {
+                                        it.transactionTitle.contains(query, ignoreCase = true)
+                                    }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        HorizontalDivider(
+                            color = Color.Black.copy(alpha = 0.3f),
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        TransactionsList(lisOfTransactions = filteredListOfTransactions.value)
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(
-                        color = Color.Black.copy(alpha = 0.3f),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    TransactionsList(lisOfTransactions = filteredListOfTransactions.value)
                 }
             }
 

@@ -5,6 +5,7 @@ import com.google.firebase.firestore.PropertyName
 
 class TransactionModel(
     @get: PropertyName("transaction_id")
+    @set: PropertyName("transaction_id")
     var transactionId: String? = null,
 
     @get:PropertyName("user_id")

@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.repository
 
+import android.util.Log
 import com.example.planificatorbuget.data.DataOrException
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionModel
@@ -25,9 +26,10 @@ class TransactionRepository @Inject constructor(
 
         dataOrExceptionTransactions.isLoading = true
         return try {
-            val querySnapshot = firebaseFirestore.collection(TRANSACTIONS_COLLECTION).whereEqualTo("userId", userId).get().await()
+            val querySnapshot = firebaseFirestore.collection(TRANSACTIONS_COLLECTION).whereEqualTo("user_id", userId).get().await()
             val transactions = querySnapshot.toObjects(TransactionModel::class.java)
             dataOrExceptionTransactions.data = transactions
+            Log.d(TAG, "fetchTransactions: ${transactions.size}")
             dataOrExceptionTransactions.isLoading = false
             dataOrExceptionTransactions
         } catch (e: Exception) {

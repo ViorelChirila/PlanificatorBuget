@@ -65,8 +65,11 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.example.planificatorbuget.R
+import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
+import com.example.planificatorbuget.navigation.PlannerScreens
 import java.util.Calendar
 
 @Composable
@@ -362,22 +365,13 @@ fun DatePickerField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
+    navController: NavController,
     showDialog: MutableState<Boolean>,
     showLoading: MutableState<Boolean>,
+    categories: MutableState<List<TransactionCategoriesModel>> = mutableStateOf(listOf()),
     onAddTransaction: (TransactionModel) -> Unit = {}
 ) {
-    val categories = listOf(
-        "Salariu",
-        "Cumparaturi",
-        "Factura telefon",
-        "Altceva",
-        "Service masina",
-        "Mancare petru caine",
-        "1000",
-        "Alta factura",
-        "Ceva",
-        "Altceva"
-    )
+
     if (showDialog.value) {
         Dialog(onDismissRequest = { showDialog.value = false }) {
             Surface(
@@ -512,12 +506,15 @@ fun AddTransactionDialog(
                                 onDismissRequest = { extendedCategory = false },
                                 modifier = Modifier.heightIn(max = 200.dp)
                             ) {
-                                categories.forEach { item ->
+                                categories.value.forEach { item ->
                                     DropdownMenuItem(onClick = {
-                                        category = item
+                                        category = item.categoryId
                                         extendedCategory = false
-                                    }, text = { Text(item) })
+                                    }, text = { Text(text=item.categoryName) })
                                 }
+                                DropdownMenuItem(text = { Text(text = "Adauga categorie noua")}, onClick = {
+                                    navController.navigate(PlannerScreens.CategoriesScreen.name)
+                                })
 
                             }
 

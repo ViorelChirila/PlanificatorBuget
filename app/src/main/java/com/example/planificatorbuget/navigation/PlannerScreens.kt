@@ -8,5 +8,6 @@ enum class PlannerScreens {
     NotificationsScreen,
     AccountSettingsScreen,
     StatisticsScreen,
-    TransactionsScreen
+    TransactionsScreen,
+    CategoriesScreen
 }

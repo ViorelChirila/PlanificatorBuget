@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -53,6 +54,7 @@ import com.example.planificatorbuget.components.FilterAndSortTransactions
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.SearchTransactionsByDateForm
 import com.example.planificatorbuget.data.Response
+import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
@@ -201,7 +203,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
         }
 
     }
-    AddTransactionDialog(showDialog = showDialog,showLoading = showLoading){transactionModel->
+    AddTransactionDialog(showDialog = showDialog,showLoading = showLoading, navController = navController){ transactionModel->
         viewModel.addTransaction(transactionModel)
         Log.d("PlannerTransactionsScreen", resultForAdd.toString())
     }

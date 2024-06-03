@@ -9,13 +9,19 @@ import androidx.lifecycle.viewModelScope
 import com.example.planificatorbuget.data.DataOrException
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.UserModel
+import com.example.planificatorbuget.repository.CategoryIconsRepository
 import com.example.planificatorbuget.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SharedViewModel @Inject constructor(private val userRepository: UserRepository) : ViewModel() {
+class SharedViewModel @Inject constructor(
+    private val userRepository: UserRepository,
+    private val categoryIconsRepository: CategoryIconsRepository
+) : ViewModel() {
 
     private val _data = MutableLiveData<DataOrException<UserModel, Boolean, Exception>>()
     val data: LiveData<DataOrException<UserModel, Boolean, Exception>> get() = _data
@@ -26,8 +32,12 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
     private val _isUpdateDone = MutableLiveData<Boolean>()
     val isUpdateDone: LiveData<Boolean> get() = _isUpdateDone
 
+    private val _icons = MutableStateFlow<List<String>>(emptyList())
+    val icons: StateFlow<List<String>> get() = _icons
+
     init {
         fetchUser()
+        fetchIcons()
         Log.d("MyViewModel", "Instance created")
     }
 
@@ -49,19 +59,19 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
         }
     }
 
-    fun updateUserEmail(email: String){
+    fun updateUserEmail(email: String) {
         viewModelScope.launch {
             userRepository.updateUserEmail(email)
         }
     }
 
-    fun updateUserPassword(password: String){
+    fun updateUserPassword(password: String) {
         viewModelScope.launch {
             userRepository.updateUserPassword(password)
         }
     }
 
-    fun updateUserPhoto(photoUri: Uri, onSuccess: (String) -> Unit){
+    fun updateUserPhoto(photoUri: Uri, onSuccess: (String) -> Unit) {
         viewModelScope.launch {
             val result = userRepository.uploadImageToFirebaseStorage(photoUri)
             Log.d("SharedViewModel", "updateUserPhoto: ${result.data}")
@@ -72,5 +82,13 @@ class SharedViewModel @Inject constructor(private val userRepository: UserReposi
 
     fun resetUpdateStatus() {
         _isUpdateDone.value = false // Reset isUpdateDone to false when needed
+    }
+
+    fun fetchIcons() {
+        viewModelScope.launch {
+            val result = categoryIconsRepository.fetchIconsFromFirestore()
+            _icons.value = result
+            Log.d("SharedViewModel", "fetchIcons: ${_icons.value}")
+        }
     }
 }

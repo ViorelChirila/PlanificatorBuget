@@ -214,7 +214,6 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
     else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true){
         Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT).show()
         showLoading.value = false
-//        showDialog.value = false
     }
     else if (resultForAdd is Response.Error){
         Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()

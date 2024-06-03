@@ -73,7 +73,8 @@ fun PlannerNavigation(startDestination: String) {
                 PlannerTransactionsScreen(navController = navController)
             }
             composable(PlannerScreens.CategoriesScreen.name) {
-                PlannerCategoriesScreen(navController = navController)
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                PlannerCategoriesScreen(navController = navController, viewModel = viewModel)
             }
         }
 

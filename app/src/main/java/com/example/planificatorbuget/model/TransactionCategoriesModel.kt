@@ -12,5 +12,8 @@ class TransactionCategoriesModel(
     @get:PropertyName("category_name")
     @set:PropertyName("category_name")
     var categoryName: String = "",
+    @get:PropertyName("category_icon")
+    @set:PropertyName("category_icon")
+    var categoryIcon: String = "",
 ) {
 }

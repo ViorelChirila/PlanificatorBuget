@@ -30,5 +30,5 @@ object AppModule {
     @Singleton
     @Provides
     fun provideCategoryIconsRepository(): CategoryIconsRepository =
-        CategoryIconsRepository(firebaseStorage = Firebase.storage, auth = FirebaseAuth.getInstance())
+        CategoryIconsRepository(firebaseStorage = Firebase.storage)
 }

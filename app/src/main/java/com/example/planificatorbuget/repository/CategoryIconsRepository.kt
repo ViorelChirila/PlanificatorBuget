@@ -1,11 +1,12 @@
 package com.example.planificatorbuget.repository
 
+import com.example.planificatorbuget.data.Response
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class CategoryIconsRepository @Inject constructor(private val firebaseStorage: FirebaseStorage, private val auth: FirebaseAuth) {
+class CategoryIconsRepository @Inject constructor(private val firebaseStorage: FirebaseStorage) {
     suspend fun fetchIconsFromFirestore(): List<String> {
         return try {
             val icons = firebaseStorage.reference.child("category_icons").listAll().await()

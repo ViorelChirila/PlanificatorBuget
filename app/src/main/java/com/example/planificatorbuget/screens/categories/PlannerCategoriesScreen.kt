@@ -1,6 +1,8 @@
 package com.example.planificatorbuget.screens.categories
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,23 +26,38 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -52,32 +69,42 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.FABContent
 import com.example.planificatorbuget.components.NavigationBarComponent
+import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.screens.SharedViewModel
+import com.example.planificatorbuget.screens.transactions.TransactionsScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 @Preview
 @Composable
 fun PlannerCategoriesScreen(
     navController: NavController = NavController(LocalContext.current),
-    viewModel: SharedViewModel = hiltViewModel()
+    sharedViewModel: SharedViewModel = hiltViewModel(),
+    categoriesScreenViewModel: CategoriesScreenViewModel = hiltViewModel()
 ) {
 
-    var categories by remember {
-        mutableStateOf(
-            listOf(
-                TransactionCategoriesModel("1", "1","Fuel", ""),
-                TransactionCategoriesModel("2", "1", "Mancare", ""),
-                TransactionCategoriesModel("3", "1", "Haine", ""),
-                TransactionCategoriesModel("4", "1", "Altele", "")
-            )
-        )
+//    var categories by remember {
+//        mutableStateOf(
+//            listOf(
+//                TransactionCategoriesModel("1", "1", "Fuel", ""),
+//                TransactionCategoriesModel("2", "1", "Mancare", ""),
+//                TransactionCategoriesModel("3", "1", "Haine", ""),
+//                TransactionCategoriesModel("4", "1", "Altele", "")
+//            )
+//        )
+//    }
+
+    val categoriesData by categoriesScreenViewModel.categories.collectAsState()
+    val categories by remember {
+        derivedStateOf { categoriesData.data ?: emptyList() }
     }
 
+    val resultForAdd by categoriesScreenViewModel.categoryAddResult.observeAsState()
 
-    val icons by viewModel.icons.collectAsState()
+    val icons by sharedViewModel.icons.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
-    var selectedIcon by remember { mutableStateOf<String?>(null) }
+    val showLoading = rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier.background(
@@ -116,44 +143,68 @@ fun PlannerCategoriesScreen(
                 }
             }
         ) { paddingValues ->
-            Card(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(bottom = 10.dp, start = 7.dp, end = 7.dp)
-                    .fillMaxSize(),
-                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.3f))
-            ) {
-                LazyColumn(
+            if (categoriesData.isLoading == true) {
+                Column(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(7.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    items(items = categories) { category ->
-                        CategoryItem(category = category)
-                    }
+                    Text(text = "Loading categories...")
+                    CircularProgressIndicator()
                 }
+            }
+            else {
+                Card(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(bottom = 10.dp, start = 7.dp, end = 7.dp)
+                        .fillMaxSize(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.3f))
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(7.dp)
+                    ) {
+                        items(items = categories) { category ->
+                            CategoryItem(category = category)
+                        }
+                    }
 
 
+                }
             }
 
         }
 
     }
     if (showDialog) {
-        IconSelectionDialog(
+        AddNewCategoryDialog(
+            showLoading = showLoading,
             icons = icons,
-            onIconSelected = { icon ->
-                val newCategory = TransactionCategoriesModel(
-                    categoryId = (categories.size + 1).toString(),
-                    categoryName = "New Category ${categories.size + 1}",
+            onDismissRequest = { showDialog = false },
+            onCategoryAdded = { name, icon ->
+                val category = TransactionCategoriesModel(
+                    userId = "",
+                    categoryName = name,
                     categoryIcon = icon
                 )
-                categories = categories + newCategory
-                selectedIcon = icon
+                categoriesScreenViewModel.addCategory(category)
                 showDialog = false
-            },
-            onDismissRequest = { showDialog = false }
+            }
         )
     }
+    if (resultForAdd is Response.Loading){
+        showLoading.value = true
+        Toast.makeText(context, "Se adauga categoria...", Toast.LENGTH_SHORT).show()
+    }
+    else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true){
+        Toast.makeText(context, "Categoria adaugata cu succes", Toast.LENGTH_SHORT).show()
+        showLoading.value = false
+    }
+    else if (resultForAdd is Response.Error){
+        Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()
+    }
+
 }
 
 @Composable
@@ -174,7 +225,7 @@ fun CategoryItem(category: TransactionCategoriesModel) {
                     model = category.categoryIcon.toUri(),
                     contentDescription = "icon",
                     modifier = Modifier
-                        .padding(5.dp)
+                        .clip(CircleShape)
                         .size(50.dp)
                 )
             }
@@ -227,5 +278,121 @@ fun IconSelectionDialog(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AddNewCategoryDialog(
+    showLoading: MutableState<Boolean>,
+    icons: List<String>,
+    onDismissRequest: () -> Unit,
+    onCategoryAdded: (String, String) -> Unit
+) {
+    val showIconSelectDialog = remember { mutableStateOf(false) }
+    var selectedIcon by remember { mutableStateOf<String?>(null) }
+    var categoryName by rememberSaveable { mutableStateOf("") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            if (showLoading.value) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+
+                }
+            } else {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Adauga o categorie",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(
+                        value = categoryName,
+                        onValueChange = { categoryName = it },
+                        label = { Text(text = "Nume categorie") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            }
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(text = "Alege o imagine")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        shape = CircleShape,
+                        modifier = Modifier.size(100.dp),
+                        border = BorderStroke(1.dp, Color.Black)
+                    ) {
+                        AsyncImage(
+                            model = selectedIcon?.toUri(),
+                            contentDescription = "icon",
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .clickable { showIconSelectDialog.value = true }
+                        )
+                    }
+                    if (showIconSelectDialog.value) {
+                        IconSelectionDialog(
+                            icons = icons,
+                            onIconSelected = { icon ->
+                                selectedIcon = icon
+                                showIconSelectDialog.value = false
+                            },
+                            onDismissRequest = { showIconSelectDialog.value = false }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row {
+                        TextButton(onClick = {
+                            onDismissRequest()
+                        }) {
+                            Text(text = "Renunta")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = {
+                            if (categoryName.isEmpty() || selectedIcon == null) {
+                                Toast.makeText(
+                                    context,
+                                    "Completeaza toate campurile",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                onCategoryAdded(categoryName, selectedIcon ?: "")
+                                onDismissRequest()
+
+                            }
+                        }) {
+                            Text(text = "Adauga")
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

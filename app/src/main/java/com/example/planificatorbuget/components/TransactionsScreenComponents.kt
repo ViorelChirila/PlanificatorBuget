@@ -407,7 +407,7 @@ fun AddTransactionDialog(
                         val context = LocalContext.current
 
                         Text(
-                            text = "Add New Transaction",
+                            text = "Adauga tranzactie noua",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )

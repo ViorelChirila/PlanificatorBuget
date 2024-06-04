@@ -1,6 +1,7 @@
 package com.example.planificatorbuget.di
 
 import com.example.planificatorbuget.repository.CategoryIconsRepository
+import com.example.planificatorbuget.repository.CategoryRepository
 import com.example.planificatorbuget.repository.TransactionRepository
 import com.example.planificatorbuget.repository.UserRepository
 import com.google.firebase.Firebase
@@ -31,4 +32,9 @@ object AppModule {
     @Provides
     fun provideCategoryIconsRepository(): CategoryIconsRepository =
         CategoryIconsRepository(firebaseStorage = Firebase.storage)
+
+    @Singleton
+    @Provides
+    fun provideCategoriesRepository(): CategoryRepository =
+        CategoryRepository(firebaseFirestore = FirebaseFirestore.getInstance(), auth = FirebaseAuth.getInstance())
 }

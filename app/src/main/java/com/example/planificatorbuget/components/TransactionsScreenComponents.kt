@@ -368,7 +368,7 @@ fun AddTransactionDialog(
     navController: NavController,
     showDialog: MutableState<Boolean>,
     showLoading: MutableState<Boolean>,
-    categories: MutableState<List<TransactionCategoriesModel>> = mutableStateOf(listOf()),
+    categories: List<TransactionCategoriesModel>,
     onAddTransaction: (TransactionModel) -> Unit = {}
 ) {
 
@@ -386,21 +386,22 @@ fun AddTransactionDialog(
                     ) {
                         CircularProgressIndicator()
                     }
-                }else {
+                } else {
                     Column(modifier = Modifier.padding(16.dp)) {
                         var title by remember { mutableStateOf("") }
                         var amount by remember { mutableStateOf("") }
                         var type by remember { mutableStateOf("") }
-                        var category by remember { mutableStateOf("") }
+                        var categoryId by remember { mutableStateOf("") }
+                        var categoryName by remember { mutableStateOf("") }
                         var date by remember { mutableStateOf("") }
                         var description by remember { mutableStateOf("") }
 
                         var expandedType by remember { mutableStateOf(false) }
                         var extendedCategory by remember { mutableStateOf(false) }
 
-                        val valid = remember(title, amount, type, category, date, description) {
+                        val valid = remember(title, amount, type, categoryId, date, description) {
                             title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
-                                .isNotEmpty() && category.trim().isNotEmpty() && date.trim()
+                                .isNotEmpty() && categoryId.trim().isNotEmpty() && date.trim()
                                 .isNotEmpty() && description.trim().isNotEmpty()
                         }
 
@@ -487,8 +488,8 @@ fun AddTransactionDialog(
                             expanded = extendedCategory,
                             onExpandedChange = { extendedCategory = !extendedCategory }) {
                             OutlinedTextField(
-                                value = category,
-                                onValueChange = { category = it },
+                                value = categoryName,
+                                onValueChange = { /* No-op */ },
                                 label = { Text(text = "Categorie") },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -506,13 +507,14 @@ fun AddTransactionDialog(
                                 onDismissRequest = { extendedCategory = false },
                                 modifier = Modifier.heightIn(max = 200.dp)
                             ) {
-                                categories.value.forEach { item ->
+                                categories.forEach { item ->
                                     DropdownMenuItem(onClick = {
-                                        category = item.categoryId
+                                        categoryId = item.categoryId
+                                        categoryName = item.categoryName
                                         extendedCategory = false
-                                    }, text = { Text(text=item.categoryName) })
+                                    }, text = { Text(text = item.categoryName) })
                                 }
-                                DropdownMenuItem(text = { Text(text = "Adauga categorie noua")}, onClick = {
+                                DropdownMenuItem(text = { Text(text = "Adauga categorie noua") }, onClick = {
                                     navController.navigate(PlannerScreens.CategoriesScreen.name)
                                 })
 
@@ -572,6 +574,7 @@ fun AddTransactionDialog(
                                             transactionDate = date,
                                             transactionTitle = title,
                                             transactionDescription = description,
+                                            categoryId = categoryId
                                         )
                                         onAddTransaction(transaction)
                                     } else {

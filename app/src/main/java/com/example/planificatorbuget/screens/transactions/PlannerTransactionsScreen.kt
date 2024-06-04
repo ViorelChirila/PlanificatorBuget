@@ -56,6 +56,8 @@ import com.example.planificatorbuget.components.SearchTransactionsByDateForm
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
+import com.example.planificatorbuget.screens.SharedViewModel
+import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 enum class SortOrder {
@@ -64,10 +66,26 @@ enum class SortOrder {
 
 @Preview
 @Composable
-fun PlannerTransactionsScreen(navController: NavController = NavController(LocalContext.current), viewModel: TransactionsScreenViewModel = hiltViewModel()) {
+fun PlannerTransactionsScreen(
+    navController: NavController = NavController(LocalContext.current),
+    viewModel: TransactionsScreenViewModel = hiltViewModel(),
+    categoriesSharedViewModel: CategoriesScreenViewModel = hiltViewModel()
+) {
 
     val transactionsData by viewModel.transactions.collectAsState()
-    val originalListOfTransactions by remember { derivedStateOf { transactionsData.data ?: emptyList() } }
+    val categoriesData by categoriesSharedViewModel.categories.collectAsState()
+
+    val listOfCategories by remember {
+        derivedStateOf {
+            categoriesData.data ?: emptyList()
+        }
+    }
+
+    val originalListOfTransactions by remember {
+        derivedStateOf {
+            transactionsData.data ?: emptyList()
+        }
+    }
     val filteredListOfTransactions = remember { mutableStateOf(originalListOfTransactions) }
     val showDialog = rememberSaveable { mutableStateOf(false) }
     val showLoading = rememberSaveable { mutableStateOf(false) }
@@ -98,7 +116,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
         modifier = Modifier.background(
             brush = gradientBackgroundBrush(
                 isVerticalGradient = true,
-                colors = if(!isSystemInDarkTheme()) listOf(
+                colors = if (!isSystemInDarkTheme()) listOf(
                     Color(0xFF7F9191),
                     Color(0xffc3c3d8),
                     Color(0xff00d4ff)
@@ -138,7 +156,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     .padding(bottom = 10.dp, start = 7.dp, end = 7.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.3f))
             ) {
-                if (transactionsData.isLoading == true){
+                if (transactionsData.isLoading == true || categoriesData.isLoading == true) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -146,9 +164,15 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                     ) {
                         CircularProgressIndicator()
                     }
-                }else {
+                } else {
 
-                    Log.d("PlannerTransactionsScreen", "PlannerTransactionsScreen: ${transactionsData.data.toString()}")
+                    Log.d(
+                        "PlannerTransactionsScreen",
+                        "PlannerTransactionsScreen: ${transactionsData.data.toString()}"
+                    )
+                    Log.d(
+                        "PlannerTransactionsScreen",
+                        "PlannerTransactionsScreen: ${categoriesData.data.toString()}")
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -195,7 +219,7 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
                             color = Color.Black.copy(alpha = 0.3f),
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-                        TransactionsList(lisOfTransactions = filteredListOfTransactions.value)
+                        TransactionsList(lisOfTransactions = filteredListOfTransactions.value, category = listOfCategories)
                     }
                 }
             }
@@ -203,36 +227,40 @@ fun PlannerTransactionsScreen(navController: NavController = NavController(Local
         }
 
     }
-    AddTransactionDialog(showDialog = showDialog,showLoading = showLoading, navController = navController){ transactionModel->
+    AddTransactionDialog(
+        showDialog = showDialog,
+        showLoading = showLoading,
+        navController = navController,
+        categories = listOfCategories
+    ) { transactionModel ->
         viewModel.addTransaction(transactionModel)
         Log.d("PlannerTransactionsScreen", resultForAdd.toString())
     }
-    if (resultForAdd is Response.Loading){
+    if (resultForAdd is Response.Loading) {
         showLoading.value = true
         Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
-    }
-    else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true){
+    } else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true) {
         Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT).show()
         showLoading.value = false
-    }
-    else if (resultForAdd is Response.Error){
+    } else if (resultForAdd is Response.Error) {
         Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()
     }
 }
 
-@Preview
+//@Preview
 @Composable
-fun TransactionsList(lisOfTransactions: List<TransactionModel> = emptyList()) {
+fun TransactionsList(lisOfTransactions: List<TransactionModel> = emptyList(),category: List<TransactionCategoriesModel>) {
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(5.dp)) {
         items(items = lisOfTransactions) { transaction ->
-            TransactionItem(transaction = transaction)
+            val categoryName = category.find { it.categoryId == transaction.categoryId }?.categoryName
+            TransactionItem(transaction = transaction, categoryName = categoryName)
         }
     }
 }
 
 @Composable
-fun TransactionItem(transaction: TransactionModel) {
+fun TransactionItem(transaction: TransactionModel, categoryName: String?) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier
@@ -250,7 +278,7 @@ fun TransactionItem(transaction: TransactionModel) {
                 Column {
                     Text(text = transaction.transactionTitle, fontWeight = FontWeight.Bold)
                     Text(
-                        text = "Categorie: ${transaction.categoryId}",
+                        text = "Categorie: $categoryName",
                         color = Color.Gray,
                         fontStyle = FontStyle.Italic
                     )
@@ -259,7 +287,7 @@ fun TransactionItem(transaction: TransactionModel) {
                 Spacer(modifier = Modifier.weight(1f))
                 Column {
                     Text(
-                        text = if(transaction.transactionType == "Venit") "+${transaction.amount}" else transaction.amount.toString(),
+                        text = if (transaction.transactionType == "Venit") "+${transaction.amount}" else transaction.amount.toString(),
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = if (transaction.transactionType == "Venit") Color(0xFF349938) else Color.Red

@@ -72,7 +72,6 @@ import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.screens.SharedViewModel
-import com.example.planificatorbuget.screens.transactions.TransactionsScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 @Preview
@@ -80,26 +79,15 @@ import com.example.planificatorbuget.utils.gradientBackgroundBrush
 fun PlannerCategoriesScreen(
     navController: NavController = NavController(LocalContext.current),
     sharedViewModel: SharedViewModel = hiltViewModel(),
-    categoriesScreenViewModel: CategoriesScreenViewModel = hiltViewModel()
+    categoriesSharedViewModel: CategoriesScreenViewModel = hiltViewModel()
 ) {
 
-//    var categories by remember {
-//        mutableStateOf(
-//            listOf(
-//                TransactionCategoriesModel("1", "1", "Fuel", ""),
-//                TransactionCategoriesModel("2", "1", "Mancare", ""),
-//                TransactionCategoriesModel("3", "1", "Haine", ""),
-//                TransactionCategoriesModel("4", "1", "Altele", "")
-//            )
-//        )
-//    }
-
-    val categoriesData by categoriesScreenViewModel.categories.collectAsState()
+    val categoriesData by categoriesSharedViewModel.categories.collectAsState()
     val categories by remember {
         derivedStateOf { categoriesData.data ?: emptyList() }
     }
 
-    val resultForAdd by categoriesScreenViewModel.categoryAddResult.observeAsState()
+    val resultForAdd by categoriesSharedViewModel.categoryAddResult.observeAsState()
 
     val icons by sharedViewModel.icons.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
@@ -188,7 +176,7 @@ fun PlannerCategoriesScreen(
                     categoryName = name,
                     categoryIcon = icon
                 )
-                categoriesScreenViewModel.addCategory(category)
+                categoriesSharedViewModel.addCategory(category)
                 showDialog = false
             }
         )
@@ -200,6 +188,7 @@ fun PlannerCategoriesScreen(
     else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true){
         Toast.makeText(context, "Categoria adaugata cu succes", Toast.LENGTH_SHORT).show()
         showLoading.value = false
+        categoriesSharedViewModel.fetchCategoriesFromFirebase()
     }
     else if (resultForAdd is Response.Error){
         Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()

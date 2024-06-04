@@ -26,7 +26,7 @@ class CategoriesScreenViewModel @Inject constructor(private val categoriesReposi
     init {
         fetchCategoriesFromFirebase()
     }
-    private fun fetchCategoriesFromFirebase() {
+    fun fetchCategoriesFromFirebase() {
         viewModelScope.launch {
             val result = categoriesRepository.fetchCategories()
             _categories.value = result

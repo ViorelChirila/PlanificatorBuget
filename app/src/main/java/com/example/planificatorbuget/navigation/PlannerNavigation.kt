@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.account.PlannerAccountScreen
 import com.example.planificatorbuget.screens.accountsettings.PlannerAccountSettingsScreen
+import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.screens.categories.PlannerCategoriesScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
 import com.example.planificatorbuget.screens.login.PlannerLoginScreen
@@ -69,13 +70,20 @@ fun PlannerNavigation(startDestination: String) {
                 PlannerStatisticsScreen(navController = navController)
             }
 
-            composable(PlannerScreens.TransactionsScreen.name) {
-                PlannerTransactionsScreen(navController = navController)
+            navigation(
+                startDestination = PlannerScreens.CategoriesScreen.name,
+                route = "AddTransactions"){
+                composable(PlannerScreens.TransactionsScreen.name) {
+                    val categoriesSharedViewModel = it.sharedViewModel<CategoriesScreenViewModel>(navController)
+                    PlannerTransactionsScreen(navController = navController, categoriesSharedViewModel = categoriesSharedViewModel)
+                }
+                composable(PlannerScreens.CategoriesScreen.name) {
+                    val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                    val categoriesSharedViewModel = it.sharedViewModel<CategoriesScreenViewModel>(navController)
+                    PlannerCategoriesScreen(navController = navController, sharedViewModel = viewModel, categoriesSharedViewModel = categoriesSharedViewModel)
+                }
             }
-            composable(PlannerScreens.CategoriesScreen.name) {
-                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
-                PlannerCategoriesScreen(navController = navController, sharedViewModel = viewModel)
-            }
+
         }
 
 

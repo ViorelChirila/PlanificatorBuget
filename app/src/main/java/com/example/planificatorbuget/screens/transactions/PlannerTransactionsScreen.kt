@@ -15,19 +15,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -38,15 +41,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.planificatorbuget.components.AddTransactionDialog
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.FABContent
@@ -56,7 +63,6 @@ import com.example.planificatorbuget.components.SearchTransactionsByDateForm
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
-import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
@@ -157,6 +163,14 @@ fun PlannerTransactionsScreen(
                 colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.3f))
             ) {
                 if (transactionsData.isLoading == true || categoriesData.isLoading == true) {
+                    Log.d(
+                        "isDataLoading",
+                        "isDataLoading: ${transactionsData.isLoading.toString()}"
+                    )
+                    Log.d(
+                        "isDataLoading",
+                        "isDataLoading: ${categoriesData.isLoading.toString()}")
+
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -264,14 +278,14 @@ fun TransactionsList(lisOfTransactions: List<TransactionModel> = emptyList(),cat
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(5.dp)) {
         items(items = lisOfTransactions) { transaction ->
-            val categoryName = category.find { it.categoryId == transaction.categoryId }?.categoryName
-            TransactionItem(transaction = transaction, categoryName = categoryName)
+            val categoryName = category.find { it.categoryId == transaction.categoryId }
+            TransactionItem(transaction = transaction, category = categoryName)
         }
     }
 }
 
 @Composable
-fun TransactionItem(transaction: TransactionModel, categoryName: String?) {
+fun TransactionItem(transaction: TransactionModel, category: TransactionCategoriesModel?) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier
@@ -286,19 +300,31 @@ fun TransactionItem(transaction: TransactionModel, categoryName: String?) {
                     .padding(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 3.dp)
                     .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(text = transaction.transactionTitle, fontWeight = FontWeight.Bold)
+                Surface(shape = CircleShape) {
+                    Log.d("CategoryItem", "categoryIcon: ${category?.categoryIcon}")
+                    AsyncImage(
+                        model = category?.categoryIcon?.toUri(),
+                        contentDescription = "icon",
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .size(60.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = transaction.transactionTitle, fontWeight = FontWeight.Bold, overflow = TextOverflow.Ellipsis)
                     Text(
-                        text = "Categorie: $categoryName",
+                        text = "Categorie: ${category?.categoryName}",
                         color = Color.Gray,
-                        fontStyle = FontStyle.Italic
+                        fontStyle = FontStyle.Italic,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(text = transaction.transactionDate, color = Color.Gray)
                 }
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(10.dp))
                 Column {
                     Text(
-                        text = if (transaction.transactionType == "Venit") "+${transaction.amount}" else transaction.amount.toString(),
+                        text = if (transaction.transactionType == "Venit") "+${transaction.amount}"+" LEI" else transaction.amount.toString() + " LEI",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
                         color = if (transaction.transactionType == "Venit") Color(0xFF349938) else Color.Red

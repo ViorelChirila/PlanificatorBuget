@@ -31,6 +31,7 @@ class TransactionsScreenViewModel @Inject constructor(private val repository: Tr
 
     fun fetchTransactionsFromDatabase() {
         viewModelScope.launch {
+            _transactions.value.isLoading = true
             val result = repository.fetchTransactions()
             _transactions.value = result
             Log.d("TransactionsScreenViewModel", "fetchTransactions: ${_transactions.value}")

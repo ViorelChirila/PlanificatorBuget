@@ -195,6 +195,7 @@ fun PlannerTransactionsScreen(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         FilterAndSortTransactions(
+                            categories = listOfCategories,
                             onSort = {
                                 sortTransactions()
                             },
@@ -236,14 +237,24 @@ fun PlannerTransactionsScreen(
         viewModel.addTransaction(transactionModel)
         Log.d("PlannerTransactionsScreen", resultForAdd.toString())
     }
-    if (resultForAdd is Response.Loading) {
-        showLoading.value = true
-        Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
-    } else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true) {
-        Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT).show()
-        showLoading.value = false
-    } else if (resultForAdd is Response.Error) {
-        Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()
+    LaunchedEffect(resultForAdd) {
+        when (resultForAdd) {
+            is Response.Loading -> {
+                showLoading.value = true
+                Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
+            }
+            is Response.Success -> {
+                if ((resultForAdd as Response.Success).data == true) {
+                    Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT).show()
+                    showLoading.value = false
+                    viewModel.fetchTransactionsFromDatabase()
+                }
+            }
+            is Response.Error -> {
+                Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()
+            }
+            else -> { /* no-op */ }
+        }
     }
 }
 

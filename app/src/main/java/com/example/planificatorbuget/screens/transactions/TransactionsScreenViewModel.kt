@@ -26,10 +26,10 @@ class TransactionsScreenViewModel @Inject constructor(private val repository: Tr
     val transactions: StateFlow<DataOrException<List<TransactionModel>, Boolean, Exception>> get() = _transactions
 
     init {
-        fetchTransactionsFromRepository()
+        fetchTransactionsFromDatabase()
     }
 
-    private fun fetchTransactionsFromRepository() {
+    fun fetchTransactionsFromDatabase() {
         viewModelScope.launch {
             val result = repository.fetchTransactions()
             _transactions.value = result

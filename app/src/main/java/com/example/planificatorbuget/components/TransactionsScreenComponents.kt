@@ -74,6 +74,7 @@ import java.util.Calendar
 
 @Composable
 fun FilterAndSortTransactions(
+    categories: List<TransactionCategoriesModel>,
     onSort: () -> Unit = { },
     onFilter: (String, List<String>) -> Unit = { _, _ -> },
     onSearch: (String) -> Unit = { },
@@ -154,6 +155,7 @@ fun FilterAndSortTransactions(
 
     }
     FilterDialog(
+        categories = categories,
         showDialog = showDialog,
         onFilterApply = onFilter,
         selectedType = selectedType,
@@ -164,6 +166,7 @@ fun FilterAndSortTransactions(
 @Composable
 fun FilterDialog(
     showDialog: MutableState<Boolean>,
+    categories: List<TransactionCategoriesModel>,
     onFilterApply: (String, List<String>) -> Unit,
     selectedType: MutableState<String>,
     selectedCategories: MutableState<List<String>>
@@ -212,18 +215,6 @@ fun FilterDialog(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Alege categoriile:")
                     LazyColumn {
-                        val categories = listOf(
-                            "Salariu",
-                            "Cumparaturi",
-                            "Factura telefon",
-                            "Altceva",
-                            "Service masina",
-                            "Mancare petru caine",
-                            "1000",
-                            "Alta factura",
-                            "Ceva",
-                            "Altceva"
-                        )
                         items(categories) { category ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -232,30 +223,30 @@ fun FilterDialog(
                                     .clickable {
                                         val currentCategories =
                                             selectedCategories.value.toMutableList()
-                                        if (currentCategories.contains(category)) {
-                                            currentCategories.remove(category)
+                                        if (currentCategories.contains(category.categoryId)) {
+                                            currentCategories.remove(category.categoryId)
                                         } else {
-                                            currentCategories.add(category)
+                                            currentCategories.add(category.categoryId)
                                         }
                                         selectedCategories.value = currentCategories
                                     }
                                     .padding(vertical = 8.dp)
                             ) {
                                 Checkbox(
-                                    checked = selectedCategories.value.contains(category),
+                                    checked = selectedCategories.value.contains(category.categoryId),
                                     onCheckedChange = {
                                         val currentCategories =
                                             selectedCategories.value.toMutableList()
                                         if (it) {
-                                            currentCategories.add(category)
+                                            currentCategories.add(category.categoryId)
                                         } else {
-                                            currentCategories.remove(category)
+                                            currentCategories.remove(category.categoryId)
                                         }
                                         selectedCategories.value = currentCategories
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = category)
+                                Text(text = category.categoryName)
                             }
                         }
                     }

@@ -100,7 +100,10 @@ class SharedViewModel @Inject constructor(
             _budgetUpdateResult.value = Response.Loading()
             val result = userRepository.updateUserCurrentBudget(budget)
             _budgetUpdateResult.postValue(result)
-            _isUpdateDone.postValue(true)
+            if (result is Response.Success && result.data == true) {
+                _isUpdateDone.postValue(true)
+            }
+
         }
     }
 }

@@ -48,7 +48,8 @@ fun PlannerNavigation(startDestination: String) {
             route = FunctionalitiesRoutes.Main.name
         ) {
             composable(PlannerScreens.HomeScreen.name) {
-                PlannerHomeScreen(navController = navController)
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                PlannerHomeScreen(navController = navController, viewModel = viewModel)
             }
 
             composable(PlannerScreens.NotificationsScreen.name) {

@@ -354,6 +354,7 @@ fun EditUserInfoForm(
                 }
                 if (initialBudget.value.isNotEmpty() && initialBudget.value != user?.initialBudget.toString()) {
                     userToUpdate["initial_budget"] = initialBudget.value.toDoubleOrNull() ?: 0.0
+                    userToUpdate["current_budget"] = initialBudget.value.toDoubleOrNull() ?: 0.0
                 }
                 onClick(userToUpdate, email.value, password.value)
             }, enabled = enabledButton) {

@@ -15,6 +15,9 @@ data class UserModel(
     @get:PropertyName("initial_budget")
     @set:PropertyName("initial_budget")
     var initialBudget: Double = 0.0,
+    @get:PropertyName("current_budget")
+    @set:PropertyName("current_budget")
+    var currentBudget: Double = 0.0,
     @get:PropertyName("avatar_url")
     @set:PropertyName("avatar_url")
     var avatarUrl: String = "",
@@ -25,6 +28,7 @@ data class UserModel(
             "user_name" to this.userName,
             "profession" to this.profession,
             "initial_budget" to this.initialBudget,
+            "current_budget" to this.currentBudget,
             "avatar_url" to this.avatarUrl
         )
     }

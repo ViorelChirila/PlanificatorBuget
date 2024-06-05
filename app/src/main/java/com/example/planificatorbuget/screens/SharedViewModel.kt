@@ -35,6 +35,9 @@ class SharedViewModel @Inject constructor(
     private val _icons = MutableStateFlow<List<String>>(emptyList())
     val icons: StateFlow<List<String>> get() = _icons
 
+    private val _budgetUpdateResult = MutableLiveData<Response<Boolean>>()
+    val budgetUpdateResult: LiveData<Response<Boolean>> get() = _budgetUpdateResult
+
     init {
         fetchUser()
         fetchIcons()
@@ -84,11 +87,20 @@ class SharedViewModel @Inject constructor(
         _isUpdateDone.value = false // Reset isUpdateDone to false when needed
     }
 
-    fun fetchIcons() {
+    private fun fetchIcons() {
         viewModelScope.launch {
             val result = categoryIconsRepository.fetchIconsFromFirestore()
             _icons.value = result
             Log.d("SharedViewModel", "fetchIcons: ${_icons.value}")
+        }
+    }
+
+    fun updateBudget(budget: Double) {
+        viewModelScope.launch {
+            _budgetUpdateResult.value = Response.Loading()
+            val result = userRepository.updateUserCurrentBudget(budget)
+            _budgetUpdateResult.postValue(result)
+            _isUpdateDone.postValue(true)
         }
     }
 }

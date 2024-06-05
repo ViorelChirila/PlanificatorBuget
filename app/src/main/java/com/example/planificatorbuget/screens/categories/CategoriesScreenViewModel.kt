@@ -25,6 +25,7 @@ class CategoriesScreenViewModel @Inject constructor(private val categoriesReposi
     val categoryAddResult: LiveData<Response<Boolean>> get() = _categoryAddResult
     init {
         fetchCategoriesFromFirebase()
+        Log.d("CategoriesScreenViewModel", "Instance created")
     }
     fun fetchCategoriesFromFirebase() {
         viewModelScope.launch {

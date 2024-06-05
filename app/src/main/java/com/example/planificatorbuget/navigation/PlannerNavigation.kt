@@ -71,19 +71,28 @@ fun PlannerNavigation(startDestination: String) {
                 PlannerStatisticsScreen(navController = navController)
             }
 
-            navigation(
-                startDestination = PlannerScreens.CategoriesScreen.name,
-                route = "AddTransactions"){
-                composable(PlannerScreens.TransactionsScreen.name) {
-                    val categoriesSharedViewModel = it.sharedViewModel<CategoriesScreenViewModel>(navController)
-                    PlannerTransactionsScreen(navController = navController, categoriesSharedViewModel = categoriesSharedViewModel)
-                }
-                composable(PlannerScreens.CategoriesScreen.name) {
-                    val viewModel = it.sharedViewModel<SharedViewModel>(navController)
-                    val categoriesSharedViewModel = it.sharedViewModel<CategoriesScreenViewModel>(navController)
-                    PlannerCategoriesScreen(navController = navController, sharedViewModel = viewModel, categoriesSharedViewModel = categoriesSharedViewModel)
-                }
+
+            composable(PlannerScreens.TransactionsScreen.name) {
+                val categoriesSharedViewModel =
+                    it.sharedViewModel<CategoriesScreenViewModel>(navController)
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                PlannerTransactionsScreen(
+                    navController = navController,
+                    categoriesSharedViewModel = categoriesSharedViewModel,
+                    sharedViewModel = viewModel
+                )
             }
+            composable(PlannerScreens.CategoriesScreen.name) {
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                val categoriesSharedViewModel =
+                    it.sharedViewModel<CategoriesScreenViewModel>(navController)
+                PlannerCategoriesScreen(
+                    navController = navController,
+                    sharedViewModel = viewModel,
+                    categoriesSharedViewModel = categoriesSharedViewModel
+                )
+            }
+
 
         }
 

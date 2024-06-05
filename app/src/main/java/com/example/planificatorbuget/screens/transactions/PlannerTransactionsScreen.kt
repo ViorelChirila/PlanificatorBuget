@@ -63,6 +63,7 @@ import com.example.planificatorbuget.components.SearchTransactionsByDateForm
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
+import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
@@ -75,8 +76,12 @@ enum class SortOrder {
 fun PlannerTransactionsScreen(
     navController: NavController = NavController(LocalContext.current),
     viewModel: TransactionsScreenViewModel = hiltViewModel(),
-    categoriesSharedViewModel: CategoriesScreenViewModel = hiltViewModel()
+    categoriesSharedViewModel: CategoriesScreenViewModel = hiltViewModel(),
+    sharedViewModel: SharedViewModel = hiltViewModel()
 ) {
+    val dataOrException by sharedViewModel.data.observeAsState()
+    val isUpdateDone by sharedViewModel.isUpdateDone.observeAsState(initial = true)
+    val user = dataOrException?.data
 
     val transactionsData by viewModel.transactions.collectAsState()
     val categoriesData by categoriesSharedViewModel.categories.collectAsState()
@@ -249,6 +254,13 @@ fun PlannerTransactionsScreen(
         categories = listOfCategories
     ) { transactionModel ->
         viewModel.addTransaction(transactionModel)
+        val budget = user?.currentBudget?.plus(transactionModel.amount)
+        sharedViewModel.updateBudget(budget!!)
+        if (isUpdateDone)
+        {
+            sharedViewModel.fetchUser()
+            sharedViewModel.resetUpdateStatus()
+        }
         Log.d("PlannerTransactionsScreen", resultForAdd.toString())
     }
     LaunchedEffect(resultForAdd) {

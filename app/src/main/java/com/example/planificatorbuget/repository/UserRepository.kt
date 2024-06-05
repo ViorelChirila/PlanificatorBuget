@@ -103,4 +103,14 @@ suspend fun updateUserData(user: Map<String, Any>): Response<Boolean> {
             avatarUri
         }
     }
+
+    suspend fun updateUserCurrentBudget(budget: Double): Response<Boolean> {
+        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+        return try {
+            firebaseFirestore.collection(USERS_COLLECTION).document(userId).update("current_budget", budget).await()
+            Response.Success(true)
+        } catch (e: Exception) {
+            Response.Error(e.message, false)
+        }
+    }
 }

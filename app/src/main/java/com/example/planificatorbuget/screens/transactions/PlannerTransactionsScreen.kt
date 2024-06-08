@@ -106,6 +106,7 @@ fun PlannerTransactionsScreen(
     var sortOrder by remember { mutableStateOf(SortOrder.NONE) }
 
     val resultForAdd by viewModel.transactionAddResult.observeAsState()
+    val resultForAddRecurring by viewModel.recurringTransactionAddResult.observeAsState()
     val context = LocalContext.current
 
     fun sortTransactions() {
@@ -258,18 +259,21 @@ fun PlannerTransactionsScreen(
         showDialog = showDialog,
         showLoading = showLoading,
         navController = navController,
-        categories = listOfCategories
-    ) { transactionModel ->
-        transactionModel.budgetSnapshot = user?.currentBudget ?: 0.0
-        viewModel.addTransaction(transactionModel)
-        val budget = user?.currentBudget?.plus(transactionModel.amount)
-        sharedViewModel.updateBudget(budget!!)
-        if (isUpdateDone) {
-            sharedViewModel.fetchUser()
-            sharedViewModel.resetUpdateStatus()
+        categories = listOfCategories,
+        onAddTransaction = {transactionModel ->
+            transactionModel.budgetSnapshot = user?.currentBudget ?: 0.0
+            viewModel.addTransaction(transactionModel)
+            val budget = user?.currentBudget?.plus(transactionModel.amount)
+            sharedViewModel.updateBudget(budget!!)
+            if (isUpdateDone) {
+                sharedViewModel.fetchUser()
+                sharedViewModel.resetUpdateStatus()
+            }
+            Log.d("PlannerTransactionsScreen", resultForAdd.toString())},
+        onAddRecurringTransaction = { recurringTransactionModel ->
+            viewModel.addRecurringTransaction(recurringTransactionModel)
         }
-        Log.d("PlannerTransactionsScreen", resultForAdd.toString())
-    }
+    )
     LaunchedEffect(resultForAdd) {
         when (resultForAdd) {
             is Response.Loading -> {
@@ -297,6 +301,34 @@ fun PlannerTransactionsScreen(
             else -> { /* no-op */
             }
         }
+    }
+    LaunchedEffect(resultForAddRecurring) {
+        when (resultForAddRecurring) {
+            is Response.Loading -> {
+                showLoading.value = true
+                Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
+            }
+
+            is Response.Success -> {
+                if ((resultForAddRecurring as Response.Success).data == true) {
+                    Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT)
+                        .show()
+                    showLoading.value = false
+                }
+            }
+
+            is Response.Error -> {
+                Toast.makeText(
+                    context,
+                    (resultForAddRecurring as Response.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            else -> { /* no-op */
+            }
+        }
+
     }
 }
 

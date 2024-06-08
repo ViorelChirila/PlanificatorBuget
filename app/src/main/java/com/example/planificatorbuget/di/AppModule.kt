@@ -2,6 +2,7 @@ package com.example.planificatorbuget.di
 
 import com.example.planificatorbuget.repository.CategoryIconsRepository
 import com.example.planificatorbuget.repository.CategoryRepository
+import com.example.planificatorbuget.repository.RecurringTransactionRepository
 import com.example.planificatorbuget.repository.TransactionRepository
 import com.example.planificatorbuget.repository.UserRepository
 import com.google.firebase.Firebase
@@ -37,4 +38,9 @@ object AppModule {
     @Provides
     fun provideCategoriesRepository(): CategoryRepository =
         CategoryRepository(firebaseFirestore = FirebaseFirestore.getInstance(), auth = FirebaseAuth.getInstance())
+
+    @Singleton
+    @Provides
+    fun provideRecurringTransactionRepository(): RecurringTransactionRepository =
+        RecurringTransactionRepository(firebaseFirestore = FirebaseFirestore.getInstance(), auth = FirebaseAuth.getInstance())
 }

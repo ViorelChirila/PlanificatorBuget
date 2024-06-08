@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.widget.DatePicker
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,9 +17,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
@@ -67,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.planificatorbuget.R
+import com.example.planificatorbuget.model.RecurringTransactionModel
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.navigation.PlannerScreens
@@ -361,7 +365,8 @@ fun AddTransactionDialog(
     showDialog: MutableState<Boolean>,
     showLoading: MutableState<Boolean>,
     categories: List<TransactionCategoriesModel>,
-    onAddTransaction: (TransactionModel) -> Unit = {}
+    onAddTransaction: (TransactionModel) -> Unit = {},
+    onAddRecurringTransaction: (RecurringTransactionModel) -> Unit = {}
 ) {
 
     if (showDialog.value) {
@@ -379,7 +384,12 @@ fun AddTransactionDialog(
                         CircularProgressIndicator()
                     }
                 } else {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .height(640.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         var title by remember { mutableStateOf("") }
                         var amount by remember { mutableStateOf("") }
                         var type by remember { mutableStateOf("") }
@@ -387,14 +397,35 @@ fun AddTransactionDialog(
                         var categoryName by remember { mutableStateOf("") }
                         var date by remember { mutableStateOf("") }
                         var description by remember { mutableStateOf("") }
+                        var isRecurring by remember { mutableStateOf(false) }
+                        var startDate by remember { mutableStateOf("") }
+                        var endDate by remember { mutableStateOf("") }
+                        var recurrenceInterval by remember { mutableStateOf("") }
 
                         var expandedType by remember { mutableStateOf(false) }
                         var extendedCategory by remember { mutableStateOf(false) }
+                        var expandedInterval by remember { mutableStateOf(false) }
 
                         val valid = remember(title, amount, type, categoryId, date, description) {
                             title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
                                 .isNotEmpty() && categoryId.trim().isNotEmpty() && date.trim()
                                 .isNotEmpty() && description.trim().isNotEmpty()
+                        }
+
+                        val validRecurring = remember(
+                            title,
+                            amount,
+                            type,
+                            categoryId,
+                            description,
+                            startDate,
+                            endDate,
+                            recurrenceInterval
+                        ) {
+                            title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
+                                .isNotEmpty() && categoryId.trim()
+                                .isNotEmpty() && description.trim().isNotEmpty() && startDate.trim()
+                                .isNotEmpty() && recurrenceInterval.trim().isNotEmpty()
                         }
 
                         val context = LocalContext.current
@@ -506,21 +537,25 @@ fun AddTransactionDialog(
                                         extendedCategory = false
                                     }, text = { Text(text = item.categoryName) })
                                 }
-                                DropdownMenuItem(text = { Text(text = "Adauga categorie noua") }, onClick = {
-                                    navController.navigate(PlannerScreens.CategoriesScreen.name)
-                                })
+                                DropdownMenuItem(
+                                    text = { Text(text = "Adauga categorie noua") },
+                                    onClick = {
+                                        navController.navigate(PlannerScreens.CategoriesScreen.name)
+                                    })
 
                             }
 
                         }
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        DatePickerField(
-                            label = "Data tranzactiei",
-                            selectedDate = date,
-                            onDateSelected = { date = it },
-                            onClearDate = { date = "" }
-                        )
+                        if (!isRecurring) {
+                            DatePickerField(
+                                label = "Data tranzactiei",
+                                selectedDate = date,
+                                onDateSelected = { date = it },
+                                onClearDate = { date = "" }
+                            )
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedTextField(
@@ -545,6 +580,81 @@ fun AddTransactionDialog(
                                 }
                             }
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Checkbox(
+                                checked = isRecurring,
+                                onCheckedChange = { isChecked ->
+                                    isRecurring = isChecked
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Tranzactie recurentă")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        if (isRecurring) {
+                            DatePickerField(
+                                label = "Data de început",
+                                selectedDate = startDate,
+                                onDateSelected = { startDate = it },
+                                onClearDate = { startDate = "" }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            DatePickerField(
+                                label = "Data de sfârșit",
+                                selectedDate = endDate,
+                                onDateSelected = { endDate = it },
+                                onClearDate = { endDate = "" }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            ExposedDropdownMenuBox(
+                                expanded = expandedInterval,
+                                onExpandedChange = { expandedInterval = !expandedInterval }) {
+                                OutlinedTextField(
+                                    value = recurrenceInterval,
+                                    onValueChange = { /* No-op */ },
+                                    label = { Text("Interval recurență") },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .menuAnchor(),
+                                    trailingIcon = {
+                                        Icon(
+                                            Icons.Default.ArrowDropDown,
+                                            contentDescription = "Dropdown Arrow"
+                                        )
+                                    },
+                                    readOnly = true
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expandedInterval,
+                                    onDismissRequest = { expandedInterval = false }
+                                ) {
+                                    DropdownMenuItem(onClick = {
+                                        recurrenceInterval = "Zilnic"
+                                        expandedInterval = false
+                                    }, text = { Text("Zilnic") })
+
+                                    DropdownMenuItem(onClick = {
+                                        recurrenceInterval = "Săptămânal"
+                                        expandedInterval = false
+                                    }, text = { Text("Săptămânal") })
+
+                                    DropdownMenuItem(onClick = {
+                                        recurrenceInterval = "Lunar"
+                                        expandedInterval = false
+                                    }, text = { Text("Lunar") })
+                                }
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
@@ -558,23 +668,48 @@ fun AddTransactionDialog(
                             Button(
                                 onClick = {
 
-                                    if (valid) {
-                                        val tempAmount = if (type == "Venit") amount.toDouble() else amount.toDouble() * -1
-                                        val transaction = TransactionModel(
-                                            amount = tempAmount,
-                                            transactionType = type,
-                                            transactionDate = formatStringToTimestamp(date)!!,
-                                            transactionTitle = title,
-                                            transactionDescription = description,
-                                            categoryId = categoryId
-                                        )
-                                        onAddTransaction(transaction)
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Toate campurile sunt obligatorii",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                    if (!isRecurring) {
+                                        if (valid) {
+                                            val tempAmount =
+                                                if (type == "Venit") amount.toDouble() else amount.toDouble() * -1
+                                            val transaction = TransactionModel(
+                                                amount = tempAmount,
+                                                transactionType = type,
+                                                transactionDate = formatStringToTimestamp(date)!!,
+                                                transactionTitle = title,
+                                                transactionDescription = description,
+                                                categoryId = categoryId
+                                            )
+                                            onAddTransaction(transaction)
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Toate campurile sunt obligatorii",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } else if (isRecurring) {
+                                        if (validRecurring) {
+                                            val tempAmount =
+                                                if (type == "Venit") amount.toDouble() else amount.toDouble() * -1
+                                            val recurringTransaction = RecurringTransactionModel(
+                                                amount = tempAmount,
+                                                transactionType = type,
+                                                transactionTitle = title,
+                                                transactionDescription = description,
+                                                categoryId = categoryId,
+                                                startDate = formatStringToTimestamp(startDate)!!,
+                                                endDate = formatStringToTimestamp(endDate)!!,
+                                                recurrenceInterval = recurrenceInterval
+                                            )
+                                            onAddRecurringTransaction(recurringTransaction)
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Toate campurile sunt obligatorii",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     }
                                 }
                             ) {

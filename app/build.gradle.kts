@@ -115,4 +115,7 @@ dependencies {
 
 //    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:<lifecycle_version>")
     implementation (libs.androidx.lifecycle.viewmodel.compose)
+
+    // WorkManager
+    implementation (libs.androidx.work.runtime.ktx)
 }

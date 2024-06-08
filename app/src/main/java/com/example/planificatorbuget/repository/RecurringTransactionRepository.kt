@@ -1,0 +1,44 @@
+package com.example.planificatorbuget.repository
+
+import com.example.planificatorbuget.data.Response
+import com.example.planificatorbuget.model.RecurringTransactionModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+
+class RecurringTransactionRepository @Inject constructor(
+    private val firebaseFirestore: FirebaseFirestore,
+    private val auth: FirebaseAuth
+) {
+    companion object {
+        private const val TAG = "RecurringTransactionRepository"
+        private const val RECURRING_TRANSACTIONS_COLLECTION = "recurring_transactions"
+    }
+
+    suspend fun fetchRecurringTransactions(): List<RecurringTransactionModel> {
+        return try {
+            val result = firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).get().await()
+            result.toObjects(RecurringTransactionModel::class.java)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun addRecurringTransaction(recurringTransaction: RecurringTransactionModel): Response<Boolean> {
+        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+
+        return try {
+            firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).add(recurringTransaction.apply {
+                this.userId = userId
+            }).addOnSuccessListener {documentReference ->
+                val docId = documentReference.id
+                firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).document(docId).update("transaction_id", docId)
+            }.await()
+            Response.Success(true)
+        } catch (e: Exception) {
+            Response.Error(e.message, false)
+        }
+    }
+
+}

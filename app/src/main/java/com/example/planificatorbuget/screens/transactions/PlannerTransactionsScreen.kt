@@ -65,7 +65,12 @@ import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
+import com.example.planificatorbuget.utils.formatStringToTimestamp
+import com.example.planificatorbuget.utils.formatTimestampToString
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 enum class SortOrder {
     NONE, ASCENDING, DESCENDING
@@ -94,7 +99,7 @@ fun PlannerTransactionsScreen(
 
     val originalListOfTransactions by remember {
         derivedStateOf {
-            transactionsData.data ?: emptyList()
+            transactionsData.data?.sortedByDescending { it.transactionDate.toDate() } ?: emptyList()
         }
     }
     val filteredListOfTransactions = remember { mutableStateOf(originalListOfTransactions) }
@@ -205,7 +210,7 @@ fun PlannerTransactionsScreen(
                             else
                                 filteredListOfTransactions.value =
                                     originalListOfTransactions.filter {
-                                        it.transactionDate == date
+                                        it.transactionDate == formatStringToTimestamp(date)
                                     }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
@@ -331,7 +336,7 @@ fun TransactionItem(transaction: TransactionModel, category: TransactionCategori
                         fontStyle = FontStyle.Italic,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = transaction.transactionDate, color = Color.Gray)
+                    Text(text = formatTimestampToString(transaction.transactionDate), color = Color.Gray)
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {

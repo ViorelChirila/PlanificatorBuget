@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.model
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
 
@@ -26,7 +27,7 @@ class TransactionModel(
 
     @get:PropertyName("transaction_date")
     @set:PropertyName("transaction_date")
-    var transactionDate: String = "",
+    var transactionDate: Timestamp = Timestamp.now(),
 
     @get:PropertyName("transaction_title")
     @set:PropertyName("transaction_title")

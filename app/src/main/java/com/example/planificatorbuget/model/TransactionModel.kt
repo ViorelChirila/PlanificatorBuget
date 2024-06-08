@@ -34,6 +34,10 @@ class TransactionModel(
 
     @get:PropertyName("transaction_description")
     @set:PropertyName("transaction_description")
-    var transactionDescription: String = ""
+    var transactionDescription: String = "",
+
+    @get:PropertyName("budget_snapshot")
+    @set:PropertyName("budget_snapshot")
+    var budgetSnapshot: Double = 0.0
 ) {
 }

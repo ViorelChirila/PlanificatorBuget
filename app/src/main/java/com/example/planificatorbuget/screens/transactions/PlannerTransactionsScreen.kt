@@ -44,9 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -176,7 +179,8 @@ fun PlannerTransactionsScreen(
                     )
                     Log.d(
                         "isDataLoading",
-                        "isDataLoading: ${categoriesData.isLoading.toString()}")
+                        "isDataLoading: ${categoriesData.isLoading.toString()}"
+                    )
 
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -193,7 +197,8 @@ fun PlannerTransactionsScreen(
                     )
                     Log.d(
                         "PlannerTransactionsScreen",
-                        "PlannerTransactionsScreen: ${categoriesData.data.toString()}")
+                        "PlannerTransactionsScreen: ${categoriesData.data.toString()}"
+                    )
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -241,7 +246,10 @@ fun PlannerTransactionsScreen(
                             color = Color.Black.copy(alpha = 0.3f),
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-                        TransactionsList(lisOfTransactions = filteredListOfTransactions.value, category = listOfCategories)
+                        TransactionsList(
+                            lisOfTransactions = filteredListOfTransactions.value,
+                            category = listOfCategories
+                        )
                     }
                 }
             }
@@ -255,11 +263,11 @@ fun PlannerTransactionsScreen(
         navController = navController,
         categories = listOfCategories
     ) { transactionModel ->
+        transactionModel.budgetSnapshot = user?.currentBudget ?: 0.0
         viewModel.addTransaction(transactionModel)
         val budget = user?.currentBudget?.plus(transactionModel.amount)
         sharedViewModel.updateBudget(budget!!)
-        if (isUpdateDone)
-        {
+        if (isUpdateDone) {
             sharedViewModel.fetchUser()
             sharedViewModel.resetUpdateStatus()
         }
@@ -271,24 +279,35 @@ fun PlannerTransactionsScreen(
                 showLoading.value = true
                 Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
             }
+
             is Response.Success -> {
                 if ((resultForAdd as Response.Success).data == true) {
-                    Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT)
+                        .show()
                     showLoading.value = false
                     viewModel.fetchTransactionsFromDatabase()
                 }
             }
+
             is Response.Error -> {
-                Toast.makeText(context, (resultForAdd as Response.Error).message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    (resultForAdd as Response.Error).message,
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-            else -> { /* no-op */ }
+
+            else -> { /* no-op */
+            }
         }
     }
 }
 
-//@Preview
 @Composable
-fun TransactionsList(lisOfTransactions: List<TransactionModel> = emptyList(),category: List<TransactionCategoriesModel>) {
+fun TransactionsList(
+    lisOfTransactions: List<TransactionModel> = emptyList(),
+    category: List<TransactionCategoriesModel>
+) {
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(5.dp)) {
         items(items = lisOfTransactions) { transaction ->
@@ -326,23 +345,41 @@ fun TransactionItem(transaction: TransactionModel, category: TransactionCategori
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = transaction.transactionTitle, fontWeight = FontWeight.Bold, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        text = transaction.transactionTitle,
+                        fontWeight = FontWeight.Bold,
+                        overflow = TextOverflow.Ellipsis
+                    )
                     Text(
                         text = "Categorie: ${category?.categoryName}",
                         color = Color.Gray,
                         fontStyle = FontStyle.Italic,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = formatTimestampToString(transaction.transactionDate), color = Color.Gray)
+                    Text(
+                        text = formatTimestampToString(transaction.transactionDate),
+                        color = Color.Gray
+                    )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Column {
+                    val transactionColor =
+                        if (transaction.transactionType == "Venit") Color(0xFF349938) else Color.Red
                     Text(
-                        text = if (transaction.transactionType == "Venit") "+${transaction.amount}"+" LEI" else transaction.amount.toString() + " LEI",
+                        text = if (transaction.transactionType == "Venit") "+${transaction.amount}" + " LEI" else transaction.amount.toString() + " LEI",
                         fontWeight = FontWeight.Bold,
                         fontSize = 17.sp,
-                        color = if (transaction.transactionType == "Venit") Color(0xFF349938) else Color.Red
+                        color = transactionColor
                     )
+                    Text(
+                        text = "Sold precedent:\n${transaction.budgetSnapshot} LEI",
+                        color = transactionColor,
+                        fontSize = 10.sp,
+                        fontStyle = FontStyle.Italic,
+                        maxLines = 2,
+                        lineHeight = 12.sp
+                    )
+
                 }
 
             }

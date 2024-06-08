@@ -68,9 +68,6 @@ import com.example.planificatorbuget.screens.categories.CategoriesScreenViewMode
 import com.example.planificatorbuget.utils.formatStringToTimestamp
 import com.example.planificatorbuget.utils.formatTimestampToString
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
-import com.google.firebase.Timestamp
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 enum class SortOrder {
     NONE, ASCENDING, DESCENDING

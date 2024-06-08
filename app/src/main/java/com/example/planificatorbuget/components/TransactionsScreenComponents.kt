@@ -71,10 +71,7 @@ import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.utils.formatStringToTimestamp
-import com.google.firebase.Timestamp
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 @Composable
 fun FilterAndSortTransactions(

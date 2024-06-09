@@ -4,7 +4,6 @@ import android.app.DatePickerDialog
 import android.widget.DatePicker
 import android.widget.Toast
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -75,6 +74,8 @@ import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.utils.formatStringToTimestamp
+import com.example.planificatorbuget.utils.isDateBeforeToday
+import com.example.planificatorbuget.utils.isDateInPast
 import java.util.Calendar
 
 @Composable
@@ -688,8 +689,24 @@ fun AddTransactionDialog(
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         }
-                                    } else if (isRecurring) {
+                                    } else {
                                         if (validRecurring) {
+                                            if(isDateInPast(startDate)){
+                                                Toast.makeText(
+                                                    context,
+                                                    "Data de inceput trebuie sa fie in viitor",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                return@Button
+                                            }
+                                            if(isDateBeforeToday(endDate)){
+                                                Toast.makeText(
+                                                    context,
+                                                    "Data de sfarsit trebuie sa fie in viitor",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                                return@Button
+                                            }
                                             val tempAmount =
                                                 if (type == "Venit") amount.toDouble() else amount.toDouble() * -1
                                             val recurringTransaction = RecurringTransactionModel(

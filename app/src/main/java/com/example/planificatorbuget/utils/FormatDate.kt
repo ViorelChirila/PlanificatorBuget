@@ -1,6 +1,5 @@
 package com.example.planificatorbuget.utils
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date

@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.planificatorbuget.model.RecurringTransactionModel
 import com.example.planificatorbuget.model.TransactionModel
@@ -16,7 +15,6 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit

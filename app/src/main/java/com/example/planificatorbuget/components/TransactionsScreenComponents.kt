@@ -47,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -279,9 +280,17 @@ fun FilterDialog(
 
 @Composable
 fun SearchTransactionsByDateForm(
+    initialDate: String?,
     onSelectedDate: (String) -> Unit = { }
 ) {
-    var selectedDate by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf(initialDate?.takeIf { it.isNotBlank() } ?: "") }
+
+    // Trigger the search when the initial date is not null and not blank
+    LaunchedEffect(initialDate) {
+        initialDate?.takeIf { it.isNotBlank() }?.let {
+            onSelectedDate(it)
+        }
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),

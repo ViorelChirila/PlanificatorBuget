@@ -6,10 +6,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.account.PlannerAccountScreen
 import com.example.planificatorbuget.screens.accountsettings.PlannerAccountSettingsScreen
@@ -72,14 +74,19 @@ fun PlannerNavigation(startDestination: String) {
             }
 
 
-            composable(PlannerScreens.TransactionsScreen.name) {
+            val transactionName = PlannerScreens.TransactionsScreen.name
+            composable("$transactionName/{selectedDate}", arguments = listOf(navArgument("selectedDate") {
+                type = NavType.StringType
+            })){backStackEntry ->
+                val selectedDate = backStackEntry.arguments?.getString("selectedDate")
                 val categoriesSharedViewModel =
-                    it.sharedViewModel<CategoriesScreenViewModel>(navController)
-                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                    backStackEntry.sharedViewModel<CategoriesScreenViewModel>(navController)
+                val viewModel = backStackEntry.sharedViewModel<SharedViewModel>(navController)
                 PlannerTransactionsScreen(
                     navController = navController,
                     categoriesSharedViewModel = categoriesSharedViewModel,
-                    sharedViewModel = viewModel
+                    sharedViewModel = viewModel,
+                    selectedDate = selectedDate ?: ""
                 )
             }
             composable(PlannerScreens.CategoriesScreen.name) {

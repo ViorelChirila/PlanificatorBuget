@@ -57,7 +57,7 @@ fun NavigationBarComponent(navController: NavController) {
             unselectedIcon = Icons.Outlined.MonetizationOn,
             hasNews = false,
             badgeCount = null,
-            destination = PlannerScreens.TransactionsScreen.name
+            destination = PlannerScreens.TransactionsScreen.name+"/ "
         ),
         BottomNavigationItem(
             title = "Cont",

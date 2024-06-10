@@ -73,14 +73,16 @@ enum class SortOrder {
     NONE, ASCENDING, DESCENDING
 }
 
-@Preview
+
 @Composable
 fun PlannerTransactionsScreen(
     navController: NavController = NavController(LocalContext.current),
     viewModel: TransactionsScreenViewModel = hiltViewModel(),
     categoriesSharedViewModel: CategoriesScreenViewModel = hiltViewModel(),
-    sharedViewModel: SharedViewModel = hiltViewModel()
+    sharedViewModel: SharedViewModel = hiltViewModel(),
+    selectedDate: String
 ) {
+    Log.d("PlannerTransactionsScreen", "selectedDate: $selectedDate")
     val dataOrException by sharedViewModel.data.observeAsState()
     val isUpdateDone by sharedViewModel.isUpdateDone.observeAsState(initial = true)
     val user = dataOrException?.data
@@ -204,7 +206,7 @@ fun PlannerTransactionsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-                        SearchTransactionsByDateForm { date ->
+                        SearchTransactionsByDateForm(selectedDate) { date ->
                             if (date.isEmpty())
                                 filteredListOfTransactions.value = originalListOfTransactions
                             else

@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.utils
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,4 +34,10 @@ fun isDateBeforeToday(dateString: String, pattern: String = "MM/dd/yyyy"): Boole
     val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
     val date = dateFormat.parse(dateString)
     return date?.before(Date()) ?: false
+}
+
+fun convertMillisToDate(millis: Long): String {
+    val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+    val date = Date(millis)
+    return sdf.format(date)
 }

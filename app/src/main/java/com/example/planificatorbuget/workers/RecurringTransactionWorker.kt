@@ -17,6 +17,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -75,7 +76,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
                 amount = recurringTransaction.amount,
                 transactionType = recurringTransaction.transactionType,
                 categoryId = recurringTransaction.categoryId,
-                transactionDate = Timestamp.now(),
+                transactionDate = getCurrentDateAtMidnight(),
                 transactionTitle = recurringTransaction.transactionTitle,
                 transactionDescription = recurringTransaction.transactionDescription,
                 budgetSnapshot = userData.data?.currentBudget ?: 0.0
@@ -102,4 +103,13 @@ class RecurringTransactionWorker @AssistedInject constructor(
         Log.d("RecurringTransactionWorker", "Days diff: $daysDiff")
         return daysDiff % timeUnit.toDays(interval) == 0L
     }
+}
+
+fun getCurrentDateAtMidnight(): Timestamp {
+    val calendar = Calendar.getInstance()
+    calendar.set(Calendar.HOUR_OF_DAY, 0)
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    return Timestamp(calendar.time)
 }

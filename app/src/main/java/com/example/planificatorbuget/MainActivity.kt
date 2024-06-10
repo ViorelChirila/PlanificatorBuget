@@ -1,18 +1,21 @@
 package com.example.planificatorbuget
 
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.animation.OvershootInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,12 +24,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.planificatorbuget.navigation.FunctionalitiesRoutes
 import com.example.planificatorbuget.navigation.PlannerNavigation
 import com.example.planificatorbuget.ui.theme.PlanificatorBugetTheme
+import com.example.planificatorbuget.workers.scheduleRecurringTransactions
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val  viewModel by viewModels<MainViewModel>()
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen().apply {
@@ -62,6 +67,9 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             PlanificatorBugetTheme {
+                LaunchedEffect(key1 = Unit) {
+                    scheduleRecurringTransactions(applicationContext)
+                }
                 // A surface container using the 'background' color from the theme
                 PlannerApp(viewModel = viewModel)
             }

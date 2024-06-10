@@ -2,8 +2,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hiltPlugin)
     id("com.google.gms.google-services")
-    id("com.google.dagger.hilt.android")
+//    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -85,7 +86,8 @@ dependencies {
 
     // Dagger - Hilt
     implementation(libs.hilt.android)
-    ksp(libs.dagger.hilt.compiler)
+    ksp(libs.dagger.compiler)
+    ksp(libs.hilt.compiler)
 
     implementation (libs.hilt.navigation.compose)
 
@@ -118,4 +120,5 @@ dependencies {
 
     // WorkManager
     implementation (libs.androidx.work.runtime.ktx)
+    implementation (libs.hilt.work)
 }

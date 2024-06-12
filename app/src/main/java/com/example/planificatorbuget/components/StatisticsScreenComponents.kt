@@ -19,6 +19,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,16 +31,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
 
+@Preview
 @Composable
 fun SummaryChartCard(
-    listOfTransactions: List<TransactionModel>,
-    selectedOption: String,
-    meanValue: Double,
-    options: List<String>
+    listOfTransactions: List<TransactionModel> = emptyList(),
+    selectedOption: String = "",
+    meanValue: Double = 0.0,
+    options: List<String> = emptyList()
 ) {
     var selectedOptionLocal by remember {
         mutableStateOf(selectedOption)
@@ -97,7 +101,10 @@ fun SummaryChartCard(
                 verticalAlignment = Alignment.Top
             ) {
                 Column {
-                    Text(text = if (selectedOptionLocal == "Cheltuieli") "Media cheltuielilor pe 7 zile: " else "Media veniturilor pe 7 zile: ")
+                    Text(
+                        text = if (selectedOptionLocal == "Cheltuieli") "Media cheltuielilor pe 7 zile: " else "Media veniturilor pe 7 zile: ",
+                        fontSize = 15.sp
+                    )
                     CustomDropdownMenu(
                         label = "Tipul tranzacției",
                         options = options,
@@ -106,9 +113,20 @@ fun SummaryChartCard(
                     )
                 }
                 Spacer(modifier = Modifier.width(15.dp))
-                Text(text = "%.2f".format(meanValueLocal))
+                Column(
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "%.2f".format(meanValueLocal) + " Lei", fontSize = 15.sp)
+                    Spacer(modifier = Modifier.height(35.dp))
+                    TextButton(
+                        onClick = { },
+                        modifier = Modifier.padding(end = 5.dp, bottom = 2.dp)
+                    ) {
+                        Text(text = "Vezi detalii")
+                    }
+                }
             }
-
         }
     }
 }

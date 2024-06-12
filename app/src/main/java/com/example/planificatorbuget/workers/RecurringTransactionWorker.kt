@@ -74,7 +74,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
                 amount = recurringTransaction.amount,
                 transactionType = recurringTransaction.transactionType,
                 categoryId = recurringTransaction.categoryId,
-                transactionDate = getCurrentDateAtMidnight(),
+                transactionDate = Timestamp.now(),
                 transactionTitle = recurringTransaction.transactionTitle,
                 transactionDescription = recurringTransaction.transactionDescription,
                 budgetSnapshot = userData.data?.currentBudget ?: 0.0

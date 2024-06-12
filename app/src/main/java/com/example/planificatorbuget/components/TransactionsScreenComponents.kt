@@ -1,7 +1,9 @@
 package com.example.planificatorbuget.components
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.widget.DatePicker
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -367,7 +369,88 @@ fun DatePickerField(
         }
     )
 }
+@Composable
+fun DateTimePickerField(
+    label: String,
+    selectedDateTime: String,
+    onDateTimeSelected: (String) -> Unit,
+    onClearDateTime: () -> Unit
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
 
+    var useCurrentTime by remember { mutableStateOf(false) }
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+    val minute = calendar.get(Calendar.MINUTE)
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
+            if (useCurrentTime) {
+                val formattedDateTime = String.format(
+                    "%02d/%02d/%d %02d:%02d",
+                    selectedMonth + 1, selectedDayOfMonth, selectedYear,
+                    hour, minute
+                )
+                onDateTimeSelected(formattedDateTime)
+            } else {
+                val timePickerDialog = TimePickerDialog(
+                    context,
+                    { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
+                        val formattedDateTime = String.format(
+                            "%02d/%02d/%d %02d:%02d",
+                            selectedMonth + 1, selectedDayOfMonth, selectedYear,
+                            selectedHour, selectedMinute
+                        )
+                        onDateTimeSelected(formattedDateTime)
+                    }, hour, minute, true
+                )
+                timePickerDialog.show()
+            }
+        }, year, month, day
+    )
+
+    Column {
+        OutlinedTextField(
+            value = selectedDateTime,
+            onValueChange = {},
+            label = { Text(label) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { datePickerDialog.show() },
+            enabled = false,
+            colors = TextFieldDefaults.colors(
+                disabledTextColor = Color.Black,
+                disabledLabelColor = Color.Black,
+                disabledIndicatorColor = Color.Black
+            ),
+            trailingIcon = {
+                if (selectedDateTime.isNotEmpty()) {
+                    IconButton(onClick = { onClearDateTime() }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear Date")
+                    }
+                }
+            }
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            Checkbox(
+                checked = useCurrentTime,
+                onCheckedChange = { useCurrentTime = it }
+            )
+            Text(text = "Use current time")
+        }
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
@@ -559,12 +642,18 @@ fun AddTransactionDialog(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         if (!isRecurring) {
-                            DatePickerField(
+                            DateTimePickerField(
                                 label = "Data tranzactiei",
-                                selectedDate = date,
-                                onDateSelected = { date = it },
-                                onClearDate = { date = "" }
+                                selectedDateTime = date,
+                                onDateTimeSelected = { date = it },
+                                onClearDateTime = { date = "" }
                             )
+//                            DatePickerField(
+//                                label = "Data tranzactiei",
+//                                selectedDate = date,
+//                                onDateSelected = { date = it },
+//                                onClearDate = { date = "" }
+//                            )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -685,7 +774,7 @@ fun AddTransactionDialog(
                                             val transaction = TransactionModel(
                                                 amount = tempAmount,
                                                 transactionType = type,
-                                                transactionDate = formatStringToTimestamp(date)!!,
+                                                transactionDate = formatStringToTimestamp(date, pattern = "MM/dd/yyyy HH:mm")!!,
                                                 transactionTitle = title,
                                                 transactionDescription = description,
                                                 categoryId = categoryId

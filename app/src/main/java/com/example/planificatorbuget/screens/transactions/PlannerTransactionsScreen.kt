@@ -211,7 +211,7 @@ fun PlannerTransactionsScreen(
                             else
                                 filteredListOfTransactions.value =
                                     originalListOfTransactions.filter {
-                                        it.transactionDate == formatStringToTimestamp(date)
+                                        formatTimestampToString(it.transactionDate) == date
                                     }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
@@ -387,7 +387,7 @@ fun TransactionItem(transaction: TransactionModel, category: TransactionCategori
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = formatTimestampToString(transaction.transactionDate),
+                        text = formatTimestampToString(transaction.transactionDate,pattern = "MM/dd/yyyy HH:mm"),
                         color = Color.Gray
                     )
                 }

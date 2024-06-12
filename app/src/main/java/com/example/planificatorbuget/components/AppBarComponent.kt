@@ -32,6 +32,7 @@ fun AppBar(
     haveNotifications: Boolean = false,
     isHomeScreen: Boolean = false,
     navController: NavController = NavController(LocalContext.current),
+    color: Color = Color.White,
     onBackArrowClicked: () -> Unit = {}
 ) {
 
@@ -70,9 +71,9 @@ fun AppBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
-            titleContentColor = Color.White,
-            navigationIconContentColor = Color.White,
-            actionIconContentColor = Color.White
+            titleContentColor = color,
+            navigationIconContentColor = color,
+            actionIconContentColor = color
         ),
     )
 }

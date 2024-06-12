@@ -43,7 +43,8 @@ fun SummaryChartCard(
     listOfTransactions: List<TransactionModel> = emptyList(),
     selectedOption: String = "",
     meanValue: Double = 0.0,
-    options: List<String> = emptyList()
+    options: List<String> = emptyList(),
+    onDetailsClicked: () -> Unit = {}
 ) {
     var selectedOptionLocal by remember {
         mutableStateOf(selectedOption)
@@ -105,7 +106,7 @@ fun SummaryChartCard(
                         text = if (selectedOptionLocal == "Cheltuieli") "Media cheltuielilor pe 7 zile: " else "Media veniturilor pe 7 zile: ",
                         fontSize = 15.sp
                     )
-                    CustomDropdownMenu(
+                    CustomDropdownMenuForTypeSelection(
                         label = "Tipul tranzacției",
                         options = options,
                         selectedOption = selectedOptionLocal,
@@ -120,7 +121,7 @@ fun SummaryChartCard(
                     Text(text = "%.2f".format(meanValueLocal) + " Lei", fontSize = 15.sp)
                     Spacer(modifier = Modifier.height(35.dp))
                     TextButton(
-                        onClick = { },
+                        onClick = { onDetailsClicked()},
                         modifier = Modifier.padding(end = 5.dp, bottom = 2.dp)
                     ) {
                         Text(text = "Vezi detalii")
@@ -134,10 +135,11 @@ fun SummaryChartCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CustomDropdownMenu(
+fun CustomDropdownMenuForTypeSelection(
     label: String,
     options: List<String>,
     selectedOption: String,
+    color: Color = Color.Transparent,
     onOptionSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -165,6 +167,9 @@ fun CustomDropdownMenu(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent,
+                    focusedContainerColor = color,
+                    unfocusedContainerColor = color,
+                    disabledContainerColor = color
                 )
 
             )
@@ -179,6 +184,72 @@ fun CustomDropdownMenu(
                         expanded = false
                     },
                         text = { Text(text = option) })
+                }
+
+            }
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomDropdownMenuForPeriodSelection(
+    label: String,
+    selectedOption: Period,
+    onOptionSelected: (Period) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldValue by remember { mutableStateOf(selectedOption) }
+    val options = Period.entries
+
+    val periodDisplayName = { period: Period ->
+        when (period) {
+            Period.LAST_7_DAYS -> "ultimele 7 zile"
+            Period.LAST_MONTH -> "ultimele 30 de zile"
+            Period.LAST_3_MONTHS -> "ultimele 3 luni"
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(top = 5.dp)
+    ) {
+        Text(text = label, fontSize = 15.sp)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }) {
+            TextField(
+                value = periodDisplayName(textFieldValue),
+                onValueChange = { },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier
+                    .width(220.dp)
+                    .menuAnchor(),
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                )
+
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(onClick = {
+                        textFieldValue = option
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                        text = { Text(text = periodDisplayName(option)) })
                 }
 
             }

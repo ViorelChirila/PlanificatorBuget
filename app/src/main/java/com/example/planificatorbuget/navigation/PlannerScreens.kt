@@ -9,5 +9,6 @@ enum class PlannerScreens {
     AccountSettingsScreen,
     StatisticsScreen,
     TransactionsScreen,
-    CategoriesScreen
+    CategoriesScreen,
+    DailySummaryDetailedChartScreen
 }

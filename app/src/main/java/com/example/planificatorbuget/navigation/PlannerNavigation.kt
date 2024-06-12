@@ -12,17 +12,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.planificatorbuget.model.TransactionModel
+import com.example.planificatorbuget.model.TransactionModelParcelable
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.account.PlannerAccountScreen
 import com.example.planificatorbuget.screens.accountsettings.PlannerAccountSettingsScreen
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.screens.categories.PlannerCategoriesScreen
+import com.example.planificatorbuget.screens.chartdetailsscreeens.DailySummaryDetailedChartScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
 import com.example.planificatorbuget.screens.login.PlannerLoginScreen
 import com.example.planificatorbuget.screens.notification.PlannerNotificationsScreen
 import com.example.planificatorbuget.screens.register.PlannerCreateAccountScreen
 import com.example.planificatorbuget.screens.statistics.PlannerStatisticsScreen
 import com.example.planificatorbuget.screens.transactions.PlannerTransactionsScreen
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 @Composable
 fun PlannerNavigation(startDestination: String) {
@@ -100,6 +105,17 @@ fun PlannerNavigation(startDestination: String) {
                 )
             }
 
+            val dailySummaryDetailedChartScreenName = PlannerScreens.DailySummaryDetailedChartScreen.name
+            composable("$dailySummaryDetailedChartScreenName/{transactions}", arguments = listOf(navArgument("transactions"){type = NavType.StringType})){
+                backStackEntry ->
+                val transactionsJson = backStackEntry.arguments?.getString("transactions")
+                val listType = object: TypeToken<List<TransactionModelParcelable>>(){}.type
+                val transactions: List<TransactionModelParcelable>? = Gson().fromJson(transactionsJson, listType)
+                if (transactions != null) {
+                    DailySummaryDetailedChartScreen(navController = navController, transactions = transactions)
+                }
+
+            }
 
         }
 

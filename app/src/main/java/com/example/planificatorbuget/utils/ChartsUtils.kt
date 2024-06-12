@@ -15,7 +15,8 @@ enum class Period {
 fun filterTransactionsByPeriod(
     transactions: List<TransactionModel>,
     period: Period,
-    transactionType: String
+    transactionType: String,
+    showAsDayName: Boolean = true
 ): List<Pair<String, Double>> {
     val endDate = getEndOfDay(Date())
     val startDate = when (period) {
@@ -36,7 +37,8 @@ fun filterTransactionsByPeriod(
         .mapValues { entry -> entry.value.sumOf { it.amount } }
 
     return allDates.map { date ->
-        date.toDayOfWeekString(Locale("ro","RO")) to (transactionMap[date.toSimpleDateString()] ?: 0.0)
+        val dateString = if (showAsDayName) date.toDayOfWeekString(Locale("ro","RO")) else date.toSimpleDateString()
+        dateString to (transactionMap[date.toSimpleDateString()] ?: 0.0)
     }
 }
 

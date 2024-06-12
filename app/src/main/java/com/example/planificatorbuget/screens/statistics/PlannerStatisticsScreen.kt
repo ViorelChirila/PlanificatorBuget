@@ -31,8 +31,11 @@ import androidx.navigation.NavController
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.SummaryChartCard
+import com.example.planificatorbuget.model.TransactionModelParcelable
+import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.screens.transactions.TransactionsScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
+import com.google.gson.Gson
 
 @Composable
 fun PlannerStatisticsScreen(
@@ -82,7 +85,13 @@ fun PlannerStatisticsScreen(
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
                 if (transactionsData.isLoading == true) {
-                    CircularProgressIndicator()
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 } else {
                     Column(
                         modifier = Modifier
@@ -91,7 +100,11 @@ fun PlannerStatisticsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-                        SummaryChartCard(listOfTransactions, selectedOption, meanValue, options)
+                        SummaryChartCard(listOfTransactions, selectedOption, meanValue, options) {
+                            val parcelableList = TransactionModelParcelable.fromTransactionModelList(listOfTransactions)
+                            val itemListJson = Gson().toJson(parcelableList)
+                            navController.navigate(PlannerScreens.DailySummaryDetailedChartScreen.name+"/$itemListJson")
+                        }
                     }
 
                 }

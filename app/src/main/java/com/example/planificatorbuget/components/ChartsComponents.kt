@@ -7,7 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.components.Legends
 import co.yml.charts.common.model.LegendLabel
@@ -28,9 +31,13 @@ fun TransactionsBarChart(
     transactions: List<TransactionModel> = emptyList(),
     period: Period = Period.LAST_7_DAYS,
     transactionType: String = "Cheltuiala",
+    showNameDay: Boolean = true,
+    xAxisRotationAngle: Float = 0f,
+    xAxisBottomPadding: Dp = 20.dp,
+    xAxisLabelFontSize: TextUnit = 0.sp,
     onMeanCalculated: (Double) -> Unit = {}
 ) {
-    val expensesData = filterTransactionsByPeriod(transactions, period, transactionType)
+    val expensesData = filterTransactionsByPeriod(transactions, period, transactionType,showAsDayName = showNameDay)
 
     val barDataList =
         expensesData.mapIndexed { index, data ->
@@ -50,10 +57,12 @@ fun TransactionsBarChart(
     val xAxisData = AxisData.Builder()
         .axisStepSize(30.dp)
         .steps(barDataList.size - 1)
-        .bottomPadding(20.dp)
+        .bottomPadding(xAxisBottomPadding)
+        .axisLabelAngle(xAxisRotationAngle)
         .labelData { index -> barDataList[index].label }
         .backgroundColor(Color.White)
-        .startDrawPadding(20.dp)
+        .startDrawPadding(30.dp)
+        .axisLabelFontSize(if (xAxisLabelFontSize.value == 0f) 15.sp else xAxisLabelFontSize)
         .build()
 
 

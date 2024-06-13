@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens.recurringtransactions
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,12 +27,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,17 +47,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.DatePickerField
 import com.example.planificatorbuget.components.NavigationBarComponent
+import com.example.planificatorbuget.model.RecurringTransactionModel
+import com.example.planificatorbuget.model.TransactionCategoriesModel
+import com.example.planificatorbuget.utils.formatTimestampToString
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 
 @Preview
 @Composable
-fun PlannerRecurringTransactionsScreen(navController: NavController = NavController(LocalContext.current)) {
-
+fun PlannerRecurringTransactionsScreen(
+    navController: NavController = NavController(LocalContext.current),
+    viewModel: RecurringTransactionsScreenViewModel = hiltViewModel()
+) {
+    val recurringTransactions by viewModel.recurringTransactions.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val categories by viewModel.categories.collectAsState()
 
     Box(
         modifier = Modifier.background(
@@ -96,50 +110,60 @@ fun PlannerRecurringTransactionsScreen(navController: NavController = NavControl
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(3.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Text(
-                        text = "Trazactii recurente active",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(
-                            top = 15.dp,
-                            start = 15.dp,
-                            end = 15.dp,
-                            bottom = 10.dp
+                if (isLoading) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.Top,
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Text(
+                            text = "Trazactii recurente active",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(
+                                top = 15.dp,
+                                start = 15.dp,
+                                end = 15.dp,
+                                bottom = 10.dp
+                            )
                         )
-                    )
-                    HorizontalDivider()
+                        HorizontalDivider()
 
-                    LazyRow(contentPadding = PaddingValues(5.dp)) {
-                        items(5) {
-                            Box(modifier = Modifier.padding(5.dp)) {
-                                RecurringTransactionsItem()
+                        LazyRow(contentPadding = PaddingValues(5.dp)) {
+                            items(items = recurringTransactions) { recurringTransaction ->
+                                Box(modifier = Modifier.padding(5.dp)) {
+                                    RecurringTransactionsItem(recurringTransaction, categories[recurringTransaction.transactionId!!]!!)
+                                }
                             }
                         }
-                    }
 
-                    Text(
-                        text = "Trazactii recurente inactive",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(
-                            top = 15.dp,
-                            start = 15.dp,
-                            end = 15.dp,
-                            bottom = 10.dp
+                        Text(
+                            text = "Trazactii recurente inactive",
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(
+                                top = 15.dp,
+                                start = 15.dp,
+                                end = 15.dp,
+                                bottom = 10.dp
+                            )
                         )
-                    )
-                    HorizontalDivider()
-                    LazyRow(contentPadding = PaddingValues(5.dp)) {
-                        items(5) {
-                            Box(modifier = Modifier.padding(5.dp)) {
-                                RecurringTransactionsItem()
+                        HorizontalDivider()
+                        LazyRow(contentPadding = PaddingValues(5.dp)) {
+                            items(items = recurringTransactions) { recurringTransaction ->
+                                Box(modifier = Modifier.padding(5.dp)) {
+                                    RecurringTransactionsItem(recurringTransaction, categories[recurringTransaction.transactionId!!]!!)
+                                }
                             }
                         }
                     }
@@ -150,12 +174,14 @@ fun PlannerRecurringTransactionsScreen(navController: NavController = NavControl
     }
 }
 
-@Preview
 @Composable
 fun RecurringTransactionsItem(
+    recurringTransaction: RecurringTransactionModel,
+    category: TransactionCategoriesModel,
 ) {
-    var startDate by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
+    var startDate by remember { mutableStateOf(formatTimestampToString(recurringTransaction.startDate)) }
+    var endDate by remember { mutableStateOf(formatTimestampToString(recurringTransaction.endDate)) }
+    var enable by remember { mutableStateOf(false) }
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(3.dp)
@@ -174,7 +200,7 @@ fun RecurringTransactionsItem(
             ) {
                 Surface(shape = CircleShape) {
                     AsyncImage(
-                        model = "",
+                        model = category.categoryIcon.toUri(),
                         contentDescription = "icon",
                         modifier = Modifier
                             .clip(CircleShape)
@@ -186,13 +212,13 @@ fun RecurringTransactionsItem(
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "Nume tranzactie",
+                        text = recurringTransaction.transactionTitle,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(start = 15.dp)
                     )
                     Text(
-                        text = "Categorie tranzactie",
+                        text = "Categorie: ${category.categoryName}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(start = 15.dp)
                     )
@@ -201,11 +227,14 @@ fun RecurringTransactionsItem(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.Start
                 ) {
+                    val transactionColor =
+                        if (recurringTransaction.transactionType == "Venit") Color(0xFF349938) else Color.Red
                     Text(
-                        text = "30.4 lei",
+                        text = if (recurringTransaction.transactionType == "Venit") "+${recurringTransaction.amount}" + " Lei" else recurringTransaction.amount.toString() + " Lei",
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 15.dp)
+                        modifier = Modifier.padding(start = 15.dp),
+                        color = transactionColor
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -241,6 +270,7 @@ fun RecurringTransactionsItem(
                 Spacer(modifier = Modifier.width(10.dp))
                 DatePickerField(
                     label = "Data de început",
+                    enable = enable,
                     selectedDate = startDate,
                     onDateSelected = { startDate = it },
                     onClearDate = { startDate = "" }
@@ -261,6 +291,7 @@ fun RecurringTransactionsItem(
                 Spacer(modifier = Modifier.width(16.dp))
                 DatePickerField(
                     label = "Data de început",
+                    enable = enable,
                     selectedDate = endDate,
                     onDateSelected = { endDate = it },
                     onClearDate = { endDate = "" }
@@ -288,10 +319,13 @@ fun RecurringTransactionsItem(
                     Text(text = "Dezactiveaza")
                 }
                 Button(
-                    onClick = { /*TODO*/ },
-                    shape = RoundedCornerShape(5.dp)
+                    onClick = {
+                        enable = !enable
+                    },
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = if(enable) Color(0xFF349938) else Color.Blue)
                 ) {
-                    Text(text = "Editeaza")
+                    Text(text = if(!enable)"Editeaza" else "Salveaza")
                 }
             }
         }

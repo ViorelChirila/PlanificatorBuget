@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens.recurringtransactions
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -21,20 +22,30 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RemoveCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,10 +64,14 @@ import coil.compose.AsyncImage
 import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.DatePickerField
 import com.example.planificatorbuget.components.NavigationBarComponent
+import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.RecurringTransactionModel
 import com.example.planificatorbuget.model.TransactionCategoriesModel
+import com.example.planificatorbuget.utils.formatStringToTimestamp
 import com.example.planificatorbuget.utils.formatTimestampToString
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
+import com.google.firebase.Timestamp
+import java.util.Calendar
 
 @Preview
 @Composable
@@ -67,6 +82,8 @@ fun PlannerRecurringTransactionsScreen(
     val recurringTransactions by viewModel.recurringTransactions.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val categories by viewModel.categories.collectAsState()
+    val resultForUpdate by viewModel.recurringTransactionUpdateResult.observeAsState()
+    val context = LocalContext.current
 
     Box(
         modifier = Modifier.background(
@@ -140,8 +157,23 @@ fun PlannerRecurringTransactionsScreen(
 
                         LazyRow(contentPadding = PaddingValues(5.dp)) {
                             items(items = recurringTransactions) { recurringTransaction ->
-                                Box(modifier = Modifier.padding(5.dp)) {
-                                    RecurringTransactionsItem(recurringTransaction, categories[recurringTransaction.transactionId!!]!!)
+                                if (recurringTransaction.status == "activ") {
+                                    Box(modifier = Modifier.padding(5.dp)) {
+                                        RecurringTransactionsItem(
+                                            recurringTransaction,
+                                            categories[recurringTransaction.transactionId!!]!!,
+                                            onDelete = { transactionId ->
+                                                viewModel.deleteRecurringTransaction(transactionId)
+                                            },
+                                        ){ startDate, endDate, recurrenceInterval ->
+                                            viewModel.updateRecurringTransaction(
+                                                recurringTransaction.transactionId!!,
+                                                startDate,
+                                                endDate,
+                                                recurrenceInterval
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -160,8 +192,13 @@ fun PlannerRecurringTransactionsScreen(
                         HorizontalDivider()
                         LazyRow(contentPadding = PaddingValues(5.dp)) {
                             items(items = recurringTransactions) { recurringTransaction ->
-                                Box(modifier = Modifier.padding(5.dp)) {
-                                    RecurringTransactionsItem(recurringTransaction, categories[recurringTransaction.transactionId!!]!!)
+                                if (recurringTransaction.status == "inactiv") {
+                                    Box(modifier = Modifier.padding(5.dp)) {
+                                        RecurringTransactionsItem(
+                                            recurringTransaction,
+                                            categories[recurringTransaction.transactionId!!]!!
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -170,17 +207,56 @@ fun PlannerRecurringTransactionsScreen(
 
             }
         }
+        LaunchedEffect(resultForUpdate) {
+            when (resultForUpdate) {
+                is Response.Loading -> {
+                    Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
+                }
+
+                is Response.Success -> {
+                    if ((resultForUpdate as Response.Success).data == true) {
+                        Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT)
+                            .show()
+                        viewModel.fetchRecurringTransactionsFromDatabase()
+                    }
+                }
+
+                is Response.Error -> {
+                    Toast.makeText(
+                        context,
+                        (resultForUpdate as Response.Error).message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                else -> { /* no-op */
+                }
+            }
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecurringTransactionsItem(
     recurringTransaction: RecurringTransactionModel,
     category: TransactionCategoriesModel,
+    onDelete: (String) -> Unit = { _ -> },
+    onEdit: (Timestamp, Timestamp, String) -> Unit = { _, _, _ -> },
 ) {
     var startDate by remember { mutableStateOf(formatTimestampToString(recurringTransaction.startDate)) }
     var endDate by remember { mutableStateOf(formatTimestampToString(recurringTransaction.endDate)) }
     var enable by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val currentDateInMillis = Calendar.getInstance().timeInMillis
+    val startDateInMillis =
+        formatStringToTimestamp(startDate, "MM/dd/yyyy")?.toDate()?.time ?: currentDateInMillis
+
+    var expandedInterval by remember { mutableStateOf(false) }
+    var recurrenceInterval by remember { mutableStateOf(recurringTransaction.recurrenceInterval) }
+    var showDialog by remember { mutableStateOf(false) }
+
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(3.dp)
@@ -237,18 +313,18 @@ fun RecurringTransactionsItem(
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Inactiv",
+                            text = recurringTransaction.status,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 15.dp)
                         )
                         Spacer(modifier = Modifier.width(7.dp))
-                        Image(
-                            modifier = Modifier.size(12.dp),
-                            imageVector = Icons.Default.RemoveCircle,
-                            contentDescription = "status icon"
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "status icon",
+                            tint = Color(0xFF349938)
                         )
                     }
                 }
@@ -271,7 +347,19 @@ fun RecurringTransactionsItem(
                     label = "Data de început",
                     enable = enable,
                     selectedDate = startDate,
-                    onDateSelected = { startDate = it },
+                    onDateSelected = { selectedDate ->
+                        val selectedDateInMillis =
+                            formatStringToTimestamp(selectedDate, "MM/dd/yyyy")?.toDate()?.time
+                        if (selectedDateInMillis != null && selectedDateInMillis >= currentDateInMillis) {
+                            startDate = selectedDate
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Data de inceput trebuie sa fie dupa data curenta!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
                     onClearDate = { startDate = "" }
                 )
             }
@@ -289,13 +377,69 @@ fun RecurringTransactionsItem(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 DatePickerField(
-                    label = "Data de început",
+                    label = "Data de sfarsit",
                     enable = enable,
                     selectedDate = endDate,
-                    onDateSelected = { endDate = it },
+                    onDateSelected = { selectedDate ->
+                        val selectedDateInMillis =
+                            formatStringToTimestamp(selectedDate, "MM/dd/yyyy")?.toDate()?.time
+                        if (selectedDateInMillis != null && selectedDateInMillis >= startDateInMillis) {
+                            endDate = selectedDate
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Data de sfarsit trebuie sa fie dupa data de inceput!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
                     onClearDate = { endDate = "" }
                 )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                ExposedDropdownMenuBox(
+                    expanded = expandedInterval && enable,
+                    onExpandedChange = { expandedInterval = !expandedInterval }) {
+                    OutlinedTextField(
+                        value = recurrenceInterval,
+                        onValueChange = { /* No-op */ },
+                        label = { Text("Interval recurență") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown Arrow"
+                            )
+                        },
+                        readOnly = true,
+                        enabled = enable
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expandedInterval && enable,
+                        onDismissRequest = { expandedInterval = false }
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            recurrenceInterval = "Zilnic"
+                            expandedInterval = false
+                        }, text = { Text("Zilnic") })
 
+                        DropdownMenuItem(onClick = {
+                            recurrenceInterval = "Săptămânal"
+                            expandedInterval = false
+                        }, text = { Text("Săptămânal") })
+
+                        DropdownMenuItem(onClick = {
+                            recurrenceInterval = "Lunar"
+                            expandedInterval = false
+                        }, text = { Text("Lunar") })
+                    }
+                }
             }
             Row(
                 modifier = Modifier
@@ -305,7 +449,7 @@ fun RecurringTransactionsItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = { showDialog = true},
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
@@ -319,14 +463,59 @@ fun RecurringTransactionsItem(
                 }
                 Button(
                     onClick = {
+                        if (enable) {
+                            val newStartDate = formatStringToTimestamp(startDate)
+                            val newEndDate = formatStringToTimestamp(endDate)
+
+                            if (newStartDate != null && newEndDate != null && (newStartDate != recurringTransaction.startDate || newEndDate != recurringTransaction.endDate || recurrenceInterval != recurringTransaction.recurrenceInterval)) {
+                                onEdit(
+                                    newStartDate, newEndDate, recurrenceInterval
+                                )
+                                Toast.makeText(
+                                    context,
+                                    "Schimbarile au fost salvate cu succes!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else if (newStartDate == null || newEndDate == null) {
+                                startDate = formatTimestampToString(recurringTransaction.startDate)
+                                endDate = formatTimestampToString(recurringTransaction.endDate)
+                                Toast.makeText(context, "Date invalide", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                         enable = !enable
                     },
                     shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = if(enable) Color(0xFF349938) else Color.Blue)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (enable) Color(0xFF349938) else Color.Blue
+                    )
                 ) {
-                    Text(text = if(!enable)"Editeaza" else "Salveaza")
+                    Text(text = if (!enable) "Editeaza" else "Salveaza")
                 }
             }
         }
+    }
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Confirmare Stergere") },
+            text = { Text(text = "Ești sigur că vrei să ștergi această tranzacție recurentă?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDelete(recurringTransaction.transactionId!!)
+                        showDialog = false
+                    }
+                ) {
+                    Text("Da")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false }
+                ) {
+                    Text("Nu")
+                }
+            }
+        )
     }
 }

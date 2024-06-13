@@ -43,6 +43,10 @@ class RecurringTransactionModel(
     @get:PropertyName("recurrence_interval")
     @set:PropertyName("recurrence_interval")
     var recurrenceInterval: String = "",
+
+    @get:PropertyName("status")
+    @set:PropertyName("status")
+    var status: String = "activ"
 ) {
 
 }

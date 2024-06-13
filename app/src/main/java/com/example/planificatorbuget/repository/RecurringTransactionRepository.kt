@@ -2,6 +2,7 @@ package com.example.planificatorbuget.repository
 
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.RecurringTransactionModel
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -41,4 +42,32 @@ class RecurringTransactionRepository @Inject constructor(
         }
     }
 
+    suspend fun updateRecurringTransaction(
+        recurringTransactionId: String,
+        startDate: Timestamp,
+        endDate: Timestamp,
+        recurrenceInterval: String
+    ): Response<Boolean> {
+        return try {
+            firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).document(recurringTransactionId).update(
+                mapOf(
+                    "start_date" to startDate,
+                    "end_date" to endDate,
+                    "recurrence_interval" to recurrenceInterval
+                )
+            ).await()
+            Response.Success(true)
+        } catch (e: Exception) {
+            Response.Error(e.message, false)
+        }
+    }
+
+    suspend fun deleteRecurringTransaction(transactionId: String): Response<Boolean> {
+        return try {
+            firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).document(transactionId).delete().await()
+            Response.Success(true)
+        } catch (e: Exception) {
+            Response.Error(e.message, false)
+        }
+    }
 }

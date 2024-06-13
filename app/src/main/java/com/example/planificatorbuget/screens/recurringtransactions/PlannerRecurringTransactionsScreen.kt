@@ -165,7 +165,10 @@ fun PlannerRecurringTransactionsScreen(
                                             onDelete = { transactionId ->
                                                 viewModel.deleteRecurringTransaction(transactionId)
                                             },
-                                        ){ startDate, endDate, recurrenceInterval ->
+                                            onUpdateStatus = { transactionId, status ->
+                                                viewModel.updateRecurrentTransactionStatus(transactionId, status)
+                                            }
+                                        ) { startDate, endDate, recurrenceInterval ->
                                             viewModel.updateRecurringTransaction(
                                                 recurringTransaction.transactionId!!,
                                                 startDate,
@@ -196,8 +199,21 @@ fun PlannerRecurringTransactionsScreen(
                                     Box(modifier = Modifier.padding(5.dp)) {
                                         RecurringTransactionsItem(
                                             recurringTransaction,
-                                            categories[recurringTransaction.transactionId!!]!!
-                                        )
+                                            categories[recurringTransaction.transactionId!!]!!,
+                                            onDelete = { transactionId ->
+                                                viewModel.deleteRecurringTransaction(transactionId)
+                                            },
+                                            onUpdateStatus = { transactionId, status ->
+                                                viewModel.updateRecurrentTransactionStatus(transactionId, status)
+                                            }
+                                        ) { startDate, endDate, recurrenceInterval ->
+                                            viewModel.updateRecurringTransaction(
+                                                recurringTransaction.transactionId!!,
+                                                startDate,
+                                                endDate,
+                                                recurrenceInterval
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -210,12 +226,12 @@ fun PlannerRecurringTransactionsScreen(
         LaunchedEffect(resultForUpdate) {
             when (resultForUpdate) {
                 is Response.Loading -> {
-                    Toast.makeText(context, "Se adauga tranzactia...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Se actualizeaza...", Toast.LENGTH_SHORT).show()
                 }
 
                 is Response.Success -> {
                     if ((resultForUpdate as Response.Success).data == true) {
-                        Toast.makeText(context, "Tranzactie adaugata cu succes", Toast.LENGTH_SHORT)
+                        Toast.makeText(context, "Actualizarea a fost facuta cu succes", Toast.LENGTH_SHORT)
                             .show()
                         viewModel.fetchRecurringTransactionsFromDatabase()
                     }
@@ -242,6 +258,7 @@ fun RecurringTransactionsItem(
     recurringTransaction: RecurringTransactionModel,
     category: TransactionCategoriesModel,
     onDelete: (String) -> Unit = { _ -> },
+    onUpdateStatus: (String, String) -> Unit = { _, _ -> },
     onEdit: (Timestamp, Timestamp, String) -> Unit = { _, _, _ -> },
 ) {
     var startDate by remember { mutableStateOf(formatTimestampToString(recurringTransaction.startDate)) }
@@ -256,6 +273,7 @@ fun RecurringTransactionsItem(
     var expandedInterval by remember { mutableStateOf(false) }
     var recurrenceInterval by remember { mutableStateOf(recurringTransaction.recurrenceInterval) }
     var showDialog by remember { mutableStateOf(false) }
+    val status by remember { mutableStateOf(recurringTransaction.status) }
 
     Card(
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -321,11 +339,19 @@ fun RecurringTransactionsItem(
                             modifier = Modifier.padding(start = 15.dp)
                         )
                         Spacer(modifier = Modifier.width(7.dp))
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "status icon",
-                            tint = Color(0xFF349938)
-                        )
+                        if (recurringTransaction.status == "inactiv")
+                            Icon(
+                                imageVector = Icons.Default.RemoveCircle,
+                                contentDescription = "status icon",
+                                tint = Color.Red
+                            )
+                        else if (recurringTransaction.status == "activ") {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = "status icon",
+                                tint = Color(0xFF349938)
+                            )
+                        }
                     }
                 }
             }
@@ -449,17 +475,26 @@ fun RecurringTransactionsItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    onClick = { showDialog = true},
+                    onClick = { showDialog = true },
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
                     Text(text = "Sterge")
                 }
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        if (status == "activ") {
+                            val newStatus = "inactiv"
+                            onUpdateStatus(recurringTransaction.transactionId!!, newStatus)
+                        }
+                        else {
+                            val newStatus = "activ"
+                            onUpdateStatus(recurringTransaction.transactionId!!, newStatus)
+                        }
+                    },
                     shape = RoundedCornerShape(5.dp)
                 ) {
-                    Text(text = "Dezactiveaza")
+                    Text(text = if (status == "activ") "Dezactiveaza" else "Activeaza")
                 }
                 Button(
                     onClick = {

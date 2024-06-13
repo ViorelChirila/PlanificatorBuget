@@ -57,6 +57,7 @@ class RecurringTransactionWorker @AssistedInject constructor(
         val userData = userRepository.fetchUser()
 
         if (currentDate.after(endDate)) {
+            repository.updateRecurrentTransactionStatus(recurringTransaction.transactionId!!, "inactiv")
             return
         }
 

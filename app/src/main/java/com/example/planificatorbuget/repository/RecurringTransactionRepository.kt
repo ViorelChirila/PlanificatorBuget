@@ -70,4 +70,16 @@ class RecurringTransactionRepository @Inject constructor(
             Response.Error(e.message, false)
         }
     }
+
+    suspend fun updateRecurrentTransactionStatus(
+        transactionId: String,
+        status: String
+    ): Response<Boolean> {
+        return try {
+            firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).document(transactionId).update("status", status).await()
+            Response.Success(true)
+        } catch (e: Exception) {
+            Response.Error(e.message, false)
+        }
+    }
 }

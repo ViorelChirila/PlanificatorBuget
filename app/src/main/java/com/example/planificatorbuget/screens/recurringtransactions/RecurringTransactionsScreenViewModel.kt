@@ -79,4 +79,16 @@ class RecurringTransactionsScreenViewModel @Inject constructor(
 
         }
     }
+
+    fun updateRecurrentTransactionStatus(transactionId: String, status: String) {
+        viewModelScope.launch {
+            _recurringTransactionUpdateResult.value = Response.Loading()
+            val result = repository.updateRecurrentTransactionStatus(transactionId, status)
+            _recurringTransactionUpdateResult.postValue(result)
+            if (result is Response.Success) {
+                delay(1000L)
+                _recurringTransactionUpdateResult.postValue(Response.Success(false))
+            }
+        }
+    }
 }

@@ -327,6 +327,7 @@ fun SearchTransactionsByDateForm(
 fun DatePickerField(
     label: String,
     selectedDate: String,
+    enable: Boolean = true,
     onDateSelected: (String) -> Unit,
     onClearDate: () -> Unit
 ) {
@@ -353,16 +354,17 @@ fun DatePickerField(
         label = { Text(label) },
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { datePickerDialog.show() },
+            .clickable { if (enable)datePickerDialog.show() },
         enabled = false,
         colors = TextFieldDefaults.colors(
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black,
-            disabledIndicatorColor = Color.Black
+            disabledIndicatorColor = Color.Black,
+            disabledContainerColor = Color.White
         ),
         trailingIcon = {
             if (selectedDate.isNotEmpty()) {
-                IconButton(onClick = { onClearDate() }) {
+                IconButton(onClick = { if(enable)onClearDate() }) {
                     Icon(Icons.Default.Clear, contentDescription = "Clear Date")
                 }
             }

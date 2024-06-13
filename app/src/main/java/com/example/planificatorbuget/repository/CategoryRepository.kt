@@ -53,4 +53,13 @@ class CategoryRepository @Inject constructor(private val firebaseFirestore: Fire
             Response.Error(e.message, false)
         }
     }
+
+    suspend fun fetchCategoryById(categoryId: String): TransactionCategoriesModel? {
+        return try {
+            val result = firebaseFirestore.collection(CATEGORIES_COLLECTION).document(categoryId).get().await()
+            result.toObject(TransactionCategoriesModel::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

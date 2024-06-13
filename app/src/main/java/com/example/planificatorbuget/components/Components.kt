@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -15,6 +19,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -83,4 +91,57 @@ fun DatePickerField(
             }
         }
     )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun DropDownMenuForRecurringPeriod(
+    enable: Boolean,
+    transactionRecurrenceInterval: String,
+    onIntervalChanged: (String) -> Unit = { _ -> }
+) {
+    var expandedInterval by remember { mutableStateOf(false) }
+    var recurrenceInterval by remember { mutableStateOf(transactionRecurrenceInterval) }
+    ExposedDropdownMenuBox(
+        expanded = expandedInterval && enable,
+        onExpandedChange = { expandedInterval = !expandedInterval }) {
+        OutlinedTextField(
+            value = recurrenceInterval,
+            onValueChange = { /* No-op */ },
+            label = { Text("Interval recurență") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            trailingIcon = {
+                Icon(
+                    Icons.Default.ArrowDropDown,
+                    contentDescription = "Dropdown Arrow"
+                )
+            },
+            readOnly = true,
+            enabled = enable
+        )
+        ExposedDropdownMenu(
+            expanded = expandedInterval && enable,
+            onDismissRequest = { expandedInterval = false }
+        ) {
+            DropdownMenuItem(onClick = {
+                recurrenceInterval = "Zilnic"
+                expandedInterval = false
+                onIntervalChanged("Zilnic")
+            }, text = { Text("Zilnic") })
+
+            DropdownMenuItem(onClick = {
+                recurrenceInterval = "Săptămânal"
+                expandedInterval = false
+                onIntervalChanged("Saptamanal")
+            }, text = { Text("Săptămânal") })
+
+            DropdownMenuItem(onClick = {
+                recurrenceInterval = "Lunar"
+                expandedInterval = false
+                onIntervalChanged("Lunar")
+            }, text = { Text("Lunar") })
+        }
+    }
 }

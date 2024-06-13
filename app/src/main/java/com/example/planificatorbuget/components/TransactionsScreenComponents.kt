@@ -648,12 +648,6 @@ fun AddTransactionDialog(
                                 onDateTimeSelected = { date = it },
                                 onClearDateTime = { date = "" }
                             )
-//                            DatePickerField(
-//                                label = "Data tranzactiei",
-//                                selectedDate = date,
-//                                onDateSelected = { date = it },
-//                                onClearDate = { date = "" }
-//                            )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
 

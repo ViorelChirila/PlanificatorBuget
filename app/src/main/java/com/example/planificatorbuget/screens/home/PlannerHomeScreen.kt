@@ -148,7 +148,7 @@ fun PlannerHomeScreen(
                                     convertMillisToDate(millis)
                                 } ?: "no selection"
                                 Text(
-                                    text = "Entered date timestamp: $formattedDate",
+                                    text = "Data selectata: $formattedDate",
                                     modifier = Modifier.align(Alignment.CenterHorizontally)
                                 )
 

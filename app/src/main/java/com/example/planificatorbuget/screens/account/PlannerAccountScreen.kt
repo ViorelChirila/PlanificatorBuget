@@ -166,6 +166,10 @@ fun AccountOptions(navController: NavController) {
             "Setari notificari",
             painterResource(id = R.drawable.notification_settings)
         ) { /* Handle click for "Setari notificari" here */ },
+        AccountOptionItem(
+            "Tranzactii recurente",
+            painterResource(id = R.drawable.recurrent_transactions)
+        ) { navController.navigate(PlannerScreens.RecurringTransactionsScreen.name) },
         AccountOptionItem("Deconecteaza-te", painterResource(id = R.drawable.logout_button)) {
             FirebaseAuth.getInstance().signOut().run {
                 navController.navigate(FunctionalitiesRoutes.Authentication.name) {

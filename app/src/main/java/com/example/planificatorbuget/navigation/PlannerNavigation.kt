@@ -23,6 +23,7 @@ import com.example.planificatorbuget.screens.chartdetailsscreeens.DailySummaryDe
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
 import com.example.planificatorbuget.screens.login.PlannerLoginScreen
 import com.example.planificatorbuget.screens.notification.PlannerNotificationsScreen
+import com.example.planificatorbuget.screens.recurringtransactions.PlannerRecurringTransactionsScreen
 import com.example.planificatorbuget.screens.register.PlannerCreateAccountScreen
 import com.example.planificatorbuget.screens.statistics.PlannerStatisticsScreen
 import com.example.planificatorbuget.screens.transactions.PlannerTransactionsScreen
@@ -115,6 +116,12 @@ fun PlannerNavigation(startDestination: String) {
                     DailySummaryDetailedChartScreen(navController = navController, transactions = transactions)
                 }
 
+            }
+
+            composable(PlannerScreens.RecurringTransactionsScreen.name) {
+                PlannerRecurringTransactionsScreen(
+                    navController = navController,
+                )
             }
 
         }

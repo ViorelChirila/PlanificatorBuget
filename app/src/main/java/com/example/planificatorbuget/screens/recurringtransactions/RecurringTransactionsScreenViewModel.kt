@@ -2,10 +2,8 @@ package com.example.planificatorbuget.screens.recurringtransactions
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.planificatorbuget.data.DataOrException
 import com.example.planificatorbuget.model.RecurringTransactionModel
 import com.example.planificatorbuget.model.TransactionCategoriesModel
-import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.repository.CategoryRepository
 import com.example.planificatorbuget.repository.RecurringTransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

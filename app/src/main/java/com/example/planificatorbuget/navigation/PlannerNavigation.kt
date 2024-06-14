@@ -25,6 +25,7 @@ import com.example.planificatorbuget.screens.notification.PlannerNotificationsSc
 import com.example.planificatorbuget.screens.recurringtransactions.PlannerRecurringTransactionsScreen
 import com.example.planificatorbuget.screens.register.PlannerCreateAccountScreen
 import com.example.planificatorbuget.screens.statistics.PlannerStatisticsScreen
+import com.example.planificatorbuget.screens.transactiondetailsscreen.PlannerTransactionDetailsScreen
 import com.example.planificatorbuget.screens.transactions.PlannerTransactionsScreen
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -79,9 +80,12 @@ fun PlannerNavigation(startDestination: String) {
 
 
             val transactionName = PlannerScreens.TransactionsScreen.name
-            composable("$transactionName/{selectedDate}", arguments = listOf(navArgument("selectedDate") {
-                type = NavType.StringType
-            })){backStackEntry ->
+            composable(
+                "$transactionName/{selectedDate}",
+                arguments = listOf(navArgument("selectedDate") {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
                 val selectedDate = backStackEntry.arguments?.getString("selectedDate")
                 val categoriesSharedViewModel =
                     backStackEntry.sharedViewModel<CategoriesScreenViewModel>(navController)
@@ -104,14 +108,21 @@ fun PlannerNavigation(startDestination: String) {
                 )
             }
 
-            val dailySummaryDetailedChartScreenName = PlannerScreens.DailySummaryDetailedChartScreen.name
-            composable("$dailySummaryDetailedChartScreenName/{transactions}", arguments = listOf(navArgument("transactions"){type = NavType.StringType})){
-                backStackEntry ->
+            val dailySummaryDetailedChartScreenName =
+                PlannerScreens.DailySummaryDetailedChartScreen.name
+            composable(
+                "$dailySummaryDetailedChartScreenName/{transactions}",
+                arguments = listOf(navArgument("transactions") { type = NavType.StringType })
+            ) { backStackEntry ->
                 val transactionsJson = backStackEntry.arguments?.getString("transactions")
-                val listType = object: TypeToken<List<TransactionModelParcelable>>(){}.type
-                val transactions: List<TransactionModelParcelable>? = Gson().fromJson(transactionsJson, listType)
+                val listType = object : TypeToken<List<TransactionModelParcelable>>() {}.type
+                val transactions: List<TransactionModelParcelable>? =
+                    Gson().fromJson(transactionsJson, listType)
                 if (transactions != null) {
-                    DailySummaryDetailedChartScreen(navController = navController, transactions = transactions)
+                    DailySummaryDetailedChartScreen(
+                        navController = navController,
+                        transactions = transactions
+                    )
                 }
 
             }
@@ -120,6 +131,15 @@ fun PlannerNavigation(startDestination: String) {
                 PlannerRecurringTransactionsScreen(
                     navController = navController,
                 )
+            }
+
+            val transactionDetailsScreenName = PlannerScreens.TransactionDetailsScreen.name
+            composable(
+                "$transactionDetailsScreenName/{transactionId}",
+                arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val transactionId = backStackEntry.arguments?.getString("transactionId")
+                PlannerTransactionDetailsScreen(navController = navController, transactionId = transactionId)
             }
 
         }

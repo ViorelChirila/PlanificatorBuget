@@ -117,4 +117,21 @@ class TransactionRepository @Inject constructor(
         firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docRef.id)
             .update("description_image", downloadUrl).await()
     }
+
+    suspend fun fetchTransactionById(transactionId: String): DataOrException<TransactionModel, Boolean, Exception> {
+        val dataOrExceptionTransaction = DataOrException<TransactionModel, Boolean, Exception>()
+        dataOrExceptionTransaction.isLoading = true
+        return try {
+            val querySnapshot = firebaseFirestore.collection(TRANSACTIONS_COLLECTION)
+                .document(transactionId).get().await()
+            val transaction = querySnapshot.toObject(TransactionModel::class.java)
+            dataOrExceptionTransaction.data = transaction!!
+            dataOrExceptionTransaction.isLoading = false
+            dataOrExceptionTransaction
+        } catch (e: Exception) {
+            dataOrExceptionTransaction.exception = e
+            dataOrExceptionTransaction.isLoading = false
+            dataOrExceptionTransaction
+        }
+    }
 }

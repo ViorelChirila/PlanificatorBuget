@@ -62,6 +62,7 @@ import com.example.planificatorbuget.components.SearchTransactionsByDateForm
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
+import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.utils.formatTimestampToString
@@ -247,7 +248,8 @@ fun PlannerTransactionsScreen(
                         )
                         TransactionsList(
                             lisOfTransactions = filteredListOfTransactions.value,
-                            category = listOfCategories
+                            category = listOfCategories,
+                            navController
                         )
                     }
                 }
@@ -337,23 +339,24 @@ fun PlannerTransactionsScreen(
 @Composable
 fun TransactionsList(
     lisOfTransactions: List<TransactionModel> = emptyList(),
-    category: List<TransactionCategoriesModel>
+    category: List<TransactionCategoriesModel>,
+    navController: NavController
 ) {
 
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(5.dp)) {
         items(items = lisOfTransactions) { transaction ->
-            val categoryName = category.find { it.categoryId == transaction.categoryId }
-            TransactionItem(transaction = transaction, category = categoryName)
+            val categoryItem = category.find { it.categoryId == transaction.categoryId }
+            TransactionItem(transaction = transaction, category = categoryItem,navController)
         }
     }
 }
 
 @Composable
-fun TransactionItem(transaction: TransactionModel, category: TransactionCategoriesModel?) {
+fun TransactionItem(transaction: TransactionModel, category: TransactionCategoriesModel?,navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(modifier = Modifier
-        .clickable { }
+        .clickable { navController.navigate(PlannerScreens.TransactionDetailsScreen.name+"/${transaction.transactionId}")}
         .fillMaxWidth()
         .padding(3.dp),
         elevation = CardDefaults.cardElevation(7.dp)

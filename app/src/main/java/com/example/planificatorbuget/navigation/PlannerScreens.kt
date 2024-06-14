@@ -11,5 +11,6 @@ enum class PlannerScreens {
     TransactionsScreen,
     CategoriesScreen,
     DailySummaryDetailedChartScreen,
-    RecurringTransactionsScreen
+    RecurringTransactionsScreen,
+    TransactionDetailsScreen
 }

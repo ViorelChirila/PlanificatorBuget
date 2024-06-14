@@ -13,8 +13,7 @@ class TransactionModelParcelable(
     var categoryId: String? = null,
     var transactionDate: Timestamp = Timestamp.now(),
     var transactionTitle: String = "",
-    var transactionDescription: String = "",
-    var budgetSnapshot: Double = 0.0
+
 ) : Parcelable{
     companion object {
         fun fromTransactionModel(model: TransactionModel) = TransactionModelParcelable(
@@ -25,8 +24,7 @@ class TransactionModelParcelable(
             categoryId = model.categoryId,
             transactionDate = model.transactionDate,
             transactionTitle = model.transactionTitle,
-            transactionDescription = model.transactionDescription,
-            budgetSnapshot = model.budgetSnapshot
+
         )
         fun fromTransactionModelList(models: List<TransactionModel>): List<TransactionModelParcelable> {
             return models.map { fromTransactionModel(it) }
@@ -43,8 +41,7 @@ class TransactionModelParcelable(
             categoryId = parcelable.categoryId,
             transactionDate = parcelable.transactionDate,
             transactionTitle = parcelable.transactionTitle,
-            transactionDescription = parcelable.transactionDescription,
-            budgetSnapshot = parcelable.budgetSnapshot
+
         )
     }
 }

@@ -2,6 +2,7 @@ package com.example.planificatorbuget.components
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.net.Uri
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.TimePicker
@@ -412,6 +413,7 @@ fun DateTimePickerField(
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
@@ -420,12 +422,15 @@ fun AddTransactionDialog(
     showDialog: MutableState<Boolean>,
     showLoading: MutableState<Boolean>,
     categories: List<TransactionCategoriesModel>,
-    onAddTransaction: (TransactionModel) -> Unit = {},
-    onAddRecurringTransaction: (RecurringTransactionModel) -> Unit = {}
+    onAddTransaction: (TransactionModel) -> Unit ,
+    onAddRecurringTransaction: (RecurringTransactionModel) -> Unit
 ) {
 
     if (showDialog.value) {
-        Dialog(onDismissRequest = { showDialog.value = false }) {
+        Dialog(onDismissRequest = {
+            showDialog.value = false
+            textRecognitionViewModel.resetRecognizedText()
+        }) {
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.background,
@@ -456,16 +461,19 @@ fun AddTransactionDialog(
                         var startDate by remember { mutableStateOf("") }
                         var endDate by remember { mutableStateOf("") }
                         var recurrenceInterval by remember { mutableStateOf("") }
+                        var imageSelectedUri by remember { mutableStateOf<Uri?>(null) }
 
                         var expandedType by remember { mutableStateOf(false) }
                         var extendedCategory by remember { mutableStateOf(false) }
                         var expandedInterval by remember { mutableStateOf(false) }
 
-                        val valid = remember(title, amount, type, categoryId, date, description.value) {
-                            title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
-                                .isNotEmpty() && categoryId.trim().isNotEmpty() && date.trim()
-                                .isNotEmpty() && description.value.trim().isNotEmpty()
-                        }
+                        val valid =
+                            remember(title, amount, type, categoryId, date, description.value) {
+                                title.trim().isNotEmpty() && amount.trim()
+                                    .isNotEmpty() && type.trim()
+                                    .isNotEmpty() && categoryId.trim().isNotEmpty() && date.trim()
+                                    .isNotEmpty() && description.value.trim().isNotEmpty()
+                            }
 
                         val validRecurring = remember(
                             title,
@@ -479,7 +487,8 @@ fun AddTransactionDialog(
                         ) {
                             title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
                                 .isNotEmpty() && categoryId.trim()
-                                .isNotEmpty() && description.value.trim().isNotEmpty() && startDate.trim()
+                                .isNotEmpty() && description.value.trim()
+                                .isNotEmpty() && startDate.trim()
                                 .isNotEmpty() && recurrenceInterval.trim().isNotEmpty()
                         }
 
@@ -615,7 +624,10 @@ fun AddTransactionDialog(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         DescriptionInputField(description, textRecognitionViewModel)
-                        Log.d("description",description.value)
+                        {
+                            imageSelectedUri = it
+                        }
+                        Log.d("description", description.value)
 
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
@@ -697,7 +709,10 @@ fun AddTransactionDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            TextButton(onClick = { showDialog.value = false }) {
+                            TextButton(onClick = {
+                                showDialog.value = false
+                                textRecognitionViewModel.resetRecognizedText()
+                            }) {
                                 Text("Renunta")
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -711,10 +726,14 @@ fun AddTransactionDialog(
                                             val transaction = TransactionModel(
                                                 amount = tempAmount,
                                                 transactionType = type,
-                                                transactionDate = formatStringToTimestamp(date, pattern = "MM/dd/yyyy HH:mm")!!,
+                                                transactionDate = formatStringToTimestamp(
+                                                    date,
+                                                    pattern = "MM/dd/yyyy HH:mm"
+                                                )!!,
                                                 transactionTitle = title,
                                                 transactionDescription = description.value,
-                                                categoryId = categoryId
+                                                categoryId = categoryId,
+                                                descriptionImage = imageSelectedUri.toString()
                                             )
                                             onAddTransaction(transaction)
                                             description.value = ""
@@ -728,7 +747,7 @@ fun AddTransactionDialog(
                                         }
                                     } else {
                                         if (validRecurring) {
-                                            if(isDateInPast(startDate)){
+                                            if (isDateInPast(startDate)) {
                                                 Toast.makeText(
                                                     context,
                                                     "Data de inceput trebuie sa fie in viitor",
@@ -736,7 +755,7 @@ fun AddTransactionDialog(
                                                 ).show()
                                                 return@Button
                                             }
-                                            if(isDateBeforeToday(endDate)){
+                                            if (isDateBeforeToday(endDate)) {
                                                 Toast.makeText(
                                                     context,
                                                     "Data de sfarsit trebuie sa fie in viitor",
@@ -782,25 +801,27 @@ fun AddTransactionDialog(
 @Composable
 fun DescriptionInputField(
     description: MutableState<String>,
-    viewModel: TextRecognitionViewModel
+    viewModel: TextRecognitionViewModel,
+    onImageSelected: (Uri) -> Unit = {}
 ) {
     val text by viewModel.recognizedText.collectAsState()
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
             if (uri != null) {
+                onImageSelected(uri)
                 viewModel.resetRecognizedText()
+                description.value = ""
                 viewModel.recognizeText(uri)
             }
         }
     )
 
     LaunchedEffect(text) {
-        // Append recognized text only if it's non-empty and not already included
         if (text.isNotEmpty() && !description.value.contains(text)) {
             description.value += " $text"
         }
-        Log.d("Text",text)
+        Log.d("Text", text)
     }
 
     OutlinedTextField(

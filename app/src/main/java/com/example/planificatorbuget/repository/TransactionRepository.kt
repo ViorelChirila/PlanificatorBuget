@@ -1,12 +1,15 @@
 package com.example.planificatorbuget.repository
 
 import android.util.Log
+import androidx.core.net.toUri
 import com.example.planificatorbuget.data.DataOrException
 import com.example.planificatorbuget.data.Response
 import com.example.planificatorbuget.model.TransactionModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -52,23 +55,28 @@ class TransactionRepository @Inject constructor(
                 ?.toObject(TransactionModel::class.java)
 
             if (!(latestTransaction != null && transaction.transactionDate < latestTransaction.transactionDate)) {
-                firebaseFirestore.collection(TRANSACTIONS_COLLECTION).add(transaction.apply {
-                    this.userId = userId
-                }).addOnSuccessListener { documentReference ->
-                    val docId = documentReference.id
-                    firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docId)
-                        .update("transaction_id", docId)
-                }.await()
+                val docRef =
+                    firebaseFirestore.collection(TRANSACTIONS_COLLECTION).add(transaction.apply {
+                        this.userId = userId
+                    }).addOnSuccessListener { documentReference ->
+                        val docId = documentReference.id
+                        firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docId)
+                            .update("transaction_id", docId)
+                    }.await()
+                if (transaction.descriptionImage != "null") {
+                    addDescriptionImageToFirestore(docRef, transaction)
+                }
                 Response.Success(true)
                 Log.d(TAG, "addTransaction: Success")
-            } else{
+            } else {
                 val subsequentTransactions = firebaseFirestore.collection(TRANSACTIONS_COLLECTION)
                     .whereGreaterThan("transaction_date", transaction.transactionDate)
                     .orderBy("transaction_date", Query.Direction.ASCENDING)
                     .get().await()
                     .toObjects(TransactionModel::class.java)
 
-                transaction.budgetSnapshot = subsequentTransactions.firstOrNull()?.budgetSnapshot ?: 0.0
+                transaction.budgetSnapshot =
+                    subsequentTransactions.firstOrNull()?.budgetSnapshot ?: 0.0
 
                 for (subsequentTransaction in subsequentTransactions) {
                     subsequentTransaction.budgetSnapshot += transaction.amount
@@ -77,13 +85,16 @@ class TransactionRepository @Inject constructor(
                         .update("budget_snapshot", subsequentTransaction.budgetSnapshot)
                         .await()
                 }
-                firebaseFirestore.collection(TRANSACTIONS_COLLECTION).add(transaction.apply {
+                val docRef =firebaseFirestore.collection(TRANSACTIONS_COLLECTION).add(transaction.apply {
                     this.userId = userId
                 }).addOnSuccessListener { documentReference ->
                     val docId = documentReference.id
                     firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docId)
                         .update("transaction_id", docId)
                 }.await()
+                if (transaction.descriptionImage != "null") {
+                    addDescriptionImageToFirestore(docRef, transaction)
+                }
                 Response.Success(true)
                 Log.d(TAG, "addTransactionOld: Success")
             }
@@ -91,5 +102,19 @@ class TransactionRepository @Inject constructor(
         } catch (e: Exception) {
             Response.Error(e.message, false)
         }
+    }
+
+    private suspend fun addDescriptionImageToFirestore(
+        docRef: DocumentReference,
+        transaction: TransactionModel
+    ) {
+        val imageRef =
+            FirebaseStorage.getInstance().reference.child("transaction_images/${docRef.id}")
+        imageRef.putFile(transaction.descriptionImage!!.toUri()).await()
+
+        val downloadUrl = imageRef.downloadUrl.await().toString()
+
+        firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(docRef.id)
+            .update("description_image", downloadUrl).await()
     }
 }

@@ -78,7 +78,8 @@ class RecurringTransactionWorker @AssistedInject constructor(
                 transactionDate = Timestamp.now(),
                 transactionTitle = recurringTransaction.transactionTitle,
                 transactionDescription = recurringTransaction.transactionDescription,
-                budgetSnapshot = userData.data?.currentBudget ?: 0.0
+                budgetSnapshot = userData.data?.currentBudget ?: 0.0,
+                descriptionImage = recurringTransaction.descriptionImageUri
             )
 
             transactionRepository.addTransaction(transaction)

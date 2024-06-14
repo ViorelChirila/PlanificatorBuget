@@ -46,7 +46,11 @@ class RecurringTransactionModel(
 
     @get:PropertyName("status")
     @set:PropertyName("status")
-    var status: String = "activ"
+    var status: String = "activ",
+
+    @get:PropertyName("description_image")
+    @set:PropertyName("description_image")
+    var descriptionImageUri: String? = ""
 ) {
 
 }

@@ -773,7 +773,8 @@ fun AddTransactionDialog(
                                                 categoryId = categoryId,
                                                 startDate = formatStringToTimestamp(startDate)!!,
                                                 endDate = formatStringToTimestamp(endDate)!!,
-                                                recurrenceInterval = recurrenceInterval
+                                                recurrenceInterval = recurrenceInterval,
+                                                descriptionImageUri = imageSelectedUri.toString()
                                             )
                                             onAddRecurringTransaction(recurringTransaction)
                                             description.value = ""

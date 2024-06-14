@@ -12,7 +12,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.model.TransactionModelParcelable
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.account.PlannerAccountScreen

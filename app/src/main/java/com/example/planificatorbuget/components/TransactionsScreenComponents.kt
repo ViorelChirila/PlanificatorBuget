@@ -1,10 +1,7 @@
 package com.example.planificatorbuget.components
 
-import android.Manifest
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.net.Uri
 import android.util.Log
 import android.widget.DatePicker
 import android.widget.TimePicker
@@ -78,9 +75,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.PermissionChecker
 import androidx.navigation.NavController
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.model.RecurringTransactionModel

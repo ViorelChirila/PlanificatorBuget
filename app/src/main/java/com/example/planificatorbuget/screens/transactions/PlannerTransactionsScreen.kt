@@ -64,7 +64,6 @@ import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
-import com.example.planificatorbuget.utils.formatStringToTimestamp
 import com.example.planificatorbuget.utils.formatTimestampToString
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 

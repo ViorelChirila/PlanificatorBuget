@@ -34,7 +34,6 @@ import com.google.gson.reflect.TypeToken
 fun PlannerNavigation(startDestination: String) {
 
     val navController = rememberNavController()
-//    val viewModel = hiltViewModel<SharedViewModel>()
 
     NavHost(navController = navController, startDestination = startDestination) {
 

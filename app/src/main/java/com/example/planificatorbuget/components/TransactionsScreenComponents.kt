@@ -1,10 +1,17 @@
 package com.example.planificatorbuget.components
 
+import android.Manifest
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.net.Uri
+import android.util.Log
 import android.widget.DatePicker
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,6 +58,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,12 +78,16 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.PermissionChecker
 import androidx.navigation.NavController
 import com.example.planificatorbuget.R
 import com.example.planificatorbuget.model.RecurringTransactionModel
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.navigation.PlannerScreens
+import com.example.planificatorbuget.screens.transactions.TextRecognitionViewModel
 import com.example.planificatorbuget.utils.formatStringToTimestamp
 import com.example.planificatorbuget.utils.isDateBeforeToday
 import com.example.planificatorbuget.utils.isDateInPast
@@ -410,6 +422,7 @@ fun DateTimePickerField(
 @Composable
 fun AddTransactionDialog(
     navController: NavController,
+    textRecognitionViewModel: TextRecognitionViewModel,
     showDialog: MutableState<Boolean>,
     showLoading: MutableState<Boolean>,
     categories: List<TransactionCategoriesModel>,
@@ -444,7 +457,7 @@ fun AddTransactionDialog(
                         var categoryId by remember { mutableStateOf("") }
                         var categoryName by remember { mutableStateOf("") }
                         var date by remember { mutableStateOf("") }
-                        var description by remember { mutableStateOf("") }
+                        val description = remember { mutableStateOf("") }
                         var isRecurring by remember { mutableStateOf(false) }
                         var startDate by remember { mutableStateOf("") }
                         var endDate by remember { mutableStateOf("") }
@@ -454,10 +467,10 @@ fun AddTransactionDialog(
                         var extendedCategory by remember { mutableStateOf(false) }
                         var expandedInterval by remember { mutableStateOf(false) }
 
-                        val valid = remember(title, amount, type, categoryId, date, description) {
+                        val valid = remember(title, amount, type, categoryId, date, description.value) {
                             title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
                                 .isNotEmpty() && categoryId.trim().isNotEmpty() && date.trim()
-                                .isNotEmpty() && description.trim().isNotEmpty()
+                                .isNotEmpty() && description.value.trim().isNotEmpty()
                         }
 
                         val validRecurring = remember(
@@ -465,14 +478,14 @@ fun AddTransactionDialog(
                             amount,
                             type,
                             categoryId,
-                            description,
+                            description.value,
                             startDate,
                             endDate,
                             recurrenceInterval
                         ) {
                             title.trim().isNotEmpty() && amount.trim().isNotEmpty() && type.trim()
                                 .isNotEmpty() && categoryId.trim()
-                                .isNotEmpty() && description.trim().isNotEmpty() && startDate.trim()
+                                .isNotEmpty() && description.value.trim().isNotEmpty() && startDate.trim()
                                 .isNotEmpty() && recurrenceInterval.trim().isNotEmpty()
                         }
 
@@ -497,6 +510,7 @@ fun AddTransactionDialog(
                             value = amount,
                             onValueChange = { amount = it },
                             label = { Text("Valoare in LEI") },
+                            singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
                             trailingIcon = {
@@ -606,28 +620,8 @@ fun AddTransactionDialog(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        OutlinedTextField(
-                            value = description,
-                            onValueChange = { description = it },
-                            label = { Text("Descriere") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 100.dp), // Set a minimum height to allow multiple lines
-                            maxLines = 5,
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        // Add photo functionality
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CameraAlt,
-                                        contentDescription = "Add Photo",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        )
+                        DescriptionInputField(description, textRecognitionViewModel)
+                        Log.d("description",description.value)
 
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
@@ -725,10 +719,12 @@ fun AddTransactionDialog(
                                                 transactionType = type,
                                                 transactionDate = formatStringToTimestamp(date, pattern = "MM/dd/yyyy HH:mm")!!,
                                                 transactionTitle = title,
-                                                transactionDescription = description,
+                                                transactionDescription = description.value,
                                                 categoryId = categoryId
                                             )
                                             onAddTransaction(transaction)
+                                            description.value = ""
+                                            textRecognitionViewModel.resetRecognizedText()
                                         } else {
                                             Toast.makeText(
                                                 context,
@@ -760,13 +756,15 @@ fun AddTransactionDialog(
                                                 amount = tempAmount,
                                                 transactionType = type,
                                                 transactionTitle = title,
-                                                transactionDescription = description,
+                                                transactionDescription = description.value,
                                                 categoryId = categoryId,
                                                 startDate = formatStringToTimestamp(startDate)!!,
                                                 endDate = formatStringToTimestamp(endDate)!!,
                                                 recurrenceInterval = recurrenceInterval
                                             )
                                             onAddRecurringTransaction(recurringTransaction)
+                                            description.value = ""
+                                            textRecognitionViewModel.resetRecognizedText()
                                         } else {
                                             Toast.makeText(
                                                 context,
@@ -785,4 +783,56 @@ fun AddTransactionDialog(
             }
         }
     }
+}
+
+@Composable
+fun DescriptionInputField(
+    description: MutableState<String>,
+    viewModel: TextRecognitionViewModel
+) {
+    val text by viewModel.recognizedText.collectAsState()
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) {
+                viewModel.resetRecognizedText()
+                viewModel.recognizeText(uri)
+            }
+        }
+    )
+
+    LaunchedEffect(text) {
+        // Append recognized text only if it's non-empty and not already included
+        if (text.isNotEmpty() && !description.value.contains(text)) {
+            description.value += " $text"
+        }
+        Log.d("Text",text)
+    }
+
+    OutlinedTextField(
+        value = description.value,
+        onValueChange = { description.value = it },
+        label = { Text("Descriere") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 100.dp),
+        maxLines = 5,
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    photoPickerLauncher.launch(
+                        PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    )
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = "Add Photo",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    )
 }

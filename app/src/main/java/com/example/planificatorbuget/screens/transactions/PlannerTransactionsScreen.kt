@@ -79,6 +79,7 @@ fun PlannerTransactionsScreen(
     viewModel: TransactionsScreenViewModel = hiltViewModel(),
     categoriesSharedViewModel: CategoriesScreenViewModel = hiltViewModel(),
     sharedViewModel: SharedViewModel = hiltViewModel(),
+    textRecognitionViewModel: TextRecognitionViewModel = hiltViewModel(),
     selectedDate: String
 ) {
     Log.d("PlannerTransactionsScreen", "selectedDate: $selectedDate")
@@ -257,6 +258,7 @@ fun PlannerTransactionsScreen(
 
     }
     AddTransactionDialog(
+        textRecognitionViewModel = textRecognitionViewModel,
         showDialog = showDialog,
         showLoading = showLoading,
         navController = navController,

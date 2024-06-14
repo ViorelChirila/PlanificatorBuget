@@ -125,4 +125,7 @@ dependencies {
 
     // YCharts
     implementation ("co.yml:ycharts:2.1.0")
+
+    // Google ML Kit
+    implementation (libs.text.recognition)
 }

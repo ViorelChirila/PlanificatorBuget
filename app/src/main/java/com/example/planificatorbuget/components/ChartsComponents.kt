@@ -1,6 +1,8 @@
 package com.example.planificatorbuget.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -19,12 +21,26 @@ import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.BarChart
 import co.yml.charts.ui.barchart.models.BarChartData
 import co.yml.charts.ui.barchart.models.BarData
+import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.GridLines
+import co.yml.charts.ui.linechart.model.IntersectionPoint
+import co.yml.charts.ui.linechart.model.Line
+import co.yml.charts.ui.linechart.model.LineChartData
+import co.yml.charts.ui.linechart.model.LinePlotData
+import co.yml.charts.ui.linechart.model.LineStyle
+import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
+import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
+import co.yml.charts.ui.linechart.model.ShadowUnderLine
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
 import com.example.planificatorbuget.utils.calculateMean
 import com.example.planificatorbuget.utils.calculateYAxisSteps
 import com.example.planificatorbuget.utils.filterTransactionsByPeriod
 
+enum class ChartType {
+    BAR_CHART,
+    LINE_CHART
+}
 @Composable
 fun TransactionsBarChart(
     modifier: Modifier = Modifier,
@@ -89,6 +105,89 @@ fun TransactionsBarChart(
     BarChart(
         modifier = modifier,
         barChartData = barChartData
+    )
+
+}
+
+@Composable
+fun TransactionsLineChart(
+    modifier: Modifier = Modifier,
+    transactions: List<TransactionModel> = emptyList(),
+    period: Period = Period.LAST_7_DAYS,
+    transactionType: String = "Cheltuiala",
+    showNameDay: Boolean = true,
+    xAxisRotationAngle: Float = 0f,
+    xAxisBottomPadding: Dp = 20.dp,
+    xAxisLabelFontSize: TextUnit = 0.sp,
+    lineStyleColor: Color = Color.Black,
+    shadowUnderLine: Color = Color.Black,
+    onMeanCalculated: (Double) -> Unit = {}
+) {
+    val expensesData = filterTransactionsByPeriod(transactions, period, transactionType,showAsDayName = showNameDay)
+
+    val barDataList =
+        expensesData.mapIndexed { index, data ->
+            BarData(
+                point = Point(
+                    (index + 1).toFloat(),
+                    if (transactionType == "Cheltuiala") data.second.toFloat() * -1 else data.second.toFloat()
+                ),
+                label = data.first,
+                color = if (transactionType == "Cheltuiala") Color.Red else Color(0xFF258B41)
+            )
+        }
+
+    val pointsData = barDataList.map { Point(it.point.x, it.point.y) }
+
+    val meanValue = calculateMean(expensesData)
+    onMeanCalculated(meanValue)
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(60.dp)
+        .steps(pointsData.size - 1)
+        .bottomPadding(xAxisBottomPadding)
+        .axisLabelAngle(xAxisRotationAngle)
+        .labelData { index -> barDataList[index].label }
+        .backgroundColor(Color.White)
+        .startDrawPadding(0.dp)
+        .axisLabelFontSize(if (xAxisLabelFontSize.value == 0f) 15.sp else xAxisLabelFontSize)
+        .build()
+
+
+    val maxRange = pointsData.maxOfOrNull { it.y } ?: 0f
+    val yAxisLabels = calculateYAxisSteps(maxRange.toDouble(), 5)
+    val yAxisData = AxisData.Builder()
+        .steps(5)
+        .labelAndAxisLinePadding(20.dp)
+        .axisOffset(20.dp)
+        .labelData { index -> yAxisLabels.getOrElse(index) { "" } }
+        .backgroundColor(Color.White)
+        .build()
+
+
+    val lineChartData = LineChartData(
+        linePlotData = LinePlotData(
+            lines = listOf(
+                Line(
+                    dataPoints = pointsData,
+                    LineStyle(color = lineStyleColor),
+                    IntersectionPoint(),
+                    SelectionHighlightPoint(),
+                    ShadowUnderLine(color = shadowUnderLine),
+                    SelectionHighlightPopUp()
+                )
+            ),
+        ),
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        gridLines = GridLines(),
+        backgroundColor = Color.White
+    )
+
+
+    LineChart(
+        modifier = modifier,
+        lineChartData = lineChartData
     )
 
 }

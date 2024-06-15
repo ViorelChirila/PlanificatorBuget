@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.components
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
+import com.example.planificatorbuget.utils.calculateMonthlyTotals
+import com.example.planificatorbuget.utils.getRecentTwoMonthsData
 
 @Preview
 @Composable
@@ -121,7 +124,7 @@ fun SummaryChartCard(
                     Text(text = "%.2f".format(meanValueLocal) + " Lei", fontSize = 15.sp)
                     Spacer(modifier = Modifier.height(35.dp))
                     TextButton(
-                        onClick = { onDetailsClicked()},
+                        onClick = { onDetailsClicked() },
                         modifier = Modifier.padding(end = 5.dp, bottom = 2.dp)
                     ) {
                         Text(text = "Vezi detalii")
@@ -132,6 +135,97 @@ fun SummaryChartCard(
     }
 }
 
+@Preview
+@Composable
+fun FinancialFlux(
+    listOfTransactions: List<TransactionModel> = emptyList(),
+    onDetailsClicked: () -> Unit = {}
+) {
+    val chartData = calculateMonthlyTotals(listOfTransactions, 3)
+    val recentData = getRecentTwoMonthsData(chartData)
+    Log.d("RecentData", recentData.toString())
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(15.dp),
+        elevation = CardDefaults.cardElevation(3.dp)
+    ) {
+        Column {
+            Text(
+                text = "Flux Financiar",
+                modifier = Modifier.padding(
+                    top = 10.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    bottom = 5.dp
+                ),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Surface(
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp), modifier = Modifier
+                    .padding(top = 15.dp, bottom = 10.dp)
+                    .height(290.dp),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    GroupedBarChart(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(240.dp),
+                        chartData = chartData
+                    )
+                    LegendComponent()
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Text(text = "Tipul tranzactiei", fontWeight = FontWeight.Bold)
+                    Text(text = "Intrari")
+                    Text(text = "Iesiri")
+                    Text(text = "Flux financiar", fontWeight = FontWeight.Bold)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Text(text = recentData[0].first, fontWeight = FontWeight.Bold)
+                    Text(text = " "+recentData[0].second.second.toString())
+                    Text(text = "${-recentData[0].second.first}")
+                    Text(text = (recentData[0].second.second - recentData[0].second.first).toString(), fontWeight = FontWeight.Bold)
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Text(text = recentData[1].first, fontWeight = FontWeight.Bold)
+                    Text(text = " "+recentData[1].second.second.toString())
+                    Text(text = "${-recentData[1].second.first}")
+                    Text(text = (recentData[1].second.second - recentData[1].second.first).toString(), fontWeight = FontWeight.Bold)
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = { onDetailsClicked() },
+                    modifier = Modifier.padding(end = 5.dp, bottom = 2.dp)
+                ) {
+                    Text(text = "Vezi detalii")
+                }
+            }
+        }
+    }
+
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

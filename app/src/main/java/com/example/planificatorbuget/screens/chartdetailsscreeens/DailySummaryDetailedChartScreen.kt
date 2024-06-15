@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens.chartdetailsscreeens
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,6 +49,7 @@ import com.example.planificatorbuget.components.TransactionsLineChart
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.model.TransactionModelParcelable
 import com.example.planificatorbuget.utils.Period
+import com.example.planificatorbuget.utils.calculateMonthlyTotals
 
 @Preview
 @Composable

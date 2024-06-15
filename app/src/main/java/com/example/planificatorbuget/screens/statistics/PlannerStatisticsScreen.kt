@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.planificatorbuget.components.AppBar
+import com.example.planificatorbuget.components.FinancialFlux
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.SummaryChartCard
 import com.example.planificatorbuget.model.TransactionModelParcelable
@@ -105,6 +106,7 @@ fun PlannerStatisticsScreen(
                             val itemListJson = Gson().toJson(parcelableList)
                             navController.navigate(PlannerScreens.DailySummaryDetailedChartScreen.name+"/$itemListJson")
                         }
+                        FinancialFlux(listOfTransactions)
                     }
 
                 }

@@ -1,8 +1,6 @@
 package com.example.planificatorbuget.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -19,8 +17,12 @@ import co.yml.charts.common.model.LegendLabel
 import co.yml.charts.common.model.LegendsConfig
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.BarChart
+import co.yml.charts.ui.barchart.GroupBarChart
 import co.yml.charts.ui.barchart.models.BarChartData
 import co.yml.charts.ui.barchart.models.BarData
+import co.yml.charts.ui.barchart.models.BarPlotData
+import co.yml.charts.ui.barchart.models.GroupBar
+import co.yml.charts.ui.barchart.models.GroupBarChartData
 import co.yml.charts.ui.linechart.LineChart
 import co.yml.charts.ui.linechart.model.GridLines
 import co.yml.charts.ui.linechart.model.IntersectionPoint
@@ -190,6 +192,56 @@ fun TransactionsLineChart(
         lineChartData = lineChartData
     )
 
+}
+
+@Composable
+fun GroupedBarChart(
+    modifier: Modifier = Modifier,
+    xAxisRotationAngle: Float = 0f,
+    xAxisBottomPadding: Dp = 20.dp,
+    xAxisLabelFontSize: TextUnit = 0.sp,
+    chartData: List<GroupBar>
+) {
+    val groupBarPlotData = BarPlotData(
+        groupBarList = chartData,
+        barColorPaletteList = listOf(Color(0xFF258B41), Color.Red)
+    )
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(60.dp)
+        .steps(chartData.size - 1)
+        .bottomPadding(40.dp)
+        .labelData { index -> chartData[index].label }
+        .bottomPadding(xAxisBottomPadding)
+        .axisLabelAngle(xAxisRotationAngle)
+        .startDrawPadding(30.dp)
+        .backgroundColor(Color.White)
+        .build()
+
+    var maxRange = 0f
+    for (groupBar in chartData) {
+        for (barData in groupBar.barList) {
+            if (barData.point.y > maxRange) {
+                maxRange = barData.point.y
+            }
+        }
+    }
+    val yAxisLabels = calculateYAxisSteps(maxRange.toDouble(), 5)
+    val yAxisData = AxisData.Builder()
+        .steps(5)
+        .labelAndAxisLinePadding(20.dp)
+        .axisOffset(20.dp)
+        .labelData { index -> yAxisLabels.getOrElse(index) { "" } }
+        .backgroundColor(Color.White)
+        .build()
+
+    val groupBarChartData = GroupBarChartData(
+        barPlotData = groupBarPlotData,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        backgroundColor = Color.White,
+    )
+    GroupBarChart(modifier = modifier, groupBarChartData = groupBarChartData)
 }
 
 @Preview

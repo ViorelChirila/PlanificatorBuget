@@ -41,6 +41,7 @@ import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.ChartType
 import com.example.planificatorbuget.components.CustomDropdownMenuForPeriodSelection
 import com.example.planificatorbuget.components.CustomDropdownMenuForTypeSelection
+import com.example.planificatorbuget.components.LegendComponent
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.TransactionsBarChart
 import com.example.planificatorbuget.components.TransactionsLineChart
@@ -98,35 +99,43 @@ fun DailySummaryDetailedChartScreen(
                             .fillMaxWidth(), color = Color.White
                     ) {
                         if (selectedChartType == ChartType.BAR_CHART) {
-                            TransactionsBarChart(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                transactions = transactionList,
-                                period = selectedPeriod,
-                                transactionType = if (selectedTypeOption == "Cheltuieli") "Cheltuiala" else "Venit",
-                                showNameDay = false,
-                                xAxisRotationAngle = 20f,
-                                xAxisBottomPadding = 40.dp,
-                                xAxisLabelFontSize = 9.sp
-                            )
-                        } else {
-                            TransactionsLineChart(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                transactions = transactionList,
-                                period = selectedPeriod,
-                                transactionType = if (selectedTypeOption == "Cheltuieli") "Cheltuiala" else "Venit",
-                                showNameDay = false,
-                                xAxisRotationAngle = 20f,
-                                xAxisBottomPadding = 40.dp,
-                                xAxisLabelFontSize = 9.sp,
-                                lineStyleColor = if (selectedTypeOption == "Cheltuieli") Color.Red else Color(
-                                    0xFF258B41
-                                ),
-                                shadowUnderLine = if (selectedTypeOption == "Cheltuieli") Color.Red else Color(
-                                    0xFF258B41
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                TransactionsBarChart(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(360.dp),
+                                    transactions = transactionList,
+                                    period = selectedPeriod,
+                                    transactionType = if (selectedTypeOption == "Cheltuieli") "Cheltuiala" else "Venit",
+                                    showNameDay = false,
+                                    xAxisRotationAngle = 20f,
+                                    xAxisBottomPadding = 20.dp,
+                                    xAxisLabelFontSize = 9.sp
                                 )
-                            )
+                                LegendComponent()
+                            }
+                        } else {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                TransactionsLineChart(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(360.dp),
+                                    transactions = transactionList,
+                                    period = selectedPeriod,
+                                    transactionType = if (selectedTypeOption == "Cheltuieli") "Cheltuiala" else "Venit",
+                                    showNameDay = false,
+                                    xAxisRotationAngle = 20f,
+                                    xAxisBottomPadding = 40.dp,
+                                    xAxisLabelFontSize = 9.sp,
+                                    lineStyleColor = if (selectedTypeOption == "Cheltuieli") Color.Red else Color(
+                                        0xFF258B41
+                                    ),
+                                    shadowUnderLine = if (selectedTypeOption == "Cheltuieli") Color.Red else Color(
+                                        0xFF258B41
+                                    )
+                                )
+                                LegendComponent()
+                            }
                         }
                     }
                     Row(

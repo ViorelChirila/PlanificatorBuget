@@ -37,8 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
-import com.example.planificatorbuget.utils.calculateMonthlyTotals
+import com.example.planificatorbuget.utils.SamplingPeriod
 import com.example.planificatorbuget.utils.getRecentTwoMonthsData
+import com.example.planificatorbuget.utils.prepareDataForGroupedBarChart
 
 @Preview
 @Composable
@@ -141,7 +142,8 @@ fun FinancialFlux(
     listOfTransactions: List<TransactionModel> = emptyList(),
     onDetailsClicked: () -> Unit = {}
 ) {
-    val chartData = calculateMonthlyTotals(listOfTransactions, 3)
+    val chartData = prepareDataForGroupedBarChart(listOfTransactions, SamplingPeriod.MONTHLY, 3)
+    Log.d("ChartData", chartData.toString())
     val recentData = getRecentTwoMonthsData(chartData)
     Log.d("RecentData", recentData.toString())
     Card(
@@ -351,3 +353,70 @@ fun CustomDropdownMenuForPeriodSelection(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomDropdownMenuForSamplingPeriodSelection(
+    label: String,
+    selectedOption: SamplingPeriod,
+    onOptionSelected: (SamplingPeriod) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldValue by remember { mutableStateOf(selectedOption) }
+    val options = SamplingPeriod.entries
+
+    val periodDisplayName = { period: SamplingPeriod ->
+        when (period) {
+            SamplingPeriod.DAILY -> "Zilinic"
+            SamplingPeriod.MONTHLY -> "Lunar"
+            SamplingPeriod.WEEKLY -> "Saptamanal"
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(top = 5.dp)
+    ) {
+        Text(text = label, fontSize = 15.sp)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }) {
+            TextField(
+                value = periodDisplayName(textFieldValue),
+                onValueChange = { },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier
+                    .width(220.dp)
+                    .menuAnchor(),
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                )
+
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(onClick = {
+                        textFieldValue = option
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                        text = { Text(text = periodDisplayName(option)) })
+                }
+
+            }
+
+        }
+    }
+}
+

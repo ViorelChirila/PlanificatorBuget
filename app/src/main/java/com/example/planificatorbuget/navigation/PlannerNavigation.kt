@@ -19,6 +19,7 @@ import com.example.planificatorbuget.screens.accountsettings.PlannerAccountSetti
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.screens.categories.PlannerCategoriesScreen
 import com.example.planificatorbuget.screens.chartdetailsscreeens.DailySummaryDetailedChartScreen
+import com.example.planificatorbuget.screens.chartdetailsscreeens.FinancialFluxDetailedScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
 import com.example.planificatorbuget.screens.login.PlannerLoginScreen
 import com.example.planificatorbuget.screens.notification.PlannerNotificationsScreen
@@ -142,6 +143,24 @@ fun PlannerNavigation(startDestination: String) {
                 PlannerTransactionDetailsScreen(navController = navController, transactionId = transactionId)
             }
 
+            val financialFluxDetailedChartScreenName =
+                PlannerScreens.FinancialFluxDetailedChartScreen.name
+            composable(
+                "$financialFluxDetailedChartScreenName/{transactions}",
+                arguments = listOf(navArgument("transactions") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val transactionsJson = backStackEntry.arguments?.getString("transactions")
+                val listType = object : TypeToken<List<TransactionModelParcelable>>() {}.type
+                val transactions: List<TransactionModelParcelable>? =
+                    Gson().fromJson(transactionsJson, listType)
+                if (transactions != null) {
+                    FinancialFluxDetailedScreen(
+                        navController = navController,
+                        transactions = transactions
+                    )
+                }
+
+            }
         }
 
 

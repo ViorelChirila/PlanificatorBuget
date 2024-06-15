@@ -102,7 +102,11 @@ fun PlannerStatisticsScreen(
                             val itemListJson = Gson().toJson(parcelableList)
                             navController.navigate(PlannerScreens.DailySummaryDetailedChartScreen.name+"/$itemListJson")
                         }
-                        FinancialFlux(listOfTransactions)
+                        FinancialFlux(listOfTransactions){
+                            val parcelableList = TransactionModelParcelable.fromTransactionModelList(listOfTransactions)
+                            val itemListJson = Gson().toJson(parcelableList)
+                            navController.navigate(PlannerScreens.FinancialFluxDetailedChartScreen.name+"/$itemListJson")
+                        }
                     }
 
                 }

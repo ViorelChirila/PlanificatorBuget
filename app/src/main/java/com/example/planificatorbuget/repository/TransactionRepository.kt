@@ -134,4 +134,14 @@ class TransactionRepository @Inject constructor(
             dataOrExceptionTransaction
         }
     }
+
+    suspend fun updateTransactionDescription(transactionId: String, newDescription: String): Response<Boolean> {
+        return try {
+            firebaseFirestore.collection(TRANSACTIONS_COLLECTION).document(transactionId)
+                .update("transaction_description", newDescription).await()
+            Response.Success(true)
+        } catch (e: Exception) {
+            Response.Error(e.message, false)
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.example.planificatorbuget.screens.chartdetailsscreeens
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.outlined.ShowChart
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,7 +46,6 @@ import com.example.planificatorbuget.components.TransactionsLineChart
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.model.TransactionModelParcelable
 import com.example.planificatorbuget.utils.Period
-import com.example.planificatorbuget.utils.calculateMonthlyTotals
 
 @Preview
 @Composable

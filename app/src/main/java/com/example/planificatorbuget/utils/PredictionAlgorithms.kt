@@ -11,11 +11,14 @@ import java.util.Date
 
 
 enum class PredictionModel {
-    AR,
-    ARMA
+    AR, ARMA
 }
+
 //v1
-fun calculateCumulativeBudget(transactions: List<TransactionModel>,initialBudget:Double): List<Pair<Date, Double>> {
+fun calculateCumulativeBudget(
+    transactions: List<TransactionModel>,
+    initialBudget: Double
+): List<Pair<Date, Double>> {
     val consolidatedTransactions = getConsolidatedTransactions(transactions)
     var cumulativeBudget = initialBudget
     return consolidatedTransactions.map { (date, amount) ->
@@ -61,8 +64,13 @@ fun calculateAR(data: List<Double>, order: Int): Pair<DoubleArray, Double>? {
     return Pair(coefficients, regression.estimateRegressionStandardError())
 }
 
-fun predictFutureBudgetAR(transactions: List<TransactionModel>, order: Int, intervalsAhead: Int, intervalType: String,initialBudget: Double): List<Pair<Date, Double>> {
-    val budgetHistory = calculateCumulativeBudget(transactions,initialBudget)
+fun predictFutureBudgetAR(
+    transactions: List<TransactionModel>,
+    order: Int,
+    intervalsAhead: Int,
+    initialBudget: Double
+): List<Pair<Date, Double>> {
+    val budgetHistory = calculateCumulativeBudget(transactions, initialBudget)
     val budgetValues = budgetHistory.map { it.second }
     val arResult = calculateAR(budgetValues, order)
         ?: // Not enough data to predict
@@ -78,13 +86,11 @@ fun predictFutureBudgetAR(transactions: List<TransactionModel>, order: Int, inte
     calendar.time = budgetHistory.last().first
 
     for (i in 1..intervalsAhead) {
-        if (intervalType == "Daily") {
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
-        } else {
-            calendar.add(Calendar.MONTH, 1)
-        }
+        calendar.add(Calendar.MONTH, 1)
 
-        predictedValue = coefficients[0] + coefficients.drop(1).zip(recentData) { coef, value -> coef * value }.sum()
+        predictedValue =
+            coefficients[0] + coefficients.drop(1).zip(recentData) { coef, value -> coef * value }
+                .sum()
         futureBudgets.add(calendar.time to predictedValue)
         recentData.add(predictedValue)
         if (recentData.size > order) {
@@ -94,7 +100,6 @@ fun predictFutureBudgetAR(transactions: List<TransactionModel>, order: Int, inte
 
     return budgetHistory + futureBudgets
 }
-
 
 
 
@@ -139,8 +144,14 @@ fun calculateARMA(data: List<Double>, p: Int, q: Int): Triple<DoubleArray, Doubl
     return Triple(arCoefficients, maCoefficients, regression.estimateRegressionStandardError())
 }
 
-fun predictFutureBudgetARMA(transactions: List<TransactionModel>, p: Int, q: Int, monthsAhead: Int,initialBudget: Double): List<Pair<Date, Double>> {
-    val budgetHistory = calculateCumulativeBudget(transactions,initialBudget)
+fun predictFutureBudgetARMA(
+    transactions: List<TransactionModel>,
+    p: Int,
+    q: Int,
+    intervalsAhead: Int,
+    initialBudget: Double
+): List<Pair<Date, Double>> {
+    val budgetHistory = calculateCumulativeBudget(transactions, initialBudget)
     val budgetValues = budgetHistory.map { it.second }
     val (arCoefficients, maCoefficients, error) = calculateARMA(budgetValues, p, q)
 
@@ -149,13 +160,20 @@ fun predictFutureBudgetARMA(transactions: List<TransactionModel>, p: Int, q: Int
     val recentData = budgetValues.takeLast(p).toMutableList()
     val recentErrors = MutableList(q) { 0.0 }
 
-    for (i in 1..monthsAhead) {
-        predictedValue = arCoefficients[0] + arCoefficients.drop(1).zip(recentData) { coef, value -> coef * value }.sum()
+    val calendar = Calendar.getInstance()
+    calendar.time = budgetHistory.last().first
+
+    for (i in 1..intervalsAhead) {
+        calendar.add(Calendar.MONTH, 1)
+
+        predictedValue = arCoefficients[0] + arCoefficients.drop(1)
+            .zip(recentData) { coef, value -> coef * value }.sum()
         if (recentErrors.size >= q) {
-            predictedValue += maCoefficients.drop(1).zip(recentErrors) { coef, err -> coef * err }.sum()
+            predictedValue += maCoefficients.drop(1).zip(recentErrors) { coef, err -> coef * err }
+                .sum()
         }
 
-        futureBudgets.add(Calendar.getInstance().apply { add(Calendar.MONTH, i) }.time to predictedValue)
+        futureBudgets.add(calendar.time to predictedValue)
 
         // Update recent data and errors
         recentData.add(predictedValue)
@@ -163,7 +181,10 @@ fun predictFutureBudgetARMA(transactions: List<TransactionModel>, p: Int, q: Int
             recentData.removeAt(0)
         }
 
-        recentErrors.add(predictedValue - (arCoefficients[0] + arCoefficients.drop(1).zip(recentData) { coef, value -> coef * value }.sum()))
+        recentErrors.add(
+            predictedValue - (arCoefficients[0] + arCoefficients.drop(1)
+                .zip(recentData) { coef, value -> coef * value }.sum())
+        )
         if (recentErrors.size > q) {
             recentErrors.removeAt(0)
         }

@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
+import com.example.planificatorbuget.utils.PredictionModel
 import com.example.planificatorbuget.utils.SamplingPeriod
 import com.example.planificatorbuget.utils.calculateCumulativeBudget
 import com.example.planificatorbuget.utils.getRecentTwoMonthsData
@@ -518,3 +519,67 @@ fun CustomDropdownMenuForSamplingPeriodSelection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomDropdownMenuForPredictionAlgorithmSelection(
+    label: String,
+    selectedOption: PredictionModel,
+    onOptionSelected: (PredictionModel) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldValue by remember { mutableStateOf(selectedOption) }
+    val options = PredictionModel.entries
+
+    val periodDisplayName = { predictionAlgorithm: PredictionModel ->
+        when (predictionAlgorithm) {
+            PredictionModel.AR -> "Autoregressive model"
+            PredictionModel.ARMA -> "Autoregressive moving-average model"
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(top = 5.dp)
+    ) {
+        Text(text = label, fontSize = 15.sp)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }) {
+            TextField(
+                value = periodDisplayName(textFieldValue),
+                onValueChange = { },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier
+                    .width(300.dp)
+                    .menuAnchor(),
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                )
+
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(onClick = {
+                        textFieldValue = option
+                        onOptionSelected(option)
+                        expanded = false
+                    },
+                        text = { Text(text = periodDisplayName(option)) })
+                }
+
+            }
+
+        }
+    }
+}

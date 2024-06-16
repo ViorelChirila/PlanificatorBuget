@@ -2,10 +2,8 @@ package com.example.planificatorbuget.utils
 
 import com.example.planificatorbuget.model.TransactionModel
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 
@@ -14,7 +12,6 @@ enum class PredictionModel {
     AR, ARMA
 }
 
-//v1
 fun calculateCumulativeBudget(
     transactions: List<TransactionModel>,
     initialBudget: Double
@@ -76,10 +73,10 @@ fun predictFutureBudgetAR(
         ?: // Not enough data to predict
         return budgetHistory
 
-    val (coefficients, error) = arResult
+    val (coefficients, _) = arResult
 
     val futureBudgets = mutableListOf<Pair<Date, Double>>()
-    var predictedValue = budgetValues.last()
+    var predictedValue: Double
     val recentData = budgetValues.takeLast(order).toMutableList()
 
     val calendar = Calendar.getInstance()
@@ -153,10 +150,10 @@ fun predictFutureBudgetARMA(
 ): List<Pair<Date, Double>> {
     val budgetHistory = calculateCumulativeBudget(transactions, initialBudget)
     val budgetValues = budgetHistory.map { it.second }
-    val (arCoefficients, maCoefficients, error) = calculateARMA(budgetValues, p, q)
+    val (arCoefficients, maCoefficients, _) = calculateARMA(budgetValues, p, q)
 
     val futureBudgets = mutableListOf<Pair<Date, Double>>()
-    var predictedValue = budgetValues.last()
+    var predictedValue: Double
     val recentData = budgetValues.takeLast(p).toMutableList()
     val recentErrors = MutableList(q) { 0.0 }
 
@@ -175,7 +172,6 @@ fun predictFutureBudgetARMA(
 
         futureBudgets.add(calendar.time to predictedValue)
 
-        // Update recent data and errors
         recentData.add(predictedValue)
         if (recentData.size > p) {
             recentData.removeAt(0)

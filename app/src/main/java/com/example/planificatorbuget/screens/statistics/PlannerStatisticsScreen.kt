@@ -11,10 +11,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,8 +30,10 @@ import com.example.planificatorbuget.components.AppBar
 import com.example.planificatorbuget.components.FinancialFlux
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.SummaryChartCard
+import com.example.planificatorbuget.components.BudgetEvolution
 import com.example.planificatorbuget.model.TransactionModelParcelable
 import com.example.planificatorbuget.navigation.PlannerScreens
+import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.transactions.TransactionsScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 import com.google.gson.Gson
@@ -37,7 +41,8 @@ import com.google.gson.Gson
 @Composable
 fun PlannerStatisticsScreen(
     navController: NavController = NavController(LocalContext.current),
-    viewModel: TransactionsScreenViewModel = hiltViewModel()
+    viewModel: TransactionsScreenViewModel = hiltViewModel(),
+    sharedViewModel: SharedViewModel = hiltViewModel()
 ) {
     val transactionsData by viewModel.transactions.collectAsState()
     val listOfTransactions by remember {
@@ -48,6 +53,10 @@ fun PlannerStatisticsScreen(
     val options = listOf("Cheltuieli", "Venituri")
     val selectedOption by remember { mutableStateOf(options[0]) }
     val meanValue by remember { mutableDoubleStateOf(0.0) }
+
+    val dataOrException by sharedViewModel.data.observeAsState()
+    val user = dataOrException?.data
+    val isLoading = dataOrException?.isLoading ?: true
     Box(
         modifier = Modifier.background(
             brush = gradientBackgroundBrush(
@@ -81,13 +90,21 @@ fun PlannerStatisticsScreen(
             containerColor = Color.Transparent
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (transactionsData.isLoading == true) {
+                if (transactionsData.isLoading == true || isLoading) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         CircularProgressIndicator()
+                    }
+                } else if (listOfTransactions.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text ="Nu exista tranzactii pentru a afisa statistici.")
                     }
                 } else {
                     Column(
@@ -98,15 +115,25 @@ fun PlannerStatisticsScreen(
                         verticalArrangement = Arrangement.Top
                     ) {
                         SummaryChartCard(listOfTransactions, selectedOption, meanValue, options) {
-                            val parcelableList = TransactionModelParcelable.fromTransactionModelList(listOfTransactions)
+                            val parcelableList =
+                                TransactionModelParcelable.fromTransactionModelList(
+                                    listOfTransactions
+                                )
                             val itemListJson = Gson().toJson(parcelableList)
-                            navController.navigate(PlannerScreens.DailySummaryDetailedChartScreen.name+"/$itemListJson")
+                            navController.navigate(PlannerScreens.DailySummaryDetailedChartScreen.name + "/$itemListJson")
                         }
-                        FinancialFlux(listOfTransactions){
-                            val parcelableList = TransactionModelParcelable.fromTransactionModelList(listOfTransactions)
+                        FinancialFlux(listOfTransactions) {
+                            val parcelableList =
+                                TransactionModelParcelable.fromTransactionModelList(
+                                    listOfTransactions
+                                )
                             val itemListJson = Gson().toJson(parcelableList)
-                            navController.navigate(PlannerScreens.FinancialFluxDetailedChartScreen.name+"/$itemListJson")
+                            navController.navigate(PlannerScreens.FinancialFluxDetailedChartScreen.name + "/$itemListJson")
                         }
+                        BudgetEvolution(
+                            listOfTransactions = listOfTransactions,
+                            initialBudget = user!!.initialBudget
+                        )
                     }
 
                 }

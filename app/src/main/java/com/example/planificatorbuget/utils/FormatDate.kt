@@ -40,3 +40,8 @@ fun convertMillisToDate(millis: Long): String {
     val date = Date(millis)
     return sdf.format(date)
 }
+
+fun formatDateToString(date: Date): String {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    return dateFormat.format(date)
+}

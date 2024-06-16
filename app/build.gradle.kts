@@ -128,4 +128,7 @@ dependencies {
 
     // Google ML Kit
     implementation (libs.text.recognition)
+
+    // Apache Commons Math
+    implementation (libs.commons.math3)
 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
 import com.example.planificatorbuget.utils.SamplingPeriod
+import com.example.planificatorbuget.utils.calculateCumulativeBudget
 import com.example.planificatorbuget.utils.getRecentTwoMonthsData
 import com.example.planificatorbuget.utils.prepareDataForGroupedBarChart
 
@@ -190,23 +191,38 @@ fun FinancialFlux(
                     .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = "Tipul tranzactiei", fontWeight = FontWeight.Bold)
                     Text(text = "Intrari")
                     Text(text = "Iesiri")
                     Text(text = "Flux financiar", fontWeight = FontWeight.Bold)
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = recentData[0].first, fontWeight = FontWeight.Bold)
-                    Text(text = " "+recentData[0].second.second.toString())
+                    Text(text = " " + recentData[0].second.second.toString())
                     Text(text = "${-recentData[0].second.first}")
-                    Text(text = (recentData[0].second.second - recentData[0].second.first).toString(), fontWeight = FontWeight.Bold)
+                    Text(
+                        text = (recentData[0].second.second - recentData[0].second.first).toString(),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = recentData[1].first, fontWeight = FontWeight.Bold)
-                    Text(text = " "+recentData[1].second.second.toString())
+                    Text(text = " " + recentData[1].second.second.toString())
                     Text(text = "${-recentData[1].second.first}")
-                    Text(text = (recentData[1].second.second - recentData[1].second.first).toString(), fontWeight = FontWeight.Bold)
+                    Text(
+                        text = (recentData[1].second.second - recentData[1].second.first).toString(),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
             Row(
@@ -227,6 +243,86 @@ fun FinancialFlux(
     }
 
 
+}
+
+@Preview
+@Composable
+fun BudgetEvolution(
+    listOfTransactions: List<TransactionModel> = emptyList(),
+    initialBudget: Double = 0.0,
+    onDetailsClicked: () -> Unit = {}
+) {
+
+    val chartData = calculateCumulativeBudget(listOfTransactions, initialBudget)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(15.dp),
+        elevation = CardDefaults.cardElevation(3.dp)
+    ) {
+        Column {
+            Text(
+                text = "Evolutia bugetului",
+                modifier = Modifier.padding(
+                    top = 10.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    bottom = 5.dp
+                ),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Surface(
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp), modifier = Modifier
+                    .padding(top = 15.dp, bottom = 10.dp)
+                    .height(290.dp),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BudgetEvolutionLineChart(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(290.dp),
+                        chartData = chartData,
+                        xAxisRotationAngle = 0f,
+                        xAxisLabelFontSize = 10.sp,
+                        lineStyleColor = Color(0x9E4330AA),
+                        shadowUnderLine = Color(0x9E4330AA),
+                        intersectionPointRadius = 4.dp
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(start = 10.dp, top = 2.dp, end = 10.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Balanta curenta: ${chartData.last().second} Lei",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 5.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = { onDetailsClicked() },
+                    modifier = Modifier.padding(end = 5.dp, bottom = 2.dp)
+                ) {
+                    Text(text = "Vezi detalii")
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

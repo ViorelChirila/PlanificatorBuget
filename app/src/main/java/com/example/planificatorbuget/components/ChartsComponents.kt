@@ -38,6 +38,8 @@ import com.example.planificatorbuget.utils.Period
 import com.example.planificatorbuget.utils.calculateMean
 import com.example.planificatorbuget.utils.calculateYAxisSteps
 import com.example.planificatorbuget.utils.filterTransactionsByPeriod
+import com.example.planificatorbuget.utils.formatDateToString
+import java.util.Date
 
 enum class ChartType {
     BAR_CHART,
@@ -242,6 +244,74 @@ fun GroupedBarChart(
         backgroundColor = Color.White,
     )
     GroupBarChart(modifier = modifier, groupBarChartData = groupBarChartData)
+}
+
+
+@Composable
+fun BudgetEvolutionLineChart(
+    modifier: Modifier = Modifier,
+    xAxisRotationAngle: Float = 0f,
+    xAxisBottomPadding: Dp = 20.dp,
+    xAxisLabelFontSize: TextUnit = 0.sp,
+    lineStyleColor: Color = Color.Black,
+    shadowUnderLine: Color = Color.Black,
+    intersectionPointColor: Color = Color.Black,
+    intersectionPointRadius: Dp =6.dp,
+    chartData: List<Pair<Date,Double>>
+){
+    val pointsData = chartData.mapIndexed { index, data ->
+        Point(
+            (index + 1).toFloat(),
+            data.second.toFloat()
+        )
+    }
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(100.dp)
+        .steps(pointsData.size - 1)
+        .bottomPadding(xAxisBottomPadding)
+        .axisLabelAngle(xAxisRotationAngle)
+        .labelData { index -> formatDateToString(chartData[index].first) }
+        .backgroundColor(Color.White)
+        .startDrawPadding(0.dp)
+        .axisLabelFontSize(if (xAxisLabelFontSize.value == 0f) 15.sp else xAxisLabelFontSize)
+        .build()
+
+    val maxRange = pointsData.maxOfOrNull { it.y } ?: 0f
+    val yAxisLabels = calculateYAxisSteps(maxRange.toDouble(), 5)
+    val yAxisData = AxisData.Builder()
+        .steps(5)
+        .labelAndAxisLinePadding(20.dp)
+        .axisOffset(20.dp)
+        .labelData { index -> yAxisLabels.getOrElse(index) { "" }+ " lei"}
+        .backgroundColor(Color.White)
+        .build()
+
+    val lineChartData = LineChartData(
+        linePlotData = LinePlotData(
+            lines = listOf(
+                Line(
+                    dataPoints = pointsData,
+                    LineStyle(color = lineStyleColor),
+                    IntersectionPoint(color = intersectionPointColor,radius = intersectionPointRadius),
+                    SelectionHighlightPoint(),
+                    ShadowUnderLine(color = shadowUnderLine),
+                    SelectionHighlightPopUp()
+                )
+            ),
+        ),
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        gridLines = GridLines(),
+        backgroundColor = Color.White,
+        containerPaddingEnd = 50.dp
+    )
+
+    LineChart(
+        modifier = modifier,
+        lineChartData = lineChartData
+    )
+
 }
 
 @Preview

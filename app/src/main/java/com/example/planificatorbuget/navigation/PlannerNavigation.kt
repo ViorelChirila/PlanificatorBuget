@@ -76,7 +76,8 @@ fun PlannerNavigation(startDestination: String) {
             }
 
             composable(PlannerScreens.StatisticsScreen.name) {
-                PlannerStatisticsScreen(navController = navController)
+                val viewModel = it.sharedViewModel<SharedViewModel>(navController)
+                PlannerStatisticsScreen(navController = navController, sharedViewModel = viewModel)
             }
 
 

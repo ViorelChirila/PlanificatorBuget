@@ -95,13 +95,14 @@ class RecurringTransactionWorker @AssistedInject constructor(
                     recurringTransaction.amount
                 ) ?: 0.0
             )
+            sendNotification(transaction.transactionTitle, transaction.amount)
         }
     }
     private fun sendNotification(transactionTitle: String, amount: Double) {
         val builder = NotificationCompat.Builder(applicationContext, "transaction_channel")
             .setSmallIcon(R.drawable.logo) // Adjust the icon according to your project
-            .setContentTitle("New Transaction Added")
-            .setContentText("Transaction: $transactionTitle of amount $$amount added.")
+            .setContentTitle("O noua tranzactie a fost adaugata")
+            .setContentText("Tranzactie: $transactionTitle cu valoarea $amount lei a fost adaugata.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(applicationContext)) {

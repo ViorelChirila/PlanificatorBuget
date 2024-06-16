@@ -15,6 +15,7 @@ import co.yml.charts.axis.AxisData
 import co.yml.charts.common.components.Legends
 import co.yml.charts.common.model.LegendLabel
 import co.yml.charts.common.model.LegendsConfig
+import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.BarChart
 import co.yml.charts.ui.barchart.GroupBarChart
@@ -33,6 +34,9 @@ import co.yml.charts.ui.linechart.model.LineStyle
 import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
 import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
 import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import co.yml.charts.ui.piechart.charts.PieChart
+import co.yml.charts.ui.piechart.models.PieChartConfig
+import co.yml.charts.ui.piechart.models.PieChartData
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
 import com.example.planificatorbuget.utils.calculateMean
@@ -311,6 +315,31 @@ fun BudgetEvolutionLineChart(
         modifier = modifier,
         lineChartData = lineChartData
     )
+
+}
+
+@Composable
+fun BudgetPieChart(
+    modifier: Modifier = Modifier,
+    chartData: List<PieChartData.Slice>
+){
+    val pieChartData = PieChartData(
+        slices = chartData,
+        plotType = PlotType.Pie,
+    )
+
+    val pieChartConfig = PieChartConfig(
+        isAnimationEnable = true,
+        showSliceLabels = true,
+        animationDuration = 1500,
+        isClickOnSliceEnabled = false,
+        chartPadding = 30,
+    )
+
+    PieChart(
+        modifier,
+        pieChartData,
+        pieChartConfig)
 
 }
 

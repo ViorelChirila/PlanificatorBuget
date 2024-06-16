@@ -31,9 +31,11 @@ import com.example.planificatorbuget.components.FinancialFlux
 import com.example.planificatorbuget.components.NavigationBarComponent
 import com.example.planificatorbuget.components.SummaryChartCard
 import com.example.planificatorbuget.components.BudgetEvolution
+import com.example.planificatorbuget.components.PieChartCard
 import com.example.planificatorbuget.model.TransactionModelParcelable
 import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.screens.SharedViewModel
+import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.screens.transactions.TransactionsScreenViewModel
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
 import com.google.gson.Gson
@@ -42,12 +44,20 @@ import com.google.gson.Gson
 fun PlannerStatisticsScreen(
     navController: NavController = NavController(LocalContext.current),
     viewModel: TransactionsScreenViewModel = hiltViewModel(),
+    categoriesScreenViewModel: CategoriesScreenViewModel = hiltViewModel(),
     sharedViewModel: SharedViewModel = hiltViewModel()
 ) {
     val transactionsData by viewModel.transactions.collectAsState()
+    val categoriesData by categoriesScreenViewModel.categories.collectAsState()
     val listOfTransactions by remember {
         derivedStateOf {
             transactionsData.data ?: emptyList()
+        }
+    }
+
+    val listOfCategories by remember {
+        derivedStateOf {
+            categoriesData.data ?: emptyList()
         }
     }
     val options = listOf("Cheltuieli", "Venituri")
@@ -90,7 +100,7 @@ fun PlannerStatisticsScreen(
             containerColor = Color.Transparent
         ) { paddingValues ->
             Box(modifier = Modifier.padding(paddingValues)) {
-                if (transactionsData.isLoading == true || isLoading) {
+                if (transactionsData.isLoading == true || isLoading || categoriesData.isLoading == true) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -141,6 +151,12 @@ fun PlannerStatisticsScreen(
                             val itemListJson = Gson().toJson(parcelableList)
                             navController.navigate(PlannerScreens.BudgetEvolutionDetailedChartScreen.name + "/$itemListJson/${user.initialBudget.toFloat()}")
                         }
+                        PieChartCard(
+                            listOfTransactions = listOfTransactions,
+                            listOfCategories = listOfCategories,
+                            selectedOption = selectedOption,
+                            options = options
+                        )
                     }
 
                 }

@@ -1,8 +1,12 @@
 package com.example.planificatorbuget.utils
 
+import androidx.compose.ui.graphics.Color
+import co.yml.charts.common.model.PlotType
 import co.yml.charts.common.model.Point
 import co.yml.charts.ui.barchart.models.BarData
 import co.yml.charts.ui.barchart.models.GroupBar
+import co.yml.charts.ui.piechart.models.PieChartData
+import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -21,6 +25,50 @@ enum class SamplingPeriod {
     WEEKLY,
     MONTHLY
 }
+
+
+
+fun getTransactionsForDateRange(transactions: List<TransactionModel>, days: Int): List<TransactionModel> {
+    val calendar = Calendar.getInstance()
+    calendar.add(Calendar.DAY_OF_YEAR, -days)
+    val startDate = calendar.time
+
+    return transactions.filter {
+        it.transactionDate.toDate().after(startDate)
+    }
+}
+
+fun getTransactionsForType(transactions: List<TransactionModel>, type: String): List<TransactionModel> {
+    return transactions.filter {
+        it.transactionType.equals(type, ignoreCase = true)
+    }
+}
+
+fun calculateCategoryTotals(transactions: List<TransactionModel>, categories: List<TransactionCategoriesModel>): Map<String, Float> {
+    val categoryTotals = mutableMapOf<String, Float>()
+
+    transactions.forEach { transaction ->
+        val categoryName = categories.find { it.categoryId == transaction.categoryId }?.categoryName ?: "Unknown"
+        val amount = if(transaction.amount.toFloat()>0) transaction.amount.toFloat() else transaction.amount.toFloat()*(-1)
+        categoryTotals[categoryName] = categoryTotals.getOrDefault(categoryName, 0f) + amount
+    }
+
+    return categoryTotals
+}
+
+fun createPieChartData(categoryTotals: Map<String, Float>): List<PieChartData.Slice> {
+    val colors = listOf(Color(0xFF333333), Color(0xFF666a86), Color(0xFF95B8D1), Color(0xFFF53844))
+    var colorIndex = 0
+
+    val slices = categoryTotals.map { (category, total) ->
+        val color = colors[colorIndex % colors.size]
+        colorIndex++
+        PieChartData.Slice(category, total, color)
+    }
+
+    return slices
+}
+
 
 fun getCurrentAndPreviousMonth(): Pair<String, String> {
     val dateFormat = SimpleDateFormat("MMM yyyy", Locale("ro","RO"))

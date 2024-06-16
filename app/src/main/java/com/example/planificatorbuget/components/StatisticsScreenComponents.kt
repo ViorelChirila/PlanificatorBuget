@@ -1,7 +1,9 @@
 package com.example.planificatorbuget.components
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,9 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -25,22 +32,32 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import co.yml.charts.common.components.Legends
+import co.yml.charts.common.model.LegendLabel
+import co.yml.charts.common.model.LegendsConfig
+import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.Period
 import com.example.planificatorbuget.utils.PredictionModel
 import com.example.planificatorbuget.utils.SamplingPeriod
+import com.example.planificatorbuget.utils.calculateCategoryTotals
 import com.example.planificatorbuget.utils.calculateCumulativeBudget
+import com.example.planificatorbuget.utils.createPieChartData
 import com.example.planificatorbuget.utils.getRecentTwoMonthsData
+import com.example.planificatorbuget.utils.getTransactionsForDateRange
+import com.example.planificatorbuget.utils.getTransactionsForType
 import com.example.planificatorbuget.utils.prepareDataForGroupedBarChart
 
 @Preview
@@ -326,7 +343,111 @@ fun BudgetEvolution(
     }
 }
 
+@Composable
+fun PieChartCard(
+    listOfTransactions: List<TransactionModel> = emptyList(),
+    listOfCategories: List<TransactionCategoriesModel> = emptyList(),
+    selectedOption: String = "",
+    options: List<String> = emptyList(),
+) {
+    var selectedOptionLocal by remember {
+        mutableStateOf(selectedOption)
+    }
+    var dateRangeDays by remember { mutableIntStateOf(7) }
 
+    val filteredTransactions = getTransactionsForDateRange(listOfTransactions, dateRangeDays)
+
+    val filteredTransactionsByType = when (selectedOptionLocal) {
+        "Cheltuieli" ->  getTransactionsForType(filteredTransactions, "Cheltuiala")
+        "Venituri" ->  getTransactionsForType(filteredTransactions, "Venit")
+        else -> {throw IllegalArgumentException("Invalid transaction type")}
+    }
+    val categoryTotals = calculateCategoryTotals(filteredTransactionsByType, listOfCategories)
+    val pieChartData = createPieChartData(categoryTotals)
+
+    Log.d("FilteredTransactions", filteredTransactionsByType.toString())
+    Log.d("CategoryTotals", categoryTotals.toString())
+    Log.d("PieChartData", pieChartData.toString())
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(15.dp),
+        elevation = CardDefaults.cardElevation(3.dp)
+    ) {
+        Column {
+            Text(
+                text = "Sumar buget",
+                modifier = Modifier.padding(
+                    top = 10.dp,
+                    start = 10.dp,
+                    end = 10.dp,
+                    bottom = 5.dp
+                ),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Surface(
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp), modifier = Modifier
+                    .padding(top = 15.dp, bottom = 10.dp)
+                    .wrapContentHeight(),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (selectedOptionLocal == "Cheltuieli") {
+                        BudgetPieChart(
+                            chartData = pieChartData, modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                    } else {
+                        BudgetPieChart(
+                            chartData = pieChartData, modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                        )
+                    }
+
+                    Legends(legendsConfig = LegendsConfig(
+                        legendLabelList = pieChartData.map {
+                            LegendLabel(it.color, it.label)
+                                                           },
+
+                        legendsArrangement = Arrangement.Center,
+                        gridColumnCount = 3,
+                        colorBoxSize = 15.dp,
+                        spaceBWLabelAndColorBox = 5.dp
+                    ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 5.dp)
+                            .height(100.dp)
+
+                    )
+                }
+            }
+
+            Row(modifier = Modifier.padding(start = 15.dp, end = 10.dp, top = 5.dp).fillMaxWidth()) {
+                CustomDropdownMenuForTypeSelection(
+                    label = "Tipul tranzacției",
+                    options = options,
+                    selectedOption = selectedOptionLocal,
+                    onOptionSelected = { selectedOptionLocal = it }
+                )
+                Spacer(modifier = Modifier.width(15.dp))
+                DateRangeDropdown(onDateRangeSelected = { days ->
+                    dateRangeDays = days
+                },
+                    label = "Alege perioada")
+
+            }
+
+        }
+    }
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -534,6 +655,7 @@ fun CustomDropdownMenuForPredictionAlgorithmSelection(
         when (predictionAlgorithm) {
             PredictionModel.AR -> "Autoregressive model"
             PredictionModel.ARMA -> "Autoregressive moving-average model"
+            PredictionModel.HoltLinear -> "Holt linear"
         }
     }
 
@@ -576,6 +698,67 @@ fun CustomDropdownMenuForPredictionAlgorithmSelection(
                         expanded = false
                     },
                         text = { Text(text = periodDisplayName(option)) })
+                }
+
+            }
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DateRangeDropdown(
+    label: String = "Alege perioada",
+    onDateRangeSelected: (Int) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf("Ultimele 7 zile") }
+    val options = listOf("Ultimele 7 zile", "Ultima luna", "Ultimele 3 luni", "Ultimele 6 luni")
+    val daysMapping = mapOf(
+        "Ultimele 7 zile" to 7,
+        "Ultima luna" to 30,
+        "Ultimele 3 luni" to 90,
+        "Ultimele 6 luni" to 180
+    )
+
+    Column(modifier = Modifier
+        .padding(top = 5.dp)) {
+        Text(text = label, fontSize = 15.sp)
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }) {
+            TextField(
+                value = selectedOption,
+                onValueChange = { },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier
+                    .width(200.dp)
+                    .menuAnchor(),
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                )
+
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(onClick = {
+                        selectedOption = option
+                        expanded = false
+                        onDateRangeSelected(daysMapping[option] ?: 7)
+                    },
+                        text = { Text(text = option) })
                 }
 
             }

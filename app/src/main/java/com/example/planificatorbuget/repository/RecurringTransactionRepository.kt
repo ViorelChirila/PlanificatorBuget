@@ -20,7 +20,7 @@ class RecurringTransactionRepository @Inject constructor(
     suspend fun fetchRecurringTransactions(): List<RecurringTransactionModel> {
         val userId = auth.currentUser?.uid ?: return emptyList()
         return try {
-            val result = firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).whereEqualTo("user_Id",userId).get().await()
+            val result = firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).whereEqualTo("user_id",userId).get().await()
             result.toObjects(RecurringTransactionModel::class.java)
         } catch (e: Exception) {
             emptyList()

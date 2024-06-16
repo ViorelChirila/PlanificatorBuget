@@ -1,7 +1,10 @@
 package com.example.planificatorbuget
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
 import androidx.work.Configuration
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
@@ -19,12 +22,28 @@ class PlannerApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var workerFactory: RecurringTransactionWorkerFactory
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+    }
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setMinimumLoggingLevel(android.util.Log.DEBUG)
             .setWorkerFactory(workerFactory)
             .build()
+
+    private fun createNotificationChannel() {
+        val name = "Transaction Notification Channel"
+        val descriptionText = "Channel for transaction notifications"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel("transaction_channel", name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
 }
 
 class RecurringTransactionWorkerFactory @Inject constructor(

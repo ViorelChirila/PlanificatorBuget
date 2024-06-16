@@ -1,10 +1,16 @@
 package com.example.planificatorbuget.workers
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.example.planificatorbuget.R
 import com.example.planificatorbuget.model.RecurringTransactionModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.repository.RecurringTransactionRepository
@@ -89,6 +95,29 @@ class RecurringTransactionWorker @AssistedInject constructor(
                     recurringTransaction.amount
                 ) ?: 0.0
             )
+        }
+    }
+    private fun sendNotification(transactionTitle: String, amount: Double) {
+        val builder = NotificationCompat.Builder(applicationContext, "transaction_channel")
+            .setSmallIcon(R.drawable.logo) // Adjust the icon according to your project
+            .setContentTitle("New Transaction Added")
+            .setContentText("Transaction: $transactionTitle of amount $$amount added.")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        with(NotificationManagerCompat.from(applicationContext)) {
+            if (ActivityCompat.checkSelfPermission(
+                    applicationContext,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return
+            }
+            notify(1, builder.build())
         }
     }
 

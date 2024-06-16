@@ -18,6 +18,7 @@ import com.example.planificatorbuget.screens.account.PlannerAccountScreen
 import com.example.planificatorbuget.screens.accountsettings.PlannerAccountSettingsScreen
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
 import com.example.planificatorbuget.screens.categories.PlannerCategoriesScreen
+import com.example.planificatorbuget.screens.chartdetailsscreeens.BudgetEvolutionDetailedChartScreen
 import com.example.planificatorbuget.screens.chartdetailsscreeens.DailySummaryDetailedChartScreen
 import com.example.planificatorbuget.screens.chartdetailsscreeens.FinancialFluxDetailedScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
@@ -141,7 +142,10 @@ fun PlannerNavigation(startDestination: String) {
                 arguments = listOf(navArgument("transactionId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val transactionId = backStackEntry.arguments?.getString("transactionId")
-                PlannerTransactionDetailsScreen(navController = navController, transactionId = transactionId)
+                PlannerTransactionDetailsScreen(
+                    navController = navController,
+                    transactionId = transactionId
+                )
             }
 
             val financialFluxDetailedChartScreenName =
@@ -160,8 +164,30 @@ fun PlannerNavigation(startDestination: String) {
                         transactions = transactions
                     )
                 }
-
             }
+
+            val budgetEvolutionDetailedChartScreenName = PlannerScreens.BudgetEvolutionDetailedChartScreen.name
+            composable(
+                "$budgetEvolutionDetailedChartScreenName/{transactions}/{initialBudget}",
+                arguments = listOf(
+                    navArgument("transactions") { type = NavType.StringType },
+                    navArgument("initialBudget") { type = NavType.FloatType } // NavType.DoubleType is not available, use FloatType and cast to Double
+                )
+            ) { backStackEntry ->
+                val transactionsJson = backStackEntry.arguments?.getString("transactions")
+                val initialBudget = backStackEntry.arguments?.getFloat("initialBudget")?.toDouble() // Retrieve and cast to Double
+                val listType = object : TypeToken<List<TransactionModelParcelable>>() {}.type
+                val transactions: List<TransactionModelParcelable>? =
+                    Gson().fromJson(transactionsJson, listType)
+                if (transactions != null && initialBudget != null) {
+                    BudgetEvolutionDetailedChartScreen(
+                        navController = navController,
+                        transactions = transactions,
+                        initialBudget = initialBudget
+                    )
+                }
+            }
+
         }
 
 

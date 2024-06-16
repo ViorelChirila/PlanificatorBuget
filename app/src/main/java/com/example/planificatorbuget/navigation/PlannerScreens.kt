@@ -14,4 +14,5 @@ enum class PlannerScreens {
     RecurringTransactionsScreen,
     TransactionDetailsScreen,
     FinancialFluxDetailedChartScreen,
+    BudgetEvolutionDetailedChartScreen,
 }

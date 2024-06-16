@@ -133,7 +133,14 @@ fun PlannerStatisticsScreen(
                         BudgetEvolution(
                             listOfTransactions = listOfTransactions,
                             initialBudget = user!!.initialBudget
-                        )
+                        ){
+                            val parcelableList =
+                                TransactionModelParcelable.fromTransactionModelList(
+                                    listOfTransactions
+                                )
+                            val itemListJson = Gson().toJson(parcelableList)
+                            navController.navigate(PlannerScreens.BudgetEvolutionDetailedChartScreen.name + "/$itemListJson/${user.initialBudget.toFloat()}")
+                        }
                     }
 
                 }

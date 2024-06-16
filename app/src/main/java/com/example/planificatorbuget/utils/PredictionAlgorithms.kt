@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.utils
 
+import com.example.planificatorbuget.data.forecastHoltLinear
 import com.example.planificatorbuget.model.TransactionModel
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression
 import java.time.LocalDate
@@ -9,9 +10,33 @@ import java.util.Date
 
 
 enum class PredictionModel {
-    AR, ARMA
+    AR,
+    ARMA,
+    HoltLinear
 }
+fun predictFutureBudgetHoltLinear(
+    transactions: List<TransactionModel>,
+    alpha: Double,
+    beta: Double,
+    intervalsAhead: Int,
+    initialBudget: Double
+): List<Pair<Date, Double>> {
+    val budgetHistory = calculateCumulativeBudget(transactions, initialBudget)
+    val budgetValues = budgetHistory.map { it.second }
 
+    val futureBudgets = mutableListOf<Pair<Date, Double>>()
+    val forecastedValues = forecastHoltLinear(budgetValues, alpha, beta, intervalsAhead)
+
+    val calendar = Calendar.getInstance()
+    calendar.time = budgetHistory.last().first
+
+    for (i in forecastedValues.indices) {
+        calendar.add(Calendar.MONTH, 1)
+        futureBudgets.add(calendar.time to forecastedValues[i])
+    }
+
+    return budgetHistory + futureBudgets
+}
 fun calculateCumulativeBudget(
     transactions: List<TransactionModel>,
     initialBudget: Double

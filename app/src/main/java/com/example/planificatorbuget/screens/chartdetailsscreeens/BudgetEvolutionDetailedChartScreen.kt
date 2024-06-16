@@ -18,11 +18,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,13 +50,14 @@ import com.example.planificatorbuget.utils.PredictionModel
 import com.example.planificatorbuget.utils.calculateCumulativeBudget
 import com.example.planificatorbuget.utils.predictFutureBudgetAR
 import com.example.planificatorbuget.utils.predictFutureBudgetARMA
+import com.example.planificatorbuget.utils.predictFutureBudgetHoltLinear
 
 @Composable
 fun BudgetEvolutionDetailedChartScreen(
     navController: NavController = NavController(LocalContext.current),
     transactions: List<TransactionModelParcelable> = emptyList(),
     initialBudget: Double = 0.0,
-    ) {
+) {
     val transactionList: List<TransactionModel> =
         TransactionModelParcelable.toTransactionModel(transactions)
 
@@ -64,26 +67,31 @@ fun BudgetEvolutionDetailedChartScreen(
     var showPrediction by remember { mutableStateOf(false) }
     var monthsAhead by remember { mutableStateOf("1") }
     var selectedModel by remember { mutableStateOf(PredictionModel.AR) }
+    var alpha by remember { mutableDoubleStateOf(0.5) }
+    var beta by remember { mutableDoubleStateOf(0.5) }
 
     val historicalData = calculateCumulativeBudget(transactionList, initialBudget = initialBudget)
 
-    Log.d("hisDatas","historicalData: ${historicalData.size}")
-    when(historicalData.size){
+    Log.d("hisDatas", "historicalData: ${historicalData.size}")
+    when (historicalData.size) {
         in 0..10 -> {
             maxArOrder = 1
             maxArmaOrderP = 1
             maxArmaOrderQ = 1
         }
+
         in 10..20 -> {
             maxArOrder = 2
             maxArmaOrderP = 2
             maxArmaOrderQ = 1
         }
+
         in 21..50 -> {
             maxArOrder = 3
             maxArmaOrderP = 3
             maxArmaOrderQ = 2
         }
+
         in 51..100 -> {
             maxArOrder = 4
             maxArmaOrderP = 4
@@ -104,6 +112,13 @@ fun BudgetEvolutionDetailedChartScreen(
             maxArmaOrderP,
             maxArmaOrderQ,
             intervalsAhead = monthsAhead.toIntOrNull() ?: 1,
+            initialBudget
+        )
+        PredictionModel.HoltLinear -> predictFutureBudgetHoltLinear(
+            transactionList,
+            alpha,
+            beta,
+            monthsAhead.toIntOrNull() ?: 1,
             initialBudget
         )
     }
@@ -218,7 +233,26 @@ fun BudgetEvolutionDetailedChartScreen(
                             ),
                             modifier = Modifier,
                             enabled = showPrediction
+                        )
+                    }
+                    if (selectedModel == PredictionModel.HoltLinear) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text("Smoothing Factor (alpha):")
+                            Slider(
+                                value = alpha.toFloat(),
+                                onValueChange = { alpha = it.toDouble() },
+                                valueRange = 0.0f..1.0f
                             )
+                            Text("Trend Smoothing Factor (beta):")
+                            Slider(
+                                value = beta.toFloat(),
+                                onValueChange = { beta = it.toDouble() },
+                                valueRange = 0.0f..1.0f
+                            )
+                        }
                     }
                 }
             }

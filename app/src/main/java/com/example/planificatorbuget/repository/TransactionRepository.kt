@@ -49,7 +49,7 @@ class TransactionRepository @Inject constructor(
         val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
 
         return try {
-            val latestTransaction = firebaseFirestore.collection(TRANSACTIONS_COLLECTION)
+            val latestTransaction = firebaseFirestore.collection(TRANSACTIONS_COLLECTION).whereEqualTo("user_id", userId)
                 .orderBy("transaction_date", Query.Direction.DESCENDING)
                 .limit(1).get().await().documents.firstOrNull()
                 ?.toObject(TransactionModel::class.java)
@@ -70,6 +70,7 @@ class TransactionRepository @Inject constructor(
                 Log.d(TAG, "addTransaction: Success")
             } else {
                 val subsequentTransactions = firebaseFirestore.collection(TRANSACTIONS_COLLECTION)
+                    .whereEqualTo("user_id", userId)
                     .whereGreaterThan("transaction_date", transaction.transactionDate)
                     .orderBy("transaction_date", Query.Direction.ASCENDING)
                     .get().await()

@@ -293,6 +293,7 @@ fun FilterDialog(
 fun SearchTransactionsByDateForm(
     initialDate: String?,
     onImportTransactions: () -> Unit = { },
+    onExportTransactions: () -> Unit = { },
     onSelectedDate: (String) -> Unit = { }
 ) {
     var selectedDate by remember { mutableStateOf(initialDate?.takeIf { it.isNotBlank() } ?: "") }
@@ -351,7 +352,7 @@ fun SearchTransactionsByDateForm(
                 }
             }
             TextButton(
-                onClick = { /*TODO*/ },
+                onClick = { onExportTransactions() },
                 colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
             ) {
                 Column(

@@ -1,7 +1,11 @@
 package com.example.planificatorbuget.screens.transactions
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -49,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -65,8 +70,10 @@ import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.navigation.PlannerScreens
 import com.example.planificatorbuget.screens.SharedViewModel
 import com.example.planificatorbuget.screens.categories.CategoriesScreenViewModel
+import com.example.planificatorbuget.utils.exportTransactionsToCsv
 import com.example.planificatorbuget.utils.formatTimestampToString
 import com.example.planificatorbuget.utils.gradientBackgroundBrush
+import com.example.planificatorbuget.utils.mapTransactionsToCategories
 
 enum class SortOrder {
     NONE, ASCENDING, DESCENDING
@@ -82,6 +89,7 @@ fun PlannerTransactionsScreen(
     textRecognitionViewModel: TextRecognitionViewModel = hiltViewModel(),
     selectedDate: String
 ) {
+    val context = LocalContext.current
     Log.d("PlannerTransactionsScreen", "selectedDate: $selectedDate")
     val dataOrException by sharedViewModel.data.observeAsState()
     val isUpdateDone by sharedViewModel.isUpdateDone.observeAsState(initial = true)
@@ -109,7 +117,6 @@ fun PlannerTransactionsScreen(
 
     val resultForAdd by viewModel.transactionAddResult.observeAsState()
     val resultForAddRecurring by viewModel.recurringTransactionAddResult.observeAsState()
-    val context = LocalContext.current
 
     fun sortTransactions() {
         sortOrder = when (sortOrder) {
@@ -207,7 +214,21 @@ fun PlannerTransactionsScreen(
                         verticalArrangement = Arrangement.Top
                     ) {
                         SearchTransactionsByDateForm(selectedDate,
-                            onImportTransactions = {navController.navigate(PlannerScreens.CsvUploadScreen.name)}) { date ->
+                            onImportTransactions = {navController.navigate(PlannerScreens.CsvUploadScreen.name)},
+                            onExportTransactions = {
+                                val transactionsWithCategories = mapTransactionsToCategories(
+                                    originalListOfTransactions,
+                                    listOfCategories
+                                )
+
+                                val fileName = "transactions.csv"
+                                val uri = exportTransactionsToCsv(context, transactionsWithCategories, fileName)
+                                if (uri != null) {
+                                    Toast.makeText(context, "CSV exported to $uri", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Error exporting CSV", Toast.LENGTH_SHORT).show()
+                                }
+                            }) { date ->
                             if (date.isEmpty())
                                 filteredListOfTransactions.value = originalListOfTransactions
                             else

@@ -13,7 +13,6 @@ import com.example.planificatorbuget.model.TransactionModel
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
 import java.io.File
-import java.io.IOException
 import java.io.OutputStream
 
 fun exportTransactionsToCsv(context: Context,transactions: List<Pair<TransactionModel,String>>,fileName: String): Uri? {
@@ -69,20 +68,6 @@ private fun writeCsvToStream(outputStream: OutputStream, transactions: List<Pair
                 )
             )
         }
-    }
-}
-fun getFilePath(context: Context, fileName: String): File? {
-    return if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()) {
-        // External storage path
-        val externalFilesDir = ContextCompat.getExternalFilesDirs(context, null).firstOrNull()
-        if (externalFilesDir != null) {
-            File(externalFilesDir, fileName)
-        } else {
-            null
-        }
-    } else {
-        // Internal storage path
-        File(context.filesDir, fileName)
     }
 }
 fun mapTransactionsToCategories(

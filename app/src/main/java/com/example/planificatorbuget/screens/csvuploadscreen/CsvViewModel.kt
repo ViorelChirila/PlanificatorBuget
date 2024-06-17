@@ -61,7 +61,4 @@ class CsvViewModel(
         _transactions.value = emptyList()
     }
 
-    fun showError(message: String) {
-        _errorMessage.value = message
-    }
 }

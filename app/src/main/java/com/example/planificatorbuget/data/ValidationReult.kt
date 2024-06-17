@@ -4,9 +4,7 @@ import android.util.Log
 import com.example.planificatorbuget.model.TransactionModel
 import com.example.planificatorbuget.utils.formatDateTimeStringToTimestamp
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
-import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 fun validateCsvContent(content: String): Pair<Boolean, List<TransactionModel>> {
@@ -16,8 +14,6 @@ fun validateCsvContent(content: String): Pair<Boolean, List<TransactionModel>> {
     } catch (e: Exception) {
         throw IllegalArgumentException("Error parsing CSV: ${e.message}")
     }
-    val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     if (rows.isEmpty() || rows[0].size < 6) {
         return Pair(false, emptyList())

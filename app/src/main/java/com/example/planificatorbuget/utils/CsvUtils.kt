@@ -7,12 +7,10 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
-import androidx.core.content.ContextCompat
 import com.example.planificatorbuget.model.TransactionCategoriesModel
 import com.example.planificatorbuget.model.TransactionModel
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.github.doyaaaaaken.kotlincsv.dsl.csvWriter
-import java.io.File
 import java.io.OutputStream
 
 fun exportTransactionsToCsv(context: Context,transactions: List<Pair<TransactionModel,String>>,fileName: String): Uri? {

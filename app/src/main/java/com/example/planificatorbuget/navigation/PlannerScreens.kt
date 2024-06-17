@@ -15,4 +15,5 @@ enum class PlannerScreens {
     TransactionDetailsScreen,
     FinancialFluxDetailedChartScreen,
     BudgetEvolutionDetailedChartScreen,
+    CsvUploadScreen
 }

@@ -21,6 +21,7 @@ import com.example.planificatorbuget.screens.categories.PlannerCategoriesScreen
 import com.example.planificatorbuget.screens.chartdetailsscreeens.BudgetEvolutionDetailedChartScreen
 import com.example.planificatorbuget.screens.chartdetailsscreeens.DailySummaryDetailedChartScreen
 import com.example.planificatorbuget.screens.chartdetailsscreeens.FinancialFluxDetailedScreen
+import com.example.planificatorbuget.screens.csvuploadscreen.CsvUploadScreen
 import com.example.planificatorbuget.screens.home.PlannerHomeScreen
 import com.example.planificatorbuget.screens.login.PlannerLoginScreen
 import com.example.planificatorbuget.screens.notification.PlannerNotificationsScreenSettings
@@ -186,6 +187,10 @@ fun PlannerNavigation(startDestination: String) {
                         initialBudget = initialBudget
                     )
                 }
+            }
+
+            composable(PlannerScreens.CsvUploadScreen.name) {
+                CsvUploadScreen(navController = navController)
             }
 
         }

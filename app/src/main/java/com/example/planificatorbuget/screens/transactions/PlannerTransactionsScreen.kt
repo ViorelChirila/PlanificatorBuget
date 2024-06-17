@@ -206,7 +206,8 @@ fun PlannerTransactionsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
-                        SearchTransactionsByDateForm(selectedDate) { date ->
+                        SearchTransactionsByDateForm(selectedDate,
+                            onImportTransactions = {navController.navigate(PlannerScreens.CsvUploadScreen.name)}) { date ->
                             if (date.isEmpty())
                                 filteredListOfTransactions.value = originalListOfTransactions
                             else
@@ -215,10 +216,10 @@ fun PlannerTransactionsScreen(
                                         formatTimestampToString(it.transactionDate) == date
                                     }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         HorizontalDivider(
                             color = Color.Black.copy(alpha = 0.3f),
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 10.dp)
                         )
                         FilterAndSortTransactions(
                             categories = listOfCategories,

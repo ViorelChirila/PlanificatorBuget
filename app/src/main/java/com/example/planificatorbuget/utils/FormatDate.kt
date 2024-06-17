@@ -45,3 +45,14 @@ fun formatDateToString(date: Date): String {
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     return dateFormat.format(date)
 }
+
+fun formatDateTimeStringToTimestamp(dateTimeString: String, pattern: String = "MM/dd/yyyy HH:mm"): Timestamp? {
+    return try {
+        val dateFormat = SimpleDateFormat(pattern, Locale.getDefault())
+        val date: Date = dateFormat.parse(dateTimeString)!!
+        Timestamp(date)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}

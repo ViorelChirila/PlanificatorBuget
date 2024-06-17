@@ -34,8 +34,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -290,6 +293,7 @@ fun FilterDialog(
 @Composable
 fun SearchTransactionsByDateForm(
     initialDate: String?,
+    onImportTransactions: () -> Unit = { },
     onSelectedDate: (String) -> Unit = { }
 ) {
     var selectedDate by remember { mutableStateOf(initialDate?.takeIf { it.isNotBlank() } ?: "") }
@@ -301,32 +305,65 @@ fun SearchTransactionsByDateForm(
         }
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp)
     ) {
-        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start) {
-            Text(
-                text = "Tranzactii",
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.padding(bottom = 2.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            DatePickerField(
+                label = "Alege o data",
+                selectedDate = selectedDate,
+                onDateSelected = {
+                    selectedDate = it
+                    onSelectedDate(selectedDate)
+                },
+                onClearDate = {
+                    selectedDate = ""
+                    onSelectedDate(selectedDate)
+                }
             )
         }
-        Spacer(modifier = Modifier.width(50.dp))
-        DatePickerField(
-            label = "Alege o data",
-            selectedDate = selectedDate,
-            onDateSelected = {
-                selectedDate = it
-                onSelectedDate(selectedDate)
-            },
-            onClearDate = {
-                selectedDate = ""
-                onSelectedDate(selectedDate)
+        Spacer(modifier = Modifier.height(5.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextButton(
+                onClick = { onImportTransactions() },
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FileDownload,
+                        contentDescription = "upload icon"
+                    )
+                    Text(text = "Importa tranzactii", fontSize = 12.sp)
+                }
             }
-        )
+            TextButton(
+                onClick = { /*TODO*/ },
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(imageVector = Icons.Default.UploadFile, contentDescription = "upload icon")
+                    Text(text = "Exporta tranzactii", fontSize = 12.sp)
+                }
+            }
+        }
     }
 }
 
@@ -422,7 +459,7 @@ fun AddTransactionDialog(
     showDialog: MutableState<Boolean>,
     showLoading: MutableState<Boolean>,
     categories: List<TransactionCategoriesModel>,
-    onAddTransaction: (TransactionModel) -> Unit ,
+    onAddTransaction: (TransactionModel) -> Unit,
     onAddRecurringTransaction: (RecurringTransactionModel) -> Unit
 ) {
 

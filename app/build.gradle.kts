@@ -131,4 +131,7 @@ dependencies {
 
     // Apache Commons Math
     implementation (libs.commons.math3)
+
+    //CSV Reader
+    implementation (libs.kotlin.csv.jvm)
 }

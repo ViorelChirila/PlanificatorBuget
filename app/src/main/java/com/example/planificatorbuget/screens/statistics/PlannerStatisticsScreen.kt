@@ -43,12 +43,11 @@ import com.google.gson.Gson
 @Composable
 fun PlannerStatisticsScreen(
     navController: NavController = NavController(LocalContext.current),
-    viewModel: TransactionsScreenViewModel = hiltViewModel(),
-    categoriesScreenViewModel: CategoriesScreenViewModel = hiltViewModel(),
+    viewModel: StatisticsScreenViewModel = hiltViewModel(),
     sharedViewModel: SharedViewModel = hiltViewModel()
 ) {
     val transactionsData by viewModel.transactions.collectAsState()
-    val categoriesData by categoriesScreenViewModel.categories.collectAsState()
+    val categoriesData by viewModel.categories.collectAsState()
     val listOfTransactions by remember {
         derivedStateOf {
             transactionsData.data ?: emptyList()

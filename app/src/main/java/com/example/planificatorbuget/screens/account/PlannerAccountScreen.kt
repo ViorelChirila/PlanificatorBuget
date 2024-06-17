@@ -165,7 +165,7 @@ fun AccountOptions(navController: NavController) {
         AccountOptionItem(
             "Setari notificari",
             painterResource(id = R.drawable.notification_settings)
-        ) { /* Handle click for "Setari notificari" here */ },
+        ) { navController.navigate(PlannerScreens.NotificationsScreenSettings.name)},
         AccountOptionItem(
             "Tranzactii recurente",
             painterResource(id = R.drawable.recurrent_transactions)

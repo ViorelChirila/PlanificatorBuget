@@ -54,7 +54,7 @@ fun AppBar(
         },
         actions = {
             IconButton(onClick = {
-                navController.navigate(PlannerScreens.NotificationsScreen.name)
+
             }) {
                 BadgedBox(badge = {
                     if (haveNotifications) {

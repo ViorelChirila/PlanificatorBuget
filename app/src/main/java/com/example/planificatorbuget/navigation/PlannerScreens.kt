@@ -5,7 +5,7 @@ enum class PlannerScreens {
     LoginScreen,
     CreateAccountScreen,
     AccountScreen,
-    NotificationsScreen,
+    NotificationsScreenSettings,
     AccountSettingsScreen,
     StatisticsScreen,
     TransactionsScreen,

@@ -9,9 +9,6 @@ data class UserModel(
     @get:PropertyName("user_name")
     @set:PropertyName("user_name")
     var userName: String = "",
-    @get:PropertyName("profession")
-    @set:PropertyName("profession")
-    var profession: String = "",
     @get:PropertyName("initial_budget")
     @set:PropertyName("initial_budget")
     var initialBudget: Double = 0.0,
@@ -26,7 +23,6 @@ data class UserModel(
         return mutableMapOf(
             "user_id" to this.userId,
             "user_name" to this.userName,
-            "profession" to this.profession,
             "initial_budget" to this.initialBudget,
             "current_budget" to this.currentBudget,
             "avatar_url" to this.avatarUrl

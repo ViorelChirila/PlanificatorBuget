@@ -55,7 +55,6 @@ class CreateAccountScreenViewModel: ViewModel() {
         val user = UserModel(
             userId = userId.toString(),
             userName = displayName.toString(),
-            profession = "",
             initialBudget = 0.0,
             currentBudget = 0.0,
             avatarUrl = ""

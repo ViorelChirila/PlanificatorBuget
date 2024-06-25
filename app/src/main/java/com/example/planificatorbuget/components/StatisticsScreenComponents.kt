@@ -356,14 +356,16 @@ fun PieChartCard(
     var dateRangeDays by remember { mutableIntStateOf(7) }
 
     val filteredTransactions = getTransactionsForDateRange(listOfTransactions, dateRangeDays)
+    Log.d("ListOfTransactions", listOfTransactions.toString())
+    Log.d("FilteredTransactions1", filteredTransactions.toString())
 
-    val filteredTransactionsByType = when (selectedOptionLocal) {
+    val filteredTransactionsByType = if (filteredTransactions.isNotEmpty()) when (selectedOptionLocal) {
         "Cheltuieli" ->  getTransactionsForType(filteredTransactions, "Cheltuiala")
         "Venituri" ->  getTransactionsForType(filteredTransactions, "Venit")
         else -> {throw IllegalArgumentException("Invalid transaction type")}
-    }
-    val categoryTotals = calculateCategoryTotals(filteredTransactionsByType, listOfCategories)
-    val pieChartData = createPieChartData(categoryTotals)
+    } else emptyList()
+    val categoryTotals = if(filteredTransactionsByType.isNotEmpty()) calculateCategoryTotals(filteredTransactionsByType, listOfCategories) else emptyMap()
+    val pieChartData = if (categoryTotals.isNotEmpty()) createPieChartData(categoryTotals) else emptyList()
 
     Log.d("FilteredTransactions", filteredTransactionsByType.toString())
     Log.d("CategoryTotals", categoryTotals.toString())
@@ -396,36 +398,43 @@ fun PieChartCard(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (selectedOptionLocal == "Cheltuieli") {
-                        BudgetPieChart(
-                            chartData = pieChartData, modifier = Modifier
+                    if ( filteredTransactions.isEmpty())
+                    {
+                        Text(text = "Nu exista tranzactii pentru a afisa statistici.", modifier = Modifier.padding(10.dp))
+                    }
+                    else{
+                        if (selectedOptionLocal == "Cheltuieli") {
+                            BudgetPieChart(
+                                chartData = pieChartData, modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp)
+                            )
+                        } else {
+                            BudgetPieChart(
+                                chartData = pieChartData, modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp)
+                            )
+                        }
+
+                        Legends(legendsConfig = LegendsConfig(
+                            legendLabelList = pieChartData.map {
+                                LegendLabel(it.color, it.label)
+                            },
+
+                            legendsArrangement = Arrangement.Center,
+                            gridColumnCount = 3,
+                            colorBoxSize = 15.dp,
+                            spaceBWLabelAndColorBox = 5.dp
+                        ),
+                            modifier = Modifier
                                 .fillMaxWidth()
-                                .height(300.dp)
-                        )
-                    } else {
-                        BudgetPieChart(
-                            chartData = pieChartData, modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
+                                .padding(start = 5.dp)
+                                .height(100.dp)
+
                         )
                     }
 
-                    Legends(legendsConfig = LegendsConfig(
-                        legendLabelList = pieChartData.map {
-                            LegendLabel(it.color, it.label)
-                                                           },
-
-                        legendsArrangement = Arrangement.Center,
-                        gridColumnCount = 3,
-                        colorBoxSize = 15.dp,
-                        spaceBWLabelAndColorBox = 5.dp
-                    ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 5.dp)
-                            .height(100.dp)
-
-                    )
                 }
             }
 

@@ -117,7 +117,7 @@ fun PlannerHomeScreen(
                         CircularProgressIndicator()
                     }
                 } else {
-                    val (totalIncome, totalExpenses) = calculateTotals(listOfTransactions)
+                    val (totalIncome, totalExpenses) = if (listOfTransactions.isNotEmpty()) calculateTotals(listOfTransactions) else Pair(0.0, 0.0)
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                         Card(
                             modifier = Modifier
@@ -271,9 +271,17 @@ fun PlannerHomeScreen(
                                     modifier = Modifier.padding(15.dp)
                                 )
                                 HorizontalDivider( modifier = Modifier.padding(start = 15.dp, end = 15.dp))
-                                TransactionCard(transaction = listOfTransactions[0])
-                                TransactionCard(transaction = listOfTransactions[1])
-                                TransactionCard(transaction = listOfTransactions[2])
+                                if (listOfTransactions.size < 3) {
+                                    Text(
+                                        text = "Nu exista tranzactii",
+                                        modifier = Modifier.padding(15.dp)
+                                    )
+                                }
+                                else {
+                                    TransactionCard(transaction = listOfTransactions[0])
+                                    TransactionCard(transaction = listOfTransactions[1])
+                                    TransactionCard(transaction = listOfTransactions[2])
+                                }
 
                             }
 

@@ -28,7 +28,7 @@ class RecurringTransactionRepository @Inject constructor(
     }
 
     suspend fun addRecurringTransaction(recurringTransaction: RecurringTransactionModel): Response<Boolean> {
-        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+        val userId = auth.currentUser?.uid ?: return Response.Error("Utilizatorul nu este autentificat")
 
         return try {
             firebaseFirestore.collection(RECURRING_TRANSACTIONS_COLLECTION).add(recurringTransaction.apply {

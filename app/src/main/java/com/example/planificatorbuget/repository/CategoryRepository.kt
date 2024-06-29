@@ -38,7 +38,7 @@ class CategoryRepository @Inject constructor(private val firebaseFirestore: Fire
     }
 
     suspend fun addCategory(category: TransactionCategoriesModel): Response<Boolean> {
-        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+        val userId = auth.currentUser?.uid ?: return Response.Error("Utilizatorul nu este autentificat")
         return try {
             firebaseFirestore.collection(CATEGORIES_COLLECTION).add(category.apply {
                 this.userId = userId

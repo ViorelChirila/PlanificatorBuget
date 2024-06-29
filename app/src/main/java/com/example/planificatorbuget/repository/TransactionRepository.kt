@@ -46,7 +46,7 @@ class TransactionRepository @Inject constructor(
     }
 
     suspend fun addTransaction(transaction: TransactionModel): Response<Boolean> {
-        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+        val userId = auth.currentUser?.uid ?: return Response.Error("Utilizatorul nu este autentificat")
 
         return try {
             val latestTransaction = firebaseFirestore.collection(TRANSACTIONS_COLLECTION).whereEqualTo("user_id", userId)

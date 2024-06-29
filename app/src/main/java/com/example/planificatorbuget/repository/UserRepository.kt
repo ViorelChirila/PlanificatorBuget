@@ -43,7 +43,7 @@ class UserRepository @Inject constructor(
     }
 
 suspend fun updateUserData(user: Map<String, Any>): Response<Boolean> {
-    val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+    val userId = auth.currentUser?.uid ?: return Response.Error("Utilizatorul nu este autentificat")
 
     return try {
         firebaseFirestore.collection(USERS_COLLECTION).document(userId).update(user).await()
@@ -105,7 +105,7 @@ suspend fun updateUserData(user: Map<String, Any>): Response<Boolean> {
     }
 
     suspend fun updateUserCurrentBudget(budget: Double): Response<Boolean> {
-        val userId = auth.currentUser?.uid ?: return Response.Error("User not authenticated")
+        val userId = auth.currentUser?.uid ?: return Response.Error("Utilizatorul nu este autentificat")
         return try {
             firebaseFirestore.collection(USERS_COLLECTION).document(userId).update("current_budget", budget).await()
             Response.Success(true)

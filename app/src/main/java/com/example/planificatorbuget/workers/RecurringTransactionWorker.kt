@@ -101,8 +101,8 @@ class RecurringTransactionWorker @AssistedInject constructor(
     private fun sendNotification(transactionTitle: String, amount: Double) {
         val builder = NotificationCompat.Builder(applicationContext, "transaction_channel")
             .setSmallIcon(R.drawable.logo) // Adjust the icon according to your project
-            .setContentTitle("O noua tranzactie a fost adaugata")
-            .setContentText("Tranzactie: $transactionTitle cu valoarea $amount lei a fost adaugata.")
+            .setContentTitle("O nouă tranzacție a fost adaugată")
+            .setContentText("Tranzactie: $transactionTitle cu valoarea $amount lei a fost adaugată.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(applicationContext)) {
@@ -135,11 +135,3 @@ class RecurringTransactionWorker @AssistedInject constructor(
     }
 }
 
-fun getCurrentDateAtMidnight(): Timestamp {
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.HOUR_OF_DAY, 0)
-    calendar.set(Calendar.MINUTE, 0)
-    calendar.set(Calendar.SECOND, 0)
-    calendar.set(Calendar.MILLISECOND, 0)
-    return Timestamp(calendar.time)
-}

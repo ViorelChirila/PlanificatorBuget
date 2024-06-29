@@ -149,7 +149,7 @@ fun PlannerTransactionsScreen(
         Scaffold(
             topBar = {
                 AppBar(
-                    title = "Tranzactii",
+                    title = "Tranzacții",
                     haveNotifications = false,
                     isHomeScreen = false,
                     navController = navController

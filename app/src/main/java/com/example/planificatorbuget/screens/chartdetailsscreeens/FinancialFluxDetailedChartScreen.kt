@@ -121,7 +121,7 @@ fun FinancialFluxDetailedScreen(
                         OutlinedTextField(
                             value = periodCount,
                             onValueChange = { periodCount = it },
-                            label = { Text("Numarul de luni/zile/saptamani") },
+                            label = { Text("Numarul de luni/zile/săptămâni") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                             keyboardActions = KeyboardActions(

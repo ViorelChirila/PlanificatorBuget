@@ -96,7 +96,7 @@ fun PlannerHomeScreen(
         Scaffold(
             topBar = {
                 AppBar(
-                    title = "Acasa",
+                    title = "Acasă",
                     haveNotifications = false,
                     isHomeScreen = true,
                     navController = navController
@@ -224,7 +224,7 @@ fun PlannerHomeScreen(
                                     title = null,
                                     headline = {
                                         Text(
-                                            text = "Alege o data",
+                                            text = "Alege o dată",
                                             modifier = Modifier.padding(start = 10.dp)
                                         )
                                     },
@@ -234,7 +234,7 @@ fun PlannerHomeScreen(
                                     convertMillisToDate(millis)
                                 } ?: ""
                                 Text(
-                                    text = "Data selectata: $formattedDate",
+                                    text = "Data selectată: $formattedDate",
                                     modifier = Modifier.align(Alignment.CenterHorizontally)
                                 )
 
@@ -266,14 +266,14 @@ fun PlannerHomeScreen(
                         ) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
-                                    text = "Ultimele 3 tranzactii",
+                                    text = "Ultimele 3 tranzacții",
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.padding(15.dp)
                                 )
                                 HorizontalDivider( modifier = Modifier.padding(start = 15.dp, end = 15.dp))
                                 if (listOfTransactions.size < 3) {
                                     Text(
-                                        text = "Nu exista tranzactii",
+                                        text = "Nu există tranzacții",
                                         modifier = Modifier.padding(15.dp)
                                     )
                                 }

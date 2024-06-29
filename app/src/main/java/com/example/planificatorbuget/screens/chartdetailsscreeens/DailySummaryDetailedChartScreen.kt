@@ -155,7 +155,7 @@ fun DailySummaryDetailedChartScreen(
                             .padding(10.dp)
                     ) {
                         CustomDropdownMenuForTypeSelection(
-                            label = "Tipul tranzactiei:",
+                            label = "Tipul tranzacției:",
                             options = typeOptions,
                             selectedOption = selectedTypeOption
                         ) {

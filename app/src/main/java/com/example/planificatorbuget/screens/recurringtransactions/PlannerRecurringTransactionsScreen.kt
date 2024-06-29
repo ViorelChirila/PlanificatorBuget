@@ -111,7 +111,7 @@ fun PlannerRecurringTransactionsScreen(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = "Trazactii recurente active",
+                            text = "Trazacții recurente active",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(
@@ -150,7 +150,7 @@ fun PlannerRecurringTransactionsScreen(
                         }
 
                         Text(
-                            text = "Trazactii recurente inactive",
+                            text = "Trazacții recurente inactive",
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(
@@ -194,12 +194,12 @@ fun PlannerRecurringTransactionsScreen(
         LaunchedEffect(resultForUpdate) {
             when (resultForUpdate) {
                 is Response.Loading -> {
-                    Toast.makeText(context, "Se actualizeaza...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Se actualizează...", Toast.LENGTH_SHORT).show()
                 }
 
                 is Response.Success -> {
                     if ((resultForUpdate as Response.Success).data == true) {
-                        Toast.makeText(context, "Actualizarea a fost facuta cu succes", Toast.LENGTH_SHORT)
+                        Toast.makeText(context, "Actualizarea a fost facută cu succes", Toast.LENGTH_SHORT)
                             .show()
                         viewModel.fetchRecurringTransactionsFromDatabase()
                     }

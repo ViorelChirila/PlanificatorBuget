@@ -206,9 +206,9 @@ fun FinancialFlux(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "Tipul tranzactiei", fontWeight = FontWeight.Bold)
-                    Text(text = "Intrari")
-                    Text(text = "Iesiri")
+                    Text(text = "Tipul tranzacției", fontWeight = FontWeight.Bold)
+                    Text(text = "Intrări")
+                    Text(text = "Ieșiri")
                     Text(text = "Flux financiar", fontWeight = FontWeight.Bold)
                 }
                 Column(
@@ -273,7 +273,7 @@ fun BudgetEvolution(
     ) {
         Column {
             Text(
-                text = "Evolutia bugetului",
+                text = "Evoluția bugetului",
                 modifier = Modifier.padding(
                     top = 10.dp,
                     start = 10.dp,
@@ -314,7 +314,7 @@ fun BudgetEvolution(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Balanta curenta: ${chartData.last().second} Lei",
+                    text = "Balanța curentă: ${chartData.last().second} Lei",
                     fontWeight = FontWeight.Bold
                 )
             }

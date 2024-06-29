@@ -159,18 +159,18 @@ fun PlannerAccountScreen(
 fun AccountOptions(navController: NavController) {
     val options = listOf(
         AccountOptionItem(
-            "Setari cont",
+            "Setări cont",
             painterResource(id = R.drawable.account_info)
         ) { navController.navigate(PlannerScreens.AccountSettingsScreen.name) },
         AccountOptionItem(
-            "Setari notificari",
+            "Setări notificări",
             painterResource(id = R.drawable.notification_settings)
         ) { navController.navigate(PlannerScreens.NotificationsScreenSettings.name)},
         AccountOptionItem(
-            "Tranzactii recurente",
+            "Tranzacții recurente",
             painterResource(id = R.drawable.recurrent_transactions)
         ) { navController.navigate(PlannerScreens.RecurringTransactionsScreen.name) },
-        AccountOptionItem("Deconecteaza-te", painterResource(id = R.drawable.logout_button)) {
+        AccountOptionItem("Deconectează-te", painterResource(id = R.drawable.logout_button)) {
             FirebaseAuth.getInstance().signOut().run {
                 navController.navigate(FunctionalitiesRoutes.Authentication.name) {
                     popUpTo(FunctionalitiesRoutes.Main.name) {

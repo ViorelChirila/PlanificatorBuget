@@ -126,7 +126,7 @@ fun FilterAndSortTransactions(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
-                Text(text = "Sorteaza")
+                Text(text = "Sortează")
             }
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -145,14 +145,14 @@ fun FilterAndSortTransactions(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(Icons.Default.FilterList, contentDescription = "Filter")
-                Text(text = "Filtreaza")
+                Text(text = "Filtrează")
             }
         }
         Spacer(modifier = Modifier.width(30.dp))
         OutlinedTextField(
             value = searchQueryState.value,
             onValueChange = { searchQueryState.value = it },
-            label = { Text("Cauta tranzactii", style = MaterialTheme.typography.labelLarge) },
+            label = { Text("Caută tranzacții", style = MaterialTheme.typography.labelLarge) },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(),
             shape = RoundedCornerShape(30),
@@ -199,14 +199,14 @@ fun FilterDialog(
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text("Filtreaza tranzactiile") },
+            title = { Text("Filtrează tranzacțiile") },
             text = {
                 Column(modifier = Modifier.height(dialogHeightDp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(text = "Tipul tranzactiei: ")
+                        Text(text = "Tipul tranzacției: ")
                         Spacer(modifier = Modifier.weight(1f))
                         Text(selectedType.value)
                         Spacer(modifier = Modifier.weight(1f))
@@ -318,7 +318,7 @@ fun SearchTransactionsByDateForm(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             DatePickerField(
-                label = "Alege o data",
+                label = "Alege o dată",
                 selectedDate = selectedDate,
                 onDateSelected = {
                     selectedDate = it
@@ -348,7 +348,7 @@ fun SearchTransactionsByDateForm(
                         imageVector = Icons.Default.FileDownload,
                         contentDescription = "upload icon"
                     )
-                    Text(text = "Importa tranzactii", fontSize = 12.sp)
+                    Text(text = "Importă tranzacții", fontSize = 12.sp)
                 }
             }
             TextButton(
@@ -360,7 +360,7 @@ fun SearchTransactionsByDateForm(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(imageVector = Icons.Default.UploadFile, contentDescription = "upload icon")
-                    Text(text = "Exporta tranzactii", fontSize = 12.sp)
+                    Text(text = "Exportă tranzacții", fontSize = 12.sp)
                 }
             }
         }
@@ -446,7 +446,7 @@ fun DateTimePickerField(
                 checked = useCurrentTime,
                 onCheckedChange = { useCurrentTime = it }
             )
-            Text(text = "Use current time")
+            Text(text = "Folosește ora curentă")
         }
     }
 }
@@ -532,7 +532,7 @@ fun AddTransactionDialog(
                         val context = LocalContext.current
 
                         Text(
-                            text = "Adauga tranzactie noua",
+                            text = "Adaugă tranzacție nouă",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -549,7 +549,7 @@ fun AddTransactionDialog(
                         OutlinedTextField(
                             value = amount,
                             onValueChange = { amount = it },
-                            label = { Text("Valoare in LEI") },
+                            label = { Text("Valoare în LEI") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth(),
@@ -577,7 +577,7 @@ fun AddTransactionDialog(
                             OutlinedTextField(
                                 value = type,
                                 onValueChange = { type = it },
-                                label = { Text(text = "Tip (Venit/Cheltuiala)") },
+                                label = { Text(text = "Tip (Venit/Cheltuială)") },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .menuAnchor(),
@@ -602,7 +602,7 @@ fun AddTransactionDialog(
                                 DropdownMenuItem(onClick = {
                                     type = "Cheltuiala"
                                     expandedType = false
-                                }, text = { Text("Cheltuiala") })
+                                }, text = { Text("Cheltuială") })
 
                             }
 
@@ -640,7 +640,7 @@ fun AddTransactionDialog(
                                     }, text = { Text(text = item.categoryName) })
                                 }
                                 DropdownMenuItem(
-                                    text = { Text(text = "Adauga categorie noua") },
+                                    text = { Text(text = "Adaugă categorie nouă") },
                                     onClick = {
                                         navController.navigate(PlannerScreens.CategoriesScreen.name)
                                     })
@@ -652,7 +652,7 @@ fun AddTransactionDialog(
 
                         if (!isRecurring) {
                             DateTimePickerField(
-                                label = "Data tranzactiei",
+                                label = "Data tranzacției",
                                 selectedDateTime = date,
                                 onDateTimeSelected = { date = it },
                                 onClearDateTime = { date = "" }
@@ -678,7 +678,7 @@ fun AddTransactionDialog(
                                 }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Tranzactie recurentă")
+                            Text("Tranzacție recurentă")
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -750,7 +750,7 @@ fun AddTransactionDialog(
                                 showDialog.value = false
                                 textRecognitionViewModel.resetRecognizedText()
                             }) {
-                                Text("Renunta")
+                                Text(text ="Renunță")
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
@@ -826,7 +826,7 @@ fun AddTransactionDialog(
                                     }
                                 }
                             ) {
-                                Text("Adauga")
+                                Text(text ="Adaugă")
                             }
                         }
                     }

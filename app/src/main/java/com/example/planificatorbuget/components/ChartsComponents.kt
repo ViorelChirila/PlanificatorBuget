@@ -96,7 +96,7 @@ fun TransactionsBarChart(
         .steps(5)
         .labelAndAxisLinePadding(20.dp)
         .axisOffset(20.dp)
-        .labelData { index -> yAxisLabels.getOrElse(index) { "" } }
+        .labelData { index -> yAxisLabels.getOrElse(index) { "" } + " lei"}
         .backgroundColor(Color.White)
         .build()
 
@@ -168,7 +168,7 @@ fun TransactionsLineChart(
         .steps(5)
         .labelAndAxisLinePadding(20.dp)
         .axisOffset(20.dp)
-        .labelData { index -> yAxisLabels.getOrElse(index) { "" } }
+        .labelData { index -> yAxisLabels.getOrElse(index) { "" } + " lei"}
         .backgroundColor(Color.White)
         .build()
 
@@ -237,7 +237,7 @@ fun GroupedBarChart(
         .steps(5)
         .labelAndAxisLinePadding(20.dp)
         .axisOffset(20.dp)
-        .labelData { index -> yAxisLabels.getOrElse(index) { "" } }
+        .labelData { index -> yAxisLabels.getOrElse(index) { "" }+ " lei"}
         .backgroundColor(Color.White)
         .build()
 

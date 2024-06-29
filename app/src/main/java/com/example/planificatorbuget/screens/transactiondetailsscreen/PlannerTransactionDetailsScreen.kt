@@ -80,7 +80,7 @@ fun PlannerTransactionDetailsScreen(
         Scaffold(
             topBar = {
                 AppBar(
-                    title = "Detalii tranzactie",
+                    title = "Detalii tranzacție",
                     haveNotifications = false,
                     isHomeScreen = false,
                     navController = navController,
@@ -217,7 +217,7 @@ fun PlannerTransactionDetailsScreen(
                                     .padding(15.dp)
                             ) {
                                 TextButton(onClick = {showDialog = true}) {
-                                    Text(text = "Arata poza descriere")
+                                    Text(text = "Arată poza descriere")
                                 }
                                 TextButton(onClick = {
                                     if(enableEdit && text != transactionState.data!!.transactionDescription) {
@@ -225,7 +225,7 @@ fun PlannerTransactionDetailsScreen(
                                     }
                                     enableEdit = !enableEdit
                                 }) {
-                                    Text(text = if (enableEdit) "Salveaza" else "Editeaza")
+                                    Text(text = if (enableEdit) "Salvează" else "Editează")
                                 }
                             }
                         }
@@ -234,12 +234,12 @@ fun PlannerTransactionDetailsScreen(
                     LaunchedEffect(resultForUpdate) {
                         when (resultForUpdate) {
                             is Response.Loading -> {
-                                Toast.makeText(context, "Se actualizeaza...", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Se actualizează...", Toast.LENGTH_SHORT).show()
                             }
 
                             is Response.Success -> {
                                 if ((resultForUpdate as Response.Success).data == true) {
-                                    Toast.makeText(context, "Tranzactie actualizata cu succes", Toast.LENGTH_SHORT)
+                                    Toast.makeText(context, "Tranzacție actualizată cu succes", Toast.LENGTH_SHORT)
                                         .show()
                                 }
                             }
@@ -265,7 +265,7 @@ fun PlannerTransactionDetailsScreen(
                                 }
                             },
                             title = {
-                                Text(text = "Imagine descriere tranzactie")
+                                Text(text = "Imagine descriere tranzacție")
                             },
                             text = {
                                 AsyncImage(

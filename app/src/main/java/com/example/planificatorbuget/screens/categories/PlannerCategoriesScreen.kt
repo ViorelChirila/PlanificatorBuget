@@ -183,10 +183,10 @@ fun PlannerCategoriesScreen(
     }
     if (resultForAdd is Response.Loading){
         showLoading.value = true
-        Toast.makeText(context, "Se adauga categoria...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Se adaugă categoria...", Toast.LENGTH_SHORT).show()
     }
     else if (resultForAdd is Response.Success && (resultForAdd as Response.Success).data == true){
-        Toast.makeText(context, "Categoria adaugata cu succes", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Categoria adăugată cu succes", Toast.LENGTH_SHORT).show()
         showLoading.value = false
         categoriesSharedViewModel.fetchCategoriesFromFirebase()
     }
@@ -307,7 +307,7 @@ fun AddNewCategoryDialog(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Adauga o categorie",
+                        text = "Adaugă o categorie",
                         style = MaterialTheme.typography.headlineMedium
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -360,14 +360,14 @@ fun AddNewCategoryDialog(
                         TextButton(onClick = {
                             onDismissRequest()
                         }) {
-                            Text(text = "Renunta")
+                            Text(text = "Renunță")
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Button(onClick = {
                             if (categoryName.isEmpty() || selectedIcon == null) {
                                 Toast.makeText(
                                     context,
-                                    "Completeaza toate campurile",
+                                    "Completează toate campurile",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
@@ -376,7 +376,7 @@ fun AddNewCategoryDialog(
 
                             }
                         }) {
-                            Text(text = "Adauga")
+                            Text(text = "Adaugă")
                         }
                     }
                 }

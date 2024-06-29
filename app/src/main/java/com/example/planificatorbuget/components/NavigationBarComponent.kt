@@ -29,7 +29,7 @@ fun NavigationBarComponent(navController: NavController) {
 
     val items = listOf(
         BottomNavigationItem(
-            title = "Acasa",
+            title = "Acasă",
             selectedIcon = Icons.Filled.Home,
             unselectedIcon = Icons.Outlined.Home,
             hasNews = false,
@@ -45,7 +45,7 @@ fun NavigationBarComponent(navController: NavController) {
             destination = PlannerScreens.StatisticsScreen.name
         ),
         BottomNavigationItem(
-            title = "Tranzactii",
+            title = "Tranzacții",
             selectedIcon = Icons.Filled.MonetizationOn,
             unselectedIcon = Icons.Outlined.MonetizationOn,
             hasNews = false,

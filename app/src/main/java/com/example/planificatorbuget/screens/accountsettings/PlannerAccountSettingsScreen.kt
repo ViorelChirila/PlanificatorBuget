@@ -124,7 +124,7 @@ fun PlannerAccountSettingsScreen(
         Scaffold(
             topBar = {
                 AppBar(
-                    title = "Setari cont",
+                    title = "Setări cont",
                     haveNotifications = false,
                     isHomeScreen = false,
                     navController = navController
@@ -246,7 +246,7 @@ fun PlannerAccountSettingsScreen(
                             } else if (resultForDataUpdate is Response.Error) {
                                 Toast.makeText(
                                     context,
-                                    "Failed to update data",
+                                    "Eroare la actualizarea datelor",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -313,7 +313,7 @@ fun EditUserInfoForm(
         PasswordInput(
             modifier = Modifier,
             passwordState = password,
-            label = "Editare parola",
+            label = "Editare parolă",
             enabled = true,
             passwordVisibility = passwordVisibility,
             imeAction = ImeAction.Next,
@@ -335,14 +335,14 @@ fun EditUserInfoForm(
 
         InputField(
             valueState = initialBudget,
-            labelId = "Adaugare buget initial",
+            labelId = "Adăugare buget inițial",
             enabled = user?.initialBudget == 0.0,
             imeAction = ImeAction.Done,
             onAction = KeyboardActions {
                 keyboardController?.hide()
             }
         )
-        Text(text = "Poti adauga bugetul initial o singura data", color = Color.Gray)
+        Text(text = "Poți adăuga bugetul inițial o singură dată", color = Color.Gray)
         Spacer(modifier = Modifier.height(15.dp))
 
 
@@ -358,13 +358,13 @@ fun EditUserInfoForm(
                 }
                 onClick(userToUpdate, email.value, password.value)
             }, enabled = enabledButton) {
-                Text(text = "Salveaza")
+                Text(text = "Salvează")
             }
 
             Button(onClick = {
                 navController.popBackStack()
             }) {
-                Text(text = "Renunta")
+                Text(text = "Renunță")
             }
         }
     }

@@ -10,6 +10,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class CreateAccountScreenViewModel: ViewModel() {
@@ -18,6 +20,9 @@ class CreateAccountScreenViewModel: ViewModel() {
 
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
 
     fun createUserWithEmailAndPassword(email: String, password: String, home: () -> Unit) =
         viewModelScope.launch {
@@ -39,6 +44,7 @@ class CreateAccountScreenViewModel: ViewModel() {
                                     "CreateAccountScreenViewModel",
                                     "createUserWithEmailAndPassword:failure"
                                 )
+                                _errorMessage.value = "A apărut o eroare: ${task.exception?.message}"
                             }
                             _loading.value = false
                         }
@@ -48,6 +54,9 @@ class CreateAccountScreenViewModel: ViewModel() {
             }
 
         }
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
 
     private fun createUser(displayName: String?) {
         val userId = auth.currentUser?.uid

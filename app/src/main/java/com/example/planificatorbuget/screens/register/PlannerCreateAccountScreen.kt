@@ -1,5 +1,6 @@
 package com.example.planificatorbuget.screens.register
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +37,8 @@ import com.example.planificatorbuget.navigation.PlannerScreens
 @Preview
 @Composable
 fun PlannerCreateAccountScreen(navController: NavController = NavController(LocalContext.current),viewModel: CreateAccountScreenViewModel = viewModel()){
+    val context = LocalContext.current
+    val errorMessage by viewModel.errorMessage.collectAsState()
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -86,7 +91,10 @@ fun PlannerCreateAccountScreen(navController: NavController = NavController(Loca
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-
+            errorMessage?.let {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                viewModel.clearErrorMessage()
+            }
         }
 
     }

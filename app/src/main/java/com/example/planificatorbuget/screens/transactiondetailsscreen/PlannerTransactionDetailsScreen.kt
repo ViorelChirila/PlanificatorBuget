@@ -1,6 +1,5 @@
 package com.example.planificatorbuget.screens.transactiondetailsscreen
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement

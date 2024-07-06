@@ -57,7 +57,8 @@ fun calculateCategoryTotals(transactions: List<TransactionModel>, categories: Li
 }
 
 fun createPieChartData(categoryTotals: Map<String, Float>): List<PieChartData.Slice> {
-    val colors = listOf(Color(0xFF333333), Color(0xFF666a86), Color(0xFF95B8D1), Color(0xFFF53844))
+    val colors = listOf(Color(0xFF333333), Color(0xFF666a86), Color(0xFF95B8D1), Color(0xFFF53844),
+        Color(0xFF9DFF28), Color(0xFF28FF9D), Color(0xFF9D28FF), Color(0xFF28FFD4), Color(0xFFD428FF))
     var colorIndex = 0
 
     val slices = categoryTotals.map { (category, total) ->
